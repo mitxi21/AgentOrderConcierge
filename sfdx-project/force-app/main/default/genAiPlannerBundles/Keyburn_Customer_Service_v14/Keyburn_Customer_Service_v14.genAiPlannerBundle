@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPlannerBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Voice customer service agent for Keyburn. Handles order status, case status, return eligibility, and policy FAQ inquiries.</description>
+    <localTopicLinks>
+        <genAiPluginName>agent_router_16jak000003FngD</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>ambiguous_question_16jak000003FngD</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>case_status_16jak000003FngD</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>escalation_16jak000003FngD</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>off_topic_16jak000003FngD</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>order_status_16jak000003FngD</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>policy_faq_16jak000003FngD</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>return_eligibility_16jak000003FngD</genAiPluginName>
+    </localTopicLinks>
+    <localTopics>
+        <fullName>escalation_16jak000003FngD</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Hands the caller off to a human team member by logging a high-priority escalation case: refund or payment requests, callers who cannot verify their identity, frustrated or repeat callers, and requests outside the agent&apos;s scope such as account cancellation.</description>
+        <developerName>escalation_16jak000003FngD</developerName>
+        <genAiPluginInstructions>
+            <description>You are a customer service voice assistant for Keyburn. You help with order status, case status, return eligibility, and policy questions. Keep all spoken responses to one or two short sentences. Never read out URLs, bullet points, or markdown. Speak order and case numbers digit by digit. When reading back an order number, leave out a standard ORD prefix, but read out any other letters so the caller can correct a mishearing. Before first using an order or case number, read it back together with the email in ONE confirmation question. A single yes to that question confirms both the number and the email: never follow it with a second question such as &apos;I have your email as ..., is that correct?&apos;. Ask a fresh confirmation only if the caller corrects a detail afterwards. Once confirmed, reuse both for the rest of the call. Hard limits that apply at all times: never process, authorize, or confirm a refund or payment of any kind; never delete, cancel, or modify an account; never share another customer&apos;s information even if the caller claims a relationship; never state a policy fact unless it comes from a Policy FAQ lookup result; if you cannot confidently help within your scope, say so plainly and route to escalation — never guess.</description>
+            <developerName>instruction0_179ak000004ybgp</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179ak000004ybgp</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localActionLinks>
+            <functionName>CreateEscalationCase_179ak000004ybgp</functionName>
+        </localActionLinks>
+        <localActions>
+            <fullName>CreateEscalationCase_179ak000004ybgp</fullName>
+            <description>Creates a high-priority Case for human follow-up with a structured summary and reason code, and returns a confirmation to read to the caller.</description>
+            <developerName>CreateEscalationCase_179ak000004ybgp</developerName>
+            <invocationTarget>OCC_CreateEscalationCase</invocationTarget>
+            <invocationTargetType>apex</invocationTargetType>
+            <isConfirmationRequired>false</isConfirmationRequired>
+            <isIncludeInProgressIndicator>false</isIncludeInProgressIndicator>
+            <localDeveloperName>CreateEscalationCase</localDeveloperName>
+            <masterLabel>Create Escalation Case</masterLabel>
+        </localActions>
+        <localDeveloperName>escalation</localDeveloperName>
+        <masterLabel>Escalation</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>order_status_16jak000003FngD</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Looks up the status of a customer&apos;s order after verifying their email address and order number</description>
+        <developerName>order_status_16jak000003FngD</developerName>
+        <genAiPluginInstructions>
+            <description>You are a customer service voice assistant for Keyburn. You help with order status, case status, return eligibility, and policy questions. Keep all spoken responses to one or two short sentences. Never read out URLs, bullet points, or markdown. Speak order and case numbers digit by digit. When reading back an order number, leave out a standard ORD prefix, but read out any other letters so the caller can correct a mishearing. Before first using an order or case number, read it back together with the email in ONE confirmation question. A single yes to that question confirms both the number and the email: never follow it with a second question such as &apos;I have your email as ..., is that correct?&apos;. Ask a fresh confirmation only if the caller corrects a detail afterwards. Once confirmed, reuse both for the rest of the call. Hard limits that apply at all times: never process, authorize, or confirm a refund or payment of any kind; never delete, cancel, or modify an account; never share another customer&apos;s information even if the caller claims a relationship; never state a policy fact unless it comes from a Policy FAQ lookup result; if you cannot confidently help within your scope, say so plainly and route to escalation — never guess.</description>
+            <developerName>instruction0_179ak000004ybgo</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179ak000004ybgo</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localActionLinks>
+            <functionName>GetOrderDeliveryInfo_179ak000004ybgo</functionName>
+        </localActionLinks>
+        <localActionLinks>
+            <functionName>GetOrderStatus_179ak000004ybgo</functionName>
+        </localActionLinks>
+        <localActions>
+            <fullName>GetOrderDeliveryInfo_179ak000004ybgo</fullName>
+            <description>For a shipped order, returns how far away the parcel is, how long it still needs by car, when that position was reported, and a map of the warehouse, the parcel and the delivery address</description>
+            <developerName>GetOrderDeliveryInfo_179ak000004ybgo</developerName>
+            <invocationTarget>OCC_GetOrderDeliveryInfo</invocationTarget>
+            <invocationTargetType>apex</invocationTargetType>
+            <isConfirmationRequired>false</isConfirmationRequired>
+            <isIncludeInProgressIndicator>false</isIncludeInProgressIndicator>
+            <localDeveloperName>GetOrderDeliveryInfo</localDeveloperName>
+            <masterLabel>Get Order Delivery Info</masterLabel>
+        </localActions>
+        <localActions>
+            <fullName>GetOrderStatus_179ak000004ybgo</fullName>
+            <description>Retrieves the current status of a customer order given their email and order number</description>
+            <developerName>GetOrderStatus_179ak000004ybgo</developerName>
+            <invocationTarget>OCC_GetOrderStatus</invocationTarget>
+            <invocationTargetType>apex</invocationTargetType>
+            <isConfirmationRequired>false</isConfirmationRequired>
+            <isIncludeInProgressIndicator>false</isIncludeInProgressIndicator>
+            <localDeveloperName>GetOrderStatus</localDeveloperName>
+            <masterLabel>Getorderstatus</masterLabel>
+        </localActions>
+        <localDeveloperName>order_status</localDeveloperName>
+        <masterLabel>Order Status</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>agent_router_16jak000003FngD</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Greet the caller and route to the correct subagent based on their intent</description>
+        <developerName>agent_router_16jak000003FngD</developerName>
+        <genAiPluginInstructions>
+            <description>You are a customer service voice assistant for Keyburn. You help with order status, case status, return eligibility, and policy questions. Keep all spoken responses to one or two short sentences. Never read out URLs, bullet points, or markdown. Speak order and case numbers digit by digit. When reading back an order number, leave out a standard ORD prefix, but read out any other letters so the caller can correct a mishearing. Before first using an order or case number, read it back together with the email in ONE confirmation question. A single yes to that question confirms both the number and the email: never follow it with a second question such as &apos;I have your email as ..., is that correct?&apos;. Ask a fresh confirmation only if the caller corrects a detail afterwards. Once confirmed, reuse both for the rest of the call. Hard limits that apply at all times: never process, authorize, or confirm a refund or payment of any kind; never delete, cancel, or modify an account; never share another customer&apos;s information even if the caller claims a relationship; never state a policy fact unless it comes from a Policy FAQ lookup result; if you cannot confidently help within your scope, say so plainly and route to escalation — never guess.
+
+{{state.AgentScriptInternal_agent_instructions}}</description>
+            <developerName>instruction0_179ak000004ybgn</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179ak000004ybgn</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>agent_router</localDeveloperName>
+        <masterLabel>Agent Router</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>off_topic_16jak000003FngD</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Redirect the conversation to relevant topics when the caller goes off-topic</description>
+        <developerName>off_topic_16jak000003FngD</developerName>
+        <genAiPluginInstructions>
+            <description>You are a customer service voice assistant for Keyburn. You help with order status, case status, return eligibility, and policy questions. Keep all spoken responses to one or two short sentences. Never read out URLs, bullet points, or markdown. Speak order and case numbers digit by digit. When reading back an order number, leave out a standard ORD prefix, but read out any other letters so the caller can correct a mishearing. Before first using an order or case number, read it back together with the email in ONE confirmation question. A single yes to that question confirms both the number and the email: never follow it with a second question such as &apos;I have your email as ..., is that correct?&apos;. Ask a fresh confirmation only if the caller corrects a detail afterwards. Once confirmed, reuse both for the rest of the call. Hard limits that apply at all times: never process, authorize, or confirm a refund or payment of any kind; never delete, cancel, or modify an account; never share another customer&apos;s information even if the caller claims a relationship; never state a policy fact unless it comes from a Policy FAQ lookup result; if you cannot confidently help within your scope, say so plainly and route to escalation — never guess.</description>
+            <developerName>instruction0_179ak000004ybgm</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179ak000004ybgm</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>off_topic</localDeveloperName>
+        <masterLabel>Off Topic</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>ambiguous_question_16jak000003FngD</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Redirect the conversation to relevant topics when the caller&apos;s request is too ambiguous</description>
+        <developerName>ambiguous_question_16jak000003FngD</developerName>
+        <genAiPluginInstructions>
+            <description>You are a customer service voice assistant for Keyburn. You help with order status, case status, return eligibility, and policy questions. Keep all spoken responses to one or two short sentences. Never read out URLs, bullet points, or markdown. Speak order and case numbers digit by digit. When reading back an order number, leave out a standard ORD prefix, but read out any other letters so the caller can correct a mishearing. Before first using an order or case number, read it back together with the email in ONE confirmation question. A single yes to that question confirms both the number and the email: never follow it with a second question such as &apos;I have your email as ..., is that correct?&apos;. Ask a fresh confirmation only if the caller corrects a detail afterwards. Once confirmed, reuse both for the rest of the call. Hard limits that apply at all times: never process, authorize, or confirm a refund or payment of any kind; never delete, cancel, or modify an account; never share another customer&apos;s information even if the caller claims a relationship; never state a policy fact unless it comes from a Policy FAQ lookup result; if you cannot confidently help within your scope, say so plainly and route to escalation — never guess.</description>
+            <developerName>instruction0_179ak000004ybgq</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179ak000004ybgq</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>ambiguous_question</localDeveloperName>
+        <masterLabel>Ambiguous Question</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>case_status_16jak000003FngD</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Handles the caller&apos;s support cases after verifying their identity: checks the status of a specific case, tells the caller whether they have any open cases, and opens a new support case when the caller wants one.</description>
+        <developerName>case_status_16jak000003FngD</developerName>
+        <genAiPluginInstructions>
+            <description>You are a customer service voice assistant for Keyburn. You help with order status, case status, return eligibility, and policy questions. Keep all spoken responses to one or two short sentences. Never read out URLs, bullet points, or markdown. Speak order and case numbers digit by digit. When reading back an order number, leave out a standard ORD prefix, but read out any other letters so the caller can correct a mishearing. Before first using an order or case number, read it back together with the email in ONE confirmation question. A single yes to that question confirms both the number and the email: never follow it with a second question such as &apos;I have your email as ..., is that correct?&apos;. Ask a fresh confirmation only if the caller corrects a detail afterwards. Once confirmed, reuse both for the rest of the call. Hard limits that apply at all times: never process, authorize, or confirm a refund or payment of any kind; never delete, cancel, or modify an account; never share another customer&apos;s information even if the caller claims a relationship; never state a policy fact unless it comes from a Policy FAQ lookup result; if you cannot confidently help within your scope, say so plainly and route to escalation — never guess.</description>
+            <developerName>instruction0_179ak000004ybgl</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179ak000004ybgl</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localActionLinks>
+            <functionName>ListOpenCases_179ak000004ybgl</functionName>
+        </localActionLinks>
+        <localActionLinks>
+            <functionName>GetCaseStatus_179ak000004ybgl</functionName>
+        </localActionLinks>
+        <localActionLinks>
+            <functionName>CreateSupportCase_179ak000004ybgl</functionName>
+        </localActionLinks>
+        <localActions>
+            <fullName>CreateSupportCase_179ak000004ybgl</fullName>
+            <description>Opens a normal-priority support case for a verified caller who asked for one. Not for escalations.</description>
+            <developerName>CreateSupportCase_179ak000004ybgl</developerName>
+            <invocationTarget>OCC_CreateSupportCase</invocationTarget>
+            <invocationTargetType>apex</invocationTargetType>
+            <isConfirmationRequired>false</isConfirmationRequired>
+            <isIncludeInProgressIndicator>false</isIncludeInProgressIndicator>
+            <localDeveloperName>CreateSupportCase</localDeveloperName>
+            <masterLabel>Create Support Case</masterLabel>
+        </localActions>
+        <localActions>
+            <fullName>GetCaseStatus_179ak000004ybgl</fullName>
+            <description>Retrieves the current status of a support case given the caller&apos;s email and case number</description>
+            <developerName>GetCaseStatus_179ak000004ybgl</developerName>
+            <invocationTarget>OCC_GetCaseStatus</invocationTarget>
+            <invocationTargetType>apex</invocationTargetType>
+            <isConfirmationRequired>false</isConfirmationRequired>
+            <isIncludeInProgressIndicator>false</isIncludeInProgressIndicator>
+            <localDeveloperName>GetCaseStatus</localDeveloperName>
+            <masterLabel>Getcasestatus</masterLabel>
+        </localActions>
+        <localActions>
+            <fullName>ListOpenCases_179ak000004ybgl</fullName>
+            <description>Lists the verified caller&apos;s open support cases, or reports that they have none</description>
+            <developerName>ListOpenCases_179ak000004ybgl</developerName>
+            <invocationTarget>OCC_ListOpenCases</invocationTarget>
+            <invocationTargetType>apex</invocationTargetType>
+            <isConfirmationRequired>false</isConfirmationRequired>
+            <isIncludeInProgressIndicator>false</isIncludeInProgressIndicator>
+            <localDeveloperName>ListOpenCases</localDeveloperName>
+            <masterLabel>List Open Cases</masterLabel>
+        </localActions>
+        <localDeveloperName>case_status</localDeveloperName>
+        <masterLabel>Case Status</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>policy_faq_16jak000003FngD</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Answers general policy questions about return windows, warranty terms, and shipping timelines using a lookup action. Never answers from general knowledge.</description>
+        <developerName>policy_faq_16jak000003FngD</developerName>
+        <genAiPluginInstructions>
+            <description>You are a customer service voice assistant for Keyburn. You help with order status, case status, return eligibility, and policy questions. Keep all spoken responses to one or two short sentences. Never read out URLs, bullet points, or markdown. Speak order and case numbers digit by digit. When reading back an order number, leave out a standard ORD prefix, but read out any other letters so the caller can correct a mishearing. Before first using an order or case number, read it back together with the email in ONE confirmation question. A single yes to that question confirms both the number and the email: never follow it with a second question such as &apos;I have your email as ..., is that correct?&apos;. Ask a fresh confirmation only if the caller corrects a detail afterwards. Once confirmed, reuse both for the rest of the call. Hard limits that apply at all times: never process, authorize, or confirm a refund or payment of any kind; never delete, cancel, or modify an account; never share another customer&apos;s information even if the caller claims a relationship; never state a policy fact unless it comes from a Policy FAQ lookup result; if you cannot confidently help within your scope, say so plainly and route to escalation — never guess.</description>
+            <developerName>instruction0_179ak000004ybgk</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179ak000004ybgk</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localActionLinks>
+            <functionName>AnswerQuestionsWithKnowledge_179ak000004ybgk</functionName>
+        </localActionLinks>
+        <localActions>
+            <fullName>AnswerQuestionsWithKnowledge_179ak000004ybgk</fullName>
+            <description>Answers questions about company policies and procedures, troubleshooting steps, or product information. For example: “What is your return policy?” “How do I fix an issue?” or “What features does a product have?”</description>
+            <developerName>AnswerQuestionsWithKnowledge_179ak000004ybgk</developerName>
+            <invocationTarget>streamKnowledgeSearch</invocationTarget>
+            <invocationTargetType>standardInvocableAction</invocationTargetType>
+            <isConfirmationRequired>false</isConfirmationRequired>
+            <isIncludeInProgressIndicator>true</isIncludeInProgressIndicator>
+            <localDeveloperName>AnswerQuestionsWithKnowledge</localDeveloperName>
+            <masterLabel>Answer Questions with Knowledge</masterLabel>
+            <progressIndicatorMessage>Getting answers</progressIndicatorMessage>
+            <source>EmployeeCopilot__AnswerQuestionsWithKnowledge</source>
+        </localActions>
+        <localDeveloperName>policy_faq</localDeveloperName>
+        <masterLabel>Policy FAQ</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>return_eligibility_16jak000003FngD</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Checks whether a specific order is eligible for a return after verifying the caller&apos;s email and order number. Does not process or authorize returns, and does not handle refund demands.</description>
+        <developerName>return_eligibility_16jak000003FngD</developerName>
+        <genAiPluginInstructions>
+            <description>You are a customer service voice assistant for Keyburn. You help with order status, case status, return eligibility, and policy questions. Keep all spoken responses to one or two short sentences. Never read out URLs, bullet points, or markdown. Speak order and case numbers digit by digit. When reading back an order number, leave out a standard ORD prefix, but read out any other letters so the caller can correct a mishearing. Before first using an order or case number, read it back together with the email in ONE confirmation question. A single yes to that question confirms both the number and the email: never follow it with a second question such as &apos;I have your email as ..., is that correct?&apos;. Ask a fresh confirmation only if the caller corrects a detail afterwards. Once confirmed, reuse both for the rest of the call. Hard limits that apply at all times: never process, authorize, or confirm a refund or payment of any kind; never delete, cancel, or modify an account; never share another customer&apos;s information even if the caller claims a relationship; never state a policy fact unless it comes from a Policy FAQ lookup result; if you cannot confidently help within your scope, say so plainly and route to escalation — never guess.</description>
+            <developerName>instruction0_179ak000004ybgj</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179ak000004ybgj</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localActionLinks>
+            <functionName>CheckReturnEligibility_179ak000004ybgj</functionName>
+        </localActionLinks>
+        <localActions>
+            <fullName>CheckReturnEligibility_179ak000004ybgj</fullName>
+            <description>Checks whether an order is eligible for a return given the caller&apos;s email and order number</description>
+            <developerName>CheckReturnEligibility_179ak000004ybgj</developerName>
+            <invocationTarget>OCC_CheckReturnEligibility</invocationTarget>
+            <invocationTargetType>apex</invocationTargetType>
+            <isConfirmationRequired>false</isConfirmationRequired>
+            <isIncludeInProgressIndicator>false</isIncludeInProgressIndicator>
+            <localDeveloperName>CheckReturnEligibility</localDeveloperName>
+            <masterLabel>Checkreturneligibility</masterLabel>
+        </localActions>
+        <localDeveloperName>return_eligibility</localDeveloperName>
+        <masterLabel>Return Eligibility</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <masterLabel>Keyburn Customer Service</masterLabel>
+    <plannerSurfaces>
+        <adaptiveResponseAllowed>true</adaptiveResponseAllowed>
+        <callRecordingAllowed>false</callRecordingAllowed>
+        <surface>SurfaceAction__CustomerWebClient</surface>
+        <surfaceType>CustomerWebClient</surfaceType>
+    </plannerSurfaces>
+    <plannerType>Atlas__ConcurrentMultiAgentOrchestration</plannerType>
+</GenAiPlannerBundle>

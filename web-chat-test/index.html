@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Keyburn — Embedded Chat test</title>
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 3rem auto; max-width: 42rem; padding: 0 1rem; color: #16325c; }
+        code { background: #f4f6f9; padding: 0.1rem 0.3rem; border-radius: 3px; }
+        li { margin-bottom: 0.4rem; }
+    </style>
+</head>
+<body>
+    <h1>Keyburn — Embedded Messaging test page</h1>
+    <p>
+        This page loads the <strong>deployed</strong> Embedded Messaging client, not the Agent Builder
+        preview. The <code>enhancedWebChat</code> renderer of the <code>OrderDeliveryMap</code> Custom
+        Lightning Type targets this client, so it is the surface where the map card can actually appear.
+    </p>
+    <ol>
+        <li>Serve this folder over http, not <code>file://</code> — the client needs a real origin:<br />
+            <code>cd web-chat-test; py -3.8 -m http.server 8000</code>, then open
+            <code>http://localhost:8000</code>.</li>
+        <li>In Setup → <strong>CORS</strong>, allow <code>http://localhost:8000</code>.</li>
+        <li>In Setup → <strong>Embedded Service Deployments</strong> → Agentforce_Service_Agent, make sure
+            the deployment is published and, if the chat refuses to start, that guest access is allowed
+            (the retrieved config has <code>areGuestUsersAllowed=false</code>).</li>
+        <li>Click the chat button, then ask: <em>"Where is my order 1042? My email is jane.doe@example.com"</em>.</li>
+    </ol>
+    <p>If the map card renders here but not in the Builder preview, the preview was simply the wrong
+       surface all along.</p>
+
+    <script type="text/javascript">
+        function initEmbeddedMessaging() {
+            try {
+                embeddedservice_bootstrap.settings.language = "en_US";
+                embeddedservice_bootstrap.init(
+                    "__ORG_ID_15__", // 15-char org ID: the messaging token carries the 15-char form and the event router compares them literally (18-char => HTTP 400 on every poll)
+                    "Agentforce_Service_Agent",
+                    "https://__MY_DOMAIN__.develop.my.site.com/ESWAgentforceServiceAge1789407438343",
+                    { scrt2URL: "https://__MY_DOMAIN__.develop.my.salesforce-scrt.com" }
+                );
+            } catch (err) {
+                console.error("Error loading Embedded Messaging: ", err);
+                document.body.insertAdjacentHTML(
+                    "beforeend",
+                    "<p style='color:#c23934'>Embedded Messaging failed to start — see the browser console. Usual causes: CORS origin not allowed, deployment not published, or guest access disabled.</p>"
+                );
+            }
+        }
+    </script>
+    <script
+        type="text/javascript"
+        src="https://__MY_DOMAIN__.develop.my.site.com/ESWAgentforceServiceAge1789407438343/assets/js/bootstrap.min.js"
+        onload="initEmbeddedMessaging()"
+    ></script>
+</body>
+</html>

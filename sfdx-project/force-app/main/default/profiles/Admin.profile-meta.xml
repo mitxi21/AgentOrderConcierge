@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Profile xmlns="http://soap.sforce.com/2006/04/metadata">
+    <layoutAssignments>
+        <layout>Knowledge__kav-Policy FAQ Layout</layout>
+        <recordType>Knowledge__kav.Policy_FAQ</recordType>
+    </layoutAssignments>
+    <recordTypeVisibilities>
+        <default>true</default>
+        <recordType>Knowledge__kav.Policy_FAQ</recordType>
+        <visible>true</visible>
+    </recordTypeVisibilities>
+</Profile>

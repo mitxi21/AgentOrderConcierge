@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Order Delivery Map Card</masterLabel>
+    <description>Renders the order tracking map inside an Agentforce conversation.</description>
+    <targets>
+        <!-- Required for a Custom Lightning Type renderer component, or the deploy fails with
+             "Invalid target configuration ... must include valid target lightning__AgentforceOutput". -->
+        <target>lightning__AgentforceOutput</target>
+    </targets>
+    <!-- Binds this component to the Apex-backed c__OrderDeliveryMapCard type, as in Salesforce's
+         agent-script-recipes CustomLightningTypes renderer. With the older JSON-schema type
+         (c__OrderDeliveryMap) and no sourceType, the deployed chat never requested the component. -->
+    <targetConfigs>
+        <targetConfig targets="lightning__AgentforceOutput">
+            <sourceType name="c__OrderDeliveryMapCard"/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

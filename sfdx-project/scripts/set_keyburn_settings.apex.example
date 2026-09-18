@@ -1,0 +1,37 @@
+// TEMPLATE - do not put the real key here. Generate the runnable copy from secrets.env:
+//
+//   . .\load_secrets.ps1
+//   $t = (Get-Content sfdx-project\scripts\set_keyburn_settings.apex.example -Raw).Replace('PUT-THE-KEY-HERE', $env:GOOGLE_MAPS_API_KEY)
+//   [IO.File]::WriteAllText("$pwd\sfdx-project\scripts\set_keyburn_settings.apex", $t, (New-Object Text.UTF8Encoding($false)))
+//   cd sfdx-project; sf apex run --file scripts/set_keyburn_settings.apex --target-org devorg
+//
+// set_keyburn_settings.apex is git-ignored. Do not use Set-Content for it: PowerShell 5.1 writes a
+// UTF-8 BOM and Apex fails to compile with "Invalid identifier".
+//
+// Why a script instead of deploying force-app/.../customMetadata/*.md-meta.xml:
+// deploying a CustomMetadata RECORD fails in this org with UNKNOWN_EXCEPTION and no component
+// error (the TYPE deploys fine). The Apex Metadata API works, and it keeps the API key out of
+// the repo. Deployment is asynchronous - wait a few seconds, then verify with:
+//   sf data query --target-org devorg --query "SELECT DeveloperName, Google_Maps_Api_Key__c FROM Keyburn_Setting__mdt"
+
+Metadata.CustomMetadata rec = new Metadata.CustomMetadata();
+rec.fullName = 'Keyburn_Setting.Default';
+rec.label = 'Default';
+
+Map<String, Object> values = new Map<String, Object>{
+    'Warehouse_Label__c' => 'our Madrid warehouse',
+    'Warehouse_Latitude__c' => 40.45,
+    'Warehouse_Longitude__c' => -3.69,
+    'Average_Speed_Kmh__c' => 35,
+    'Google_Maps_Api_Key__c' => 'PUT-THE-KEY-HERE'
+};
+for (String field : values.keySet()) {
+    Metadata.CustomMetadataValue v = new Metadata.CustomMetadataValue();
+    v.field = field;
+    v.value = values.get(field);
+    rec.values.add(v);
+}
+
+Metadata.DeployContainer container = new Metadata.DeployContainer();
+container.addMetadata(rec);
+System.debug('Enqueued metadata deployment: ' + Metadata.Operations.enqueueDeployment(container, null));

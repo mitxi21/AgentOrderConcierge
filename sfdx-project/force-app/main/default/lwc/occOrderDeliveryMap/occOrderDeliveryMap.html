@@ -1,0 +1,48 @@
+<template>
+    <lightning-card title="Delivery tracking" icon-name="utility:location">
+        <lightning-button-icon
+            slot="actions"
+            icon-name="utility:refresh"
+            alternative-text="Refresh"
+            title="Refresh"
+            onclick={handleRefresh}
+        ></lightning-button-icon>
+
+        <div class="slds-var-p-horizontal_medium">
+            <template if:true={loading}>
+                <lightning-spinner alternative-text="Loading map" size="small"></lightning-spinner>
+            </template>
+
+            <template if:true={error}>
+                <p class="slds-text-color_error">{error}</p>
+            </template>
+
+            <template if:false={loading}>
+                <p class="slds-text-heading_small slds-var-m-bottom_xx-small">{summary}</p>
+                <template if:true={hasMap}>
+                    <p class="slds-text-body_small slds-text-color_weak slds-var-m-bottom_x-small">{detail}</p>
+                    <a
+                        href={snapshot.directionsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Open this route in Google Maps"
+                    >
+                        <img
+                            src={snapshot.mapUrl}
+                            alt="Route from the warehouse through the parcel's current position to the delivery address. Opens in Google Maps."
+                            class="map"
+                        />
+                    </a>
+                    <div class="slds-grid slds-grid_align-spread slds-var-m-top_xx-small">
+                        <p class="slds-text-body_small slds-text-color_weak">
+                            W warehouse &middot; O parcel now &middot; D delivery address
+                        </p>
+                        <a href={snapshot.directionsUrl} target="_blank" rel="noopener noreferrer" class="slds-text-body_small">
+                            Open in Google Maps
+                        </a>
+                    </div>
+                </template>
+            </template>
+        </div>
+    </lightning-card>
+</template>

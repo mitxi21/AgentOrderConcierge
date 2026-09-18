@@ -1,0 +1,28 @@
+{
+  "required" : [ "summary", "reasonCode" ],
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "email" : {
+      "title" : "Customer Email",
+      "description" : "Email address the caller already provided, if any. Leave blank when the caller could not provide one.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "reasonCode" : {
+      "title" : "Reason Code",
+      "description" : "One of: financial_request, unverifiable_identity, frustration, out_of_scope.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "summary" : {
+      "title" : "Summary",
+      "description" : "What the caller asked for, what was already checked, and why this is being escalated.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    }
+  },
+  "lightning:type" : "lightning__objectType"
+}

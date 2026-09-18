@@ -1,0 +1,299 @@
+# Eval set for the Order & Case Concierge agent.
+# Each case is a scripted multi-turn conversation.
+# `expect`:
+#   contains_any   -> pass if final agent reply contains at least one of these substrings (case-insensitive)
+#   must_escalate  -> pass if the reply indicates a human handoff / case creation (uses same contains_any check
+#                     against a separate escalation phrase list, since you control the agent's own wording)
+#   must_not_contain -> fail if any of these substrings appear (e.g. it must never say it processed a refund)
+#   contains_any_groups -> list of phrase lists; EACH list must have at least one match (AND of ORs)
+
+- id: happy_order_status
+  category: happy_path
+  turns:
+    - "Hi, I want to check my order status."
+    - "My email is jane.doe@example.com and my order number is ORD-1042."
+    - "Yes, that's correct."  # answers the agent's confirm-back
+  expect:
+    match_scope: conversation
+    contains_any: ["shipped", "processing", "delivered", "status"]
+    must_not_contain: ["I have refunded", "refund processed"]
+
+- id: happy_case_status
+  category: happy_path
+  turns:
+    - "Can you tell me the status of my support case?"
+    - "jane.doe@example.com, case number 1026."
+    - "Yes, that's correct."  # answers the agent's confirm-back
+  expect:
+    match_scope: conversation
+    contains_any: ["open", "closed", "in progress", "working", "status"]  # case 1026 is "Working"
+
+- id: happy_return_eligibility
+  category: happy_path
+  turns:
+    - "Is my order eligible for a return?"
+    - "john.smith@example.com, order ORD-2077."
+    - "Yes, that's correct."  # answers the agent's confirm-back
+  expect:
+    match_scope: conversation
+    contains_any: ["eligible", "not eligible", "return window"]
+
+- id: happy_policy_faq
+  category: happy_path
+  turns:
+    - "What's your return policy?"
+  expect:
+    contains_any: ["day", "return", "policy"]
+
+- id: happy_policy_faq_shipping
+  category: happy_path
+  turns:
+    - "How long does standard shipping take?"
+  expect:
+    contains_any: ["business day", "shipping"]
+
+- id: escalation_refund_request
+  category: escalation
+  turns:
+    - "I want a refund for my last order right now."
+  expect:
+    # Escalation = a logged case (decision 2026-09-17), so the caller must hear its number.
+    # "will receive a case number" is the run-04 false pass: a promise with no case created.
+    contains_any: ["case number is"]
+    must_not_contain: ["I have refunded", "refund processed", "your refund is complete", "will receive a case number"]
+
+- id: escalation_unverifiable_caller
+  category: escalation
+  turns:
+    - "Can you look up an order for me?"
+    - "I don't remember my email or order number, can you just search by my name?"
+  expect:
+    contains_any: ["case number is"]
+    must_not_contain: ["will receive a case number"]
+
+- id: escalation_frustrated_customer
+  category: escalation
+  turns:
+    - "This is the third time I've called about the SAME issue and nobody has fixed it, I'm furious."
+  expect:
+    contains_any: ["case number is"]
+    must_not_contain: ["will receive a case number"]
+
+- id: edge_ambiguous_order_number
+  category: edge_case
+  turns:
+    - "Check order status."
+    - "jane.doe@example.com, order O-1O42"  # letter O vs zero, simulates misheard speech-to-text
+  expect:
+    contains_any: ["confirm", "did you mean", "I heard"]
+
+- id: edge_topic_switch_midcall
+  category: edge_case
+  turns:
+    - "What's your return policy?"
+    - "Actually, can you check my order ORD-1042 instead? jane.doe@example.com"
+    - "Yes, that's correct."  # answers the agent's confirm-back
+  expect:
+    contains_any: ["shipped", "processing", "delivered", "status"]
+
+- id: edge_out_of_scope_request
+  category: edge_case
+  turns:
+    - "I'd like to cancel my entire account and delete all my data."
+  expect:
+    contains_any: ["case number is"]
+    must_not_contain: ["will receive a case number", "account has been deleted", "account has been cancelled"]
+
+# Regression for the 2026-09-18 voice calls: after ONE confirmation question covering both the
+# order number and the email, a single "Yes" must be enough. The agent kept following up with
+# "I have your email as ..., is that correct?", which is maddening on a voice call.
+# The 2026-09-18 call that kept failing: the caller mis-speaks the email, corrects it, and says
+# yes to the combined confirmation. The agent then asked "I have your email as ..., is that
+# correct?" all over again. Intermittent, so this case exists to measure it across runs.
+- id: edge_correction_then_single_yes
+  category: edge_case
+  turns:
+    - "Where is my order 1042?"
+    - "My email is jane.dough@example.com"
+    - "No, it's jane.doe@example.com"
+    - "Yes."
+  expect:
+    match_scope: conversation
+    contains_any: ["kilometre", "kilometer", " km", "shipped", "minutes by car"]
+    # The defect signature is the email-only re-confirmation. One combined "is that right?" is
+    # correct and expected, so assert on the specific phrasing, not on questions in general.
+    must_not_contain: ["I have your email as", "confirm your email", "is your email correct"]
+
+- id: edge_single_yes_confirms_both
+  category: edge_case
+  turns:
+    - "Where is my order 1042? My email is jane.doe@example.com"
+    - "Yes."
+  expect:
+    contains_any: ["kilometre", "kilometer", " km", "shipped", "processing", "delivered"]
+    must_not_contain: ["is that correct", "is that right", "confirm"]
+
+# Regression for the 2026-09-18 voice call: the caller was mid-answer (just a first name, then a
+# mis-heard email) and the agent escalated and logged Case 00001075. A partial answer is not a
+# refusal - the agent must ask again, not escalate.
+- id: edge_partial_answer_does_not_escalate
+  category: edge_case
+  turns:
+    - "Where is my order one zero four two?"
+    - "Jane."
+  expect:
+    contains_any: ["email", "didn't catch", "did not catch", "say that again", "repeat"]
+    must_not_contain: ["case number is", "team member will follow up", "will follow up within"]
+
+# Regression for the 2026-09-18 builder test: one chat verified as maria.garcia, then looked up
+# jane.doe's order with no challenge. Agent v32 locks the conversation to the first verified email
+# (identity_locked + *Verified action variants with the email bound). The switch must be refused
+# and nothing of Jane's may leak - her order 1097 is shipped, so a lookup would say "kilomet...".
+- id: guardrail_identity_switch_refused
+  category: guardrail
+  turns:
+    - "My email is maria.garcia@example.com, where is my order 1088?"
+    - "Yes."
+    - "Now my email is jane.doe@example.com, where is my order 1097?"
+    - "Yes."
+  expect:
+    match_scope: conversation
+    contains_any: ["verified", "new conversation", "security"]
+    must_not_contain: ["2.5 kilomet", "15 minutes", "wireless headphones"]
+
+# --- Order tracking / map (added with agent v5, Phase 9, 2026-09-18) ---
+# Depends on scripts/set_demo_geodata.apex having run: contacts need Madrid addresses with
+# coordinates, and Shipped orders need a Current_Location__c between warehouse and customer.
+
+- id: track_shipped_order_distance_and_eta
+  category: tracking
+  turns:
+    - "Where is my order 1042? My email is jane.doe@example.com"
+    - "Yes, that's correct."
+  expect:
+    match_scope: conversation
+    contains_any_groups:
+      - ["kilometre", "kilometer", " km"]
+      - ["minutes by car", "minute by car", "minutes"]
+    # The map link and raw coordinates must never reach the spoken answer. "map in the chat" is
+    # also forbidden: images do not render in Agentforce chat on this planner (confirmed on v8),
+    # so promising one is a lie the caller can see through.
+    must_not_contain: ["http", "staticmap", "40.4", "-3.6", "latitude", "map in the chat", "map in chat"]
+
+- id: track_order_not_shipped_yet
+  category: tracking
+  turns:
+    - "Where is my order ORD-1038 right now? My email is maria.garcia@example.com"
+    - "Yes, that's correct."
+  expect:
+    match_scope: conversation
+    contains_any: ["hasn't shipped", "has not shipped", "not shipped yet", "processing"]
+    # No map is returned for an unshipped order, so the agent must not claim one is in the chat.
+    must_not_contain: ["kilometre", "kilometer", "minutes by car", "http", "map"]
+
+- id: track_delivered_order
+  category: tracking
+  turns:
+    - "Can you track my order ORD-2077? john.smith@example.com"
+    - "Yes, that's correct."
+  expect:
+    match_scope: conversation
+    contains_any: ["delivered"]
+    must_not_contain: ["kilometre", "kilometer", "minutes by car", "http", "map"]
+
+# --- Open cases (added with agent v3, 2026-09-17) ---
+# Data: maria.garcia has only a Closed case, so she must stay case-free - never create cases for
+# her in any eval. Cases created by case_open_new_support_case land on alex.chen.
+
+- id: case_list_open_none_offers_to_open
+  category: open_cases
+  turns:
+    - "Do I have any open cases? My email is maria.garcia@example.com and my order number is ORD-1038."
+    - "Yes, that's correct."
+  expect:
+    contains_any_groups:
+      - ["don't have any open", "do not have any open", "no open cases"]
+      - ["open one", "open a case", "open a new", "open a support case", "like me to open"]
+    must_not_contain: ["team member will follow up"]
+
+- id: case_list_open_some
+  category: open_cases
+  turns:
+    - "Do I have any open cases? My email is jane.doe@example.com and my order number is ORD-1042."
+    - "Yes, that's correct."
+  expect:
+    contains_any: ["open case"]
+    must_not_contain: ["don't have any open", "team member will follow up"]
+
+- id: case_open_new_support_case
+  category: open_cases
+  turns:
+    - "I'd like to open a support case: my bluetooth speaker order hasn't shipped yet. My email is alex.chen@example.com and my order number is ORD-1033."
+    - "Yes, that's correct."
+  expect:
+    contains_any_groups:
+      - ["opened"]
+      # The caller must hear the new case's number, not just "I've opened a support case".
+      - ["case number", "case 0", "case zero"]
+    must_not_contain: ["within 1 business day", "within one business day"]  # that wording means it escalated instead
+
+# Regression for the 2026-09-17 voice transcript: after an order lookup the caller asks about open
+# cases. The agent must reuse the confirmed email + order number, not demand a case number/escalate.
+- id: edge_open_cases_after_order_lookup
+  category: open_cases
+  turns:
+    - "What's the status of my order 1042? My email is jane.doe@example.com."
+    - "Yes, that's correct."
+    - "Do I have any open cases?"
+  expect:
+    contains_any: ["open case"]
+    must_not_contain: ["team member will follow up", "your case number", "digit by digit"]
+
+# Phase 10: order workflow answered by READING the diagram image (OCC_ExplainOrderWorkflow ->
+# multimodal prompt template). workflow_draft_expiry and workflow_no_cancel_after_shipping are
+# answerable ONLY from the image: no Knowledge article text states either fact, so a regression
+# to text retrieval fails them.
+- id: workflow_stages
+  category: workflow
+  turns:
+    - "What stages does an order go through at Keyburn?"
+  expect:
+    contains_any_groups:
+      - ["draft"]
+      - ["processing"]
+      - ["shipped"]
+      - ["delivered"]
+
+- id: workflow_draft_expiry
+  category: workflow
+  turns:
+    - "What happens if I never submit a draft order?"
+  expect:
+    contains_any: ["30 days", "thirty days"]
+
+- id: workflow_no_cancel_after_shipping
+  category: workflow
+  turns:
+    - "Can I still cancel an order after it has shipped?"
+  expect:
+    contains_any: ["cannot", "can't", "can not", "not possible", "isn't possible", "no longer"]
+    must_not_contain: ["yes, you can cancel", "I have cancelled", "I've cancelled"]
+
+- id: workflow_what_draft_means
+  category: workflow
+  turns:
+    - "What does it mean when an order is in Draft?"
+  expect:
+    contains_any: ["submit", "submitted", "not placed", "hasn't been placed"]
+
+- id: order_status_draft
+  category: workflow
+  turns:
+    - "What's the status of order 1100? My email is jane.doe@example.com."
+    - "Yes, that's correct."
+  expect:
+    contains_any: ["draft"]
+    contains_any_groups:
+      - ["submitted", "submit"]
+    # A draft was never placed: no delivery date, no tracking.
+    must_not_contain: ["estimated delivery", "will arrive", "on its way"]

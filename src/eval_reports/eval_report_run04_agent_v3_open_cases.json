@@ -1,0 +1,375 @@
+{
+  "run_at": "2026-09-17T14:15:52.208746+00:00",
+  "total": 15,
+  "passed": 12,
+  "failed": 3,
+  "pass_rate": 0.8,
+  "results": [
+    {
+      "id": "happy_order_status",
+      "category": "happy_path",
+      "turns": [
+        "Hi, I want to check my order status.",
+        "My email is jane.doe@example.com and my order number is ORD-1042.",
+        "Yes, that's correct."
+      ],
+      "final_reply": "Your order for wireless headphones has shipped and is expected to be delivered by September eleventh, twenty twenty-six. Is there anything else I can check for you?",
+      "final_non_text_messages": [],
+      "transcript": [
+        {
+          "user": "Hi, I want to check my order status.",
+          "agent": "I can help with that. Please provide your email address and your order number.",
+          "non_text_messages": []
+        },
+        {
+          "user": "My email is jane.doe@example.com and my order number is ORD-1042.",
+          "agent": "Just to confirm, I have your email as jane.doe@example.com and your order number as one zero four two. Is that correct?",
+          "non_text_messages": []
+        },
+        {
+          "user": "Yes, that's correct.",
+          "agent": "Your order for wireless headphones has shipped and is expected to be delivered by September eleventh, twenty twenty-six. Is there anything else I can check for you?",
+          "non_text_messages": []
+        }
+      ],
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "happy_case_status",
+      "category": "happy_path",
+      "turns": [
+        "Can you tell me the status of my support case?",
+        "jane.doe@example.com, case number 1026.",
+        "Yes, that's correct."
+      ],
+      "final_reply": "Your case number one zero two six is currently being worked on and marked as high priority. I also see you have other open cases\u2014would you like a team member to follow up with you about those?",
+      "final_non_text_messages": [],
+      "transcript": [
+        {
+          "user": "Can you tell me the status of my support case?",
+          "agent": "I can check the status of your support case. Please tell me your email address and your case number, and I will read them back for confirmation.",
+          "non_text_messages": []
+        },
+        {
+          "user": "jane.doe@example.com, case number 1026.",
+          "agent": "To confirm, you asked about case number one zero two six with the email jane dot doe at example dot com. Is that correct?",
+          "non_text_messages": []
+        },
+        {
+          "user": "Yes, that's correct.",
+          "agent": "Your case number one zero two six is currently being worked on and marked as high priority. I also see you have other open cases\u2014would you like a team member to follow up with you about those?",
+          "non_text_messages": []
+        }
+      ],
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "happy_return_eligibility",
+      "category": "happy_path",
+      "turns": [
+        "Is my order eligible for a return?",
+        "john.smith@example.com, order ORD-2077.",
+        "Yes, that's correct."
+      ],
+      "final_reply": "Your order is eligible for a return since it's still within the standard return window. Is there anything else I can help you with?",
+      "final_non_text_messages": [],
+      "transcript": [
+        {
+          "user": "Is my order eligible for a return?",
+          "agent": "I'll need your email address and your order number to check if your order is eligible for a return. Could you please provide both?",
+          "non_text_messages": []
+        },
+        {
+          "user": "john.smith@example.com, order ORD-2077.",
+          "agent": "Just to confirm, I have your email as john.smith@example.com and your order number as two zero seven seven. Is that correct?",
+          "non_text_messages": []
+        },
+        {
+          "user": "Yes, that's correct.",
+          "agent": "Your order is eligible for a return since it's still within the standard return window. Is there anything else I can help you with?",
+          "non_text_messages": []
+        }
+      ],
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "happy_policy_faq",
+      "category": "happy_path",
+      "turns": [
+        "What's your return policy?"
+      ],
+      "final_reply": "Most items can be returned within 30 days of delivery if they are unused, in their original packaging, and include all accessories. Final-sale and clearance items cannot be returned. Would you like to know how to start a return?",
+      "final_non_text_messages": [],
+      "transcript": [
+        {
+          "user": "What's your return policy?",
+          "agent": "Most items can be returned within 30 days of delivery if they are unused, in their original packaging, and include all accessories. Final-sale and clearance items cannot be returned. Would you like to know how to start a return?",
+          "non_text_messages": []
+        }
+      ],
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "happy_policy_faq_shipping",
+      "category": "happy_path",
+      "turns": [
+        "How long does standard shipping take?"
+      ],
+      "final_reply": "Standard shipping usually takes five to seven business days from the ship date. Orders are processed within one business day, and you will get a tracking number by email once your order ships. Would you like to ask about a specific order?",
+      "final_non_text_messages": [],
+      "transcript": [
+        {
+          "user": "How long does standard shipping take?",
+          "agent": "Standard shipping usually takes five to seven business days from the ship date. Orders are processed within one business day, and you will get a tracking number by email once your order ships. Would you like to ask about a specific order?",
+          "non_text_messages": []
+        }
+      ],
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "escalation_refund_request",
+      "category": "escalation",
+      "turns": [
+        "I want a refund for my last order right now."
+      ],
+      "final_reply": "A team member will follow up within one business day to help with your refund request. Your case number is zero zero zero zero one zero three five. Is there anything else I can help you with today?",
+      "final_non_text_messages": [],
+      "transcript": [
+        {
+          "user": "I want a refund for my last order right now.",
+          "agent": "A team member will follow up within one business day to help with your refund request. Your case number is zero zero zero zero one zero three five. Is there anything else I can help you with today?",
+          "non_text_messages": []
+        }
+      ],
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "escalation_unverifiable_caller",
+      "category": "escalation",
+      "turns": [
+        "Can you look up an order for me?",
+        "I don't remember my email or order number, can you just search by my name?"
+      ],
+      "final_reply": "To help you, I need either your order number or the email address used for the purchase. Which one can you provide?",
+      "final_non_text_messages": [],
+      "transcript": [
+        {
+          "user": "Can you look up an order for me?",
+          "agent": "I can help with that. Please tell me the email address used for the order and your order number.",
+          "non_text_messages": []
+        },
+        {
+          "user": "I don't remember my email or order number, can you just search by my name?",
+          "agent": "To help you, I need either your order number or the email address used for the purchase. Which one can you provide?",
+          "non_text_messages": []
+        }
+      ],
+      "passed": false,
+      "failures": [
+        "expected one of ['verify', \"can't locate\", 'unable to confirm', 'connect you with'] in reply, found none"
+      ]
+    },
+    {
+      "id": "escalation_frustrated_customer",
+      "category": "escalation",
+      "turns": [
+        "This is the third time I've called about the SAME issue and nobody has fixed it, I'm furious."
+      ],
+      "final_reply": "I understand you're frustrated, and I apologize for the repeated inconvenience. A team member will follow up within one business day\u2014your case number is zero zero zero zero one zero three six. How else can I help today?",
+      "final_non_text_messages": [],
+      "transcript": [
+        {
+          "user": "This is the third time I've called about the SAME issue and nobody has fixed it, I'm furious.",
+          "agent": "I understand you're frustrated, and I apologize for the repeated inconvenience. A team member will follow up within one business day\u2014your case number is zero zero zero zero one zero three six. How else can I help today?",
+          "non_text_messages": []
+        }
+      ],
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "edge_ambiguous_order_number",
+      "category": "edge_case",
+      "turns": [
+        "Check order status.",
+        "jane.doe@example.com, order O-1O42"
+      ],
+      "final_reply": "Just to confirm, I have the email jane.doe@example.com and order number O dash one O four two. Is that correct?",
+      "final_non_text_messages": [],
+      "transcript": [
+        {
+          "user": "Check order status.",
+          "agent": "I can help with that. Please provide the email address and your order number so I can check the status for you.",
+          "non_text_messages": []
+        },
+        {
+          "user": "jane.doe@example.com, order O-1O42",
+          "agent": "Just to confirm, I have the email jane.doe@example.com and order number O dash one O four two. Is that correct?",
+          "non_text_messages": []
+        }
+      ],
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "edge_topic_switch_midcall",
+      "category": "edge_case",
+      "turns": [
+        "What's your return policy?",
+        "Actually, can you check my order ORD-1042 instead? jane.doe@example.com",
+        "Yes, that's correct."
+      ],
+      "final_reply": "Your order for wireless headphones has shipped and is expected to arrive by September eleventh, twenty twenty-six. Is there anything else I can check for you?",
+      "final_non_text_messages": [],
+      "transcript": [
+        {
+          "user": "What's your return policy?",
+          "agent": "Most items can be returned within 30 days of delivery if they are unused, in their original packaging, and include all accessories. Final-sale and clearance items cannot be returned. Would you like to know how to start a return?",
+          "non_text_messages": []
+        },
+        {
+          "user": "Actually, can you check my order ORD-1042 instead? jane.doe@example.com",
+          "agent": "Just to confirm, I have your email as jane.doe@example.com and your order number as one zero four two. Is that correct?",
+          "non_text_messages": []
+        },
+        {
+          "user": "Yes, that's correct.",
+          "agent": "Your order for wireless headphones has shipped and is expected to arrive by September eleventh, twenty twenty-six. Is there anything else I can check for you?",
+          "non_text_messages": []
+        }
+      ],
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "edge_out_of_scope_request",
+      "category": "edge_case",
+      "turns": [
+        "I'd like to cancel my entire account and delete all my data."
+      ],
+      "final_reply": "I am not able to delete accounts or data directly, but I will have a team member follow up to help with your request. You will receive a case number and someone will contact you soon. Is there anything else I can check for you while you wait?",
+      "final_non_text_messages": [],
+      "transcript": [
+        {
+          "user": "I'd like to cancel my entire account and delete all my data.",
+          "agent": "I am not able to delete accounts or data directly, but I will have a team member follow up to help with your request. You will receive a case number and someone will contact you soon. Is there anything else I can check for you while you wait?",
+          "non_text_messages": []
+        }
+      ],
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "case_list_open_none_offers_to_open",
+      "category": "open_cases",
+      "turns": [
+        "Do I have any open cases? My email is maria.garcia@example.com and my order number is ORD-1038.",
+        "Yes, that's correct."
+      ],
+      "final_reply": "You don't have any open cases. Would you like me to open a new support case for you today?",
+      "final_non_text_messages": [],
+      "transcript": [
+        {
+          "user": "Do I have any open cases? My email is maria.garcia@example.com and my order number is ORD-1038.",
+          "agent": "Just to confirm, your email is maria.garcia@example.com and your order number is O R D dash 1 0 3 8. Is that correct?",
+          "non_text_messages": []
+        },
+        {
+          "user": "Yes, that's correct.",
+          "agent": "You don't have any open cases. Would you like me to open a new support case for you today?",
+          "non_text_messages": []
+        }
+      ],
+      "passed": false,
+      "failures": [
+        "expected one of ['open one', 'open a case', 'open a new case', 'open a support case'] in reply, found none"
+      ]
+    },
+    {
+      "id": "case_list_open_some",
+      "category": "open_cases",
+      "turns": [
+        "Do I have any open cases? My email is jane.doe@example.com and my order number is ORD-1042.",
+        "Yes, that's correct."
+      ],
+      "final_reply": "You have four open cases. The most recent are about unverifiable identity, a financial request, and an order that arrived damaged. Is there anything else I can help you with regarding these cases?",
+      "final_non_text_messages": [],
+      "transcript": [
+        {
+          "user": "Do I have any open cases? My email is jane.doe@example.com and my order number is ORD-1042.",
+          "agent": "Just to confirm, your email is jane dot doe at example dot com and your order number is O R D dash 1 0 4 2. Is that correct?",
+          "non_text_messages": []
+        },
+        {
+          "user": "Yes, that's correct.",
+          "agent": "You have four open cases. The most recent are about unverifiable identity, a financial request, and an order that arrived damaged. Is there anything else I can help you with regarding these cases?",
+          "non_text_messages": []
+        }
+      ],
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "case_open_new_support_case",
+      "category": "open_cases",
+      "turns": [
+        "I'd like to open a support case: my bluetooth speaker order hasn't shipped yet. My email is alex.chen@example.com and my order number is ORD-1033.",
+        "Yes, that's correct."
+      ],
+      "final_reply": "I've opened a support case for you. A team member will follow up within two business days about your bluetooth speaker order. Is there anything else I can help you with today?",
+      "final_non_text_messages": [],
+      "transcript": [
+        {
+          "user": "I'd like to open a support case: my bluetooth speaker order hasn't shipped yet. My email is alex.chen@example.com and my order number is ORD-1033.",
+          "agent": "Just to confirm, you want to open a support case for order O R D dash 1 0 3 3 with the email alex dot chen at example dot com. Is that correct?",
+          "non_text_messages": []
+        },
+        {
+          "user": "Yes, that's correct.",
+          "agent": "I've opened a support case for you. A team member will follow up within two business days about your bluetooth speaker order. Is there anything else I can help you with today?",
+          "non_text_messages": []
+        }
+      ],
+      "passed": false,
+      "failures": [
+        "expected one of ['opened case', 'opened a case', 'case number'] in reply, found none"
+      ]
+    },
+    {
+      "id": "edge_open_cases_after_order_lookup",
+      "category": "open_cases",
+      "turns": [
+        "What's the status of my order 1042? My email is jane.doe@example.com.",
+        "Yes, that's correct.",
+        "Do I have any open cases?"
+      ],
+      "final_reply": "You currently have four open cases. Would you like details about a specific case or need help with something else?",
+      "final_non_text_messages": [],
+      "transcript": [
+        {
+          "user": "What's the status of my order 1042? My email is jane.doe@example.com.",
+          "agent": "I heard order one zero four two with the email jane dot doe at example dot com. Is that correct?",
+          "non_text_messages": []
+        },
+        {
+          "user": "Yes, that's correct.",
+          "agent": "Your order one zero four two for wireless headphones has shipped and is estimated to arrive by September eleventh, twenty twenty-six. Is there anything else I can check for you?",
+          "non_text_messages": []
+        },
+        {
+          "user": "Do I have any open cases?",
+          "agent": "You currently have four open cases. Would you like details about a specific case or need help with something else?",
+          "non_text_messages": []
+        }
+      ],
+      "passed": true,
+      "failures": []
+    }
+  ]
+}

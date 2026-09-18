@@ -1,0 +1,21 @@
+// Run from the repo root (AgentFDE/). Every sf command runs from inside sfdx-project/.
+cd sfdx-project
+sf org login web --alias devorg
+
+sf project deploy start --target-org devorg --metadata CustomObject
+sf project deploy start --target-org devorg --metadata Layout
+sf project deploy start --target-org devorg --metadata Profile
+sf project deploy start --target-org devorg --metadata Settings
+
+//import data
+//change case number in eval.
+sf apex run --file scripts\link_contacts_to_account.apex --target-org devorg
+
+sf apex run --file scripts\publish_knowledge_articles.apex --target-org devorg
+
+sf project deploy start --target-org devorg --metadata ApexClass
+sf project deploy start --target-org devorg --metadata PermissionSet
+sf apex run --file scripts\test_actions.apex --target-org devorg
+
+//change agent username in script
+sf apex run --file scripts\assign_agent_permset.apex --target-org devorg

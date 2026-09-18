@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Current_Location__c</fullName>
+    <label>Current Location</label>
+    <description>Where the parcel is right now, as reported by the carrier. Populated for Shipped orders only. Query the components as Current_Location__Latitude__s / Current_Location__Longitude__s.</description>
+    <displayLocationInDecimal>true</displayLocationInDecimal>
+    <required>false</required>
+    <scale>6</scale>
+    <type>Location</type>
+</CustomField>

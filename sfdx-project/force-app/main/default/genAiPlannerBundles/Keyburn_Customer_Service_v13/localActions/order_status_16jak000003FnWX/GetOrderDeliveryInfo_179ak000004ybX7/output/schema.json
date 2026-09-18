@@ -1,0 +1,90 @@
+{
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "distanceKm" : {
+      "title" : "Distance Km",
+      "description" : "Remaining driving distance in kilometres.",
+      "lightning:type" : "lightning__numberType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true
+    },
+    "driveMinutes" : {
+      "title" : "Drive Minutes",
+      "description" : "Remaining driving time in minutes.",
+      "lightning:type" : "lightning__integerType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true
+    },
+    "estimated" : {
+      "title" : "Estimated",
+      "description" : "True if the driving time is a local estimate because the routing service was unavailable.",
+      "lightning:type" : "lightning__booleanType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true
+    },
+    "found" : {
+      "title" : "Found",
+      "description" : "True if a matching order was located for this email and order number.",
+      "lightning:type" : "lightning__booleanType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true
+    },
+    "inTransit" : {
+      "title" : "In Transit",
+      "description" : "True only when the order is shipped and has a reported position.",
+      "lightning:type" : "lightning__booleanType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true
+    },
+    "itemDetails" : {
+      "title" : "Item Details",
+      "description" : "Rich link card: route image, title and Google Maps URL. Pass through untouched.",
+      "maxItems" : 2000,
+      "items" : {
+        "lightning:type" : "@apexClassType/c__OCC_GetOrderDeliveryInfo$ItemDetail"
+      },
+      "lightning:type" : "lightning__listType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : true,
+      "copilotAction:isUsedByPlanner" : false
+    },
+    "locationAge" : {
+      "title" : "Location Age",
+      "description" : "How long ago the position was reported, in words.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true
+    },
+    "mapImage" : {
+      "title" : "Map",
+      "description" : "Map of the route as an HTML image tag, for display in the chat. Never read this aloud.",
+      "lightning:type" : "lightning__richTextType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : true,
+      "copilotAction:isUsedByPlanner" : false
+    },
+    "mapUrl" : {
+      "title" : "Map Url",
+      "description" : "The map image URL. Never read this aloud.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : false
+    },
+    "message" : {
+      "title" : "Message",
+      "description" : "Spoken answer with distance, driving time and how old the position is - safe to read to the caller as-is. Contains no link and no coordinates.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : true,
+      "copilotAction:isUsedByPlanner" : true
+    }
+  },
+  "lightning:type" : "lightning__objectType"
+}

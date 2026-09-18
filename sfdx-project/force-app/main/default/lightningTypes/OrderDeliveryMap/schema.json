@@ -1,0 +1,35 @@
+{
+  "title": "Order Delivery Map",
+  "description": "Live tracking for a shipped order: the route image, how far it still has to travel, and a link to the same route in Google Maps.",
+  "type": "object",
+  "lightning:type": "lightning__objectType",
+  "unevaluatedProperties": false,
+  "properties": {
+    "mapImageUrl": {
+      "title": "Map Image URL",
+      "description": "Static map of warehouse, parcel and delivery address with the route drawn.",
+      "type": "string",
+      "lightning:type": "lightning__urlType",
+      "lightning:allowedUrlSchemes": ["https"]
+    },
+    "directionsUrl": {
+      "title": "Directions URL",
+      "description": "The same journey in Google Maps, for the caller to open.",
+      "type": "string",
+      "lightning:type": "lightning__urlType",
+      "lightning:allowedUrlSchemes": ["https"]
+    },
+    "headline": {
+      "title": "Headline",
+      "description": "Short summary, e.g. 'Order ORD-1042 - 2.5 km away, about 16 min by car'.",
+      "type": "string",
+      "lightning:type": "lightning__textType"
+    },
+    "subtext": {
+      "title": "Subtext",
+      "description": "Supporting line, e.g. when the position was reported.",
+      "type": "string",
+      "lightning:type": "lightning__textType"
+    }
+  }
+}

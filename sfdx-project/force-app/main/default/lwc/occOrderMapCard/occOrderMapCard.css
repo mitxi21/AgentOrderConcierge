@@ -1,0 +1,24 @@
+.card {
+    border: 1px solid rgb(201, 201, 201);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: white;
+    max-width: 24rem;
+}
+
+.map {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.headline {
+    font-weight: 600;
+    padding: 0.5rem 0.75rem;
+}
+
+.subtext {
+    font-size: 0.75rem;
+    color: rgb(90, 90, 90);
+    padding: 0.5rem 0.75rem;
+}

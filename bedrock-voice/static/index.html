@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keyburn Voice Line</title>
+<style>
+  :root {
+    --bg: #f4f6f8; --panel: #ffffff; --ink: #14202b; --muted: #5d6b78; --line: #dde3e9;
+    --brand: #0b6e6e; --brand-ink: #ffffff; --caller: #e8eef4; --agent: #e3f2f1;
+    --danger: #b3261e; --hold: #b26a00; --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1419; --panel: #172029; --ink: #e6edf3; --muted: #93a1ae; --line: #2a3642;
+      --brand: #2aa7a7; --brand-ink: #06201f; --caller: #1f2a35; --agent: #143533;
+      --danger: #f2766e; --hold: #f0b35a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 15px/1.45 system-ui, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 16px 24px; border-bottom: 1px solid var(--line); background: var(--panel);
+           display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  header h1 { margin: 0; font-size: 18px; }
+  header p { margin: 0; color: var(--muted); font-size: 13px; }
+  main { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 16px;
+         padding: 16px 24px; max-width: 1280px; margin: 0 auto; }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; padding: 16px; } }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+            display: flex; flex-direction: column; min-height: 0; }
+  section > h2 { margin: 0; padding: 12px 16px; font-size: 13px; text-transform: uppercase;
+                 letter-spacing: .06em; color: var(--muted); border-bottom: 1px solid var(--line); }
+  .controls { display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+              border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  button { font: inherit; border: 0; border-radius: 999px; padding: 10px 20px; cursor: pointer;
+           background: var(--brand); color: var(--brand-ink); font-weight: 600; }
+  button.hangup { background: var(--danger); color: #fff; }
+  button:disabled { opacity: .5; cursor: default; }
+  .status { font-size: 14px; color: var(--muted); }
+  .status b { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .status .hold { color: var(--hold); font-weight: 600; }
+  .meter { width: 90px; height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; }
+  .meter i { display: block; height: 100%; width: 0; background: var(--brand); transition: width .08s; }
+  .transcript { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column;
+                gap: 10px; min-height: 360px; max-height: calc(100vh - 290px); }
+  .msg { max-width: 85%; padding: 9px 13px; border-radius: 12px; white-space: pre-wrap; }
+  .msg small { display: block; font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+  .msg.caller { align-self: flex-end; background: var(--caller); }
+  .msg.agent { align-self: flex-start; background: var(--agent); }
+  .msg.system { align-self: center; color: var(--muted); font-size: 13px; background: none; }
+  form { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line); }
+  input { flex: 1; font: inherit; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--line);
+          background: var(--bg); color: var(--ink); min-width: 0; }
+  form button { border-radius: 8px; padding: 9px 16px; }
+  .relay { flex: 1; overflow-y: auto; padding: 12px 16px; max-height: calc(100vh - 170px); }
+  .relay .hint { color: var(--muted); font-size: 13px; }
+  .turn { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
+  .turn .row { display: grid; grid-template-columns: 92px 1fr; gap: 8px; font-size: 13px; }
+  .turn .row + .row { margin-top: 6px; }
+  .turn .k { color: var(--muted); }
+  .turn .v { font-family: var(--mono); font-size: 12.5px; word-break: break-word; }
+  .turn .t { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .turn.pending .t { color: var(--hold); }
+  .turn.blocked { border-color: var(--danger); }
+  .turn.blocked .k { color: var(--danger); font-weight: 600; }
+  .turn.blocked .v { font-family: inherit; font-size: 13px; }
+  .summary { padding: 10px 16px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Keyburn customer service · voice line</h1>
+  <p>Amazon Nova 2 Sonic handles speech in and out; every caller turn is answered by the Agentforce agent.</p>
+</header>
+<main>
+  <section>
+    <h2>Call</h2>
+    <div class="controls">
+      <button id="callBtn">Call Keyburn</button>
+      <div class="meter" title="Microphone level"><i id="level"></i></div>
+      <div class="status" id="status">Not connected</div>
+    </div>
+    <div class="transcript" id="transcript" aria-live="polite"></div>
+    <form id="typeForm">
+      <input id="typeInput" placeholder="Or type what the caller says…" autocomplete="off" disabled>
+      <button id="typeBtn" disabled>Send</button>
+    </form>
+  </section>
+  <section>
+    <h2>Behind the call: Agentforce relay</h2>
+    <div class="relay" id="relay">
+      <p class="hint">Each caller turn is sent verbatim to the Keyburn Agentforce agent over the
+        Agent API. Its reply is what Nova speaks. Identity checks, permissions and escalations all
+        happen in Salesforce.</p>
+    </div>
+    <div class="summary" id="summary">No turns yet.</div>
+  </section>
+</main>
+
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const callBtn = $("callBtn"), statusEl = $("status"), transcript = $("transcript"), relayEl = $("relay");
+
+let ws = null, micCtx = null, micStream = null, playCtx = null;
+let playHead = 0, sources = [], callStart = 0, timer = null;
+let holdTimer = null, holding = false;
+let agentBubble = null;             // current assistant bubble (grouped until the caller speaks)
+let pendingTurn = null;             // relay card awaiting its reply
+let lastTyped = "";
+const latencies = [];
+
+// ---------- mic capture: 16 kHz mono s16le, 32 ms chunks ----------
+const WORKLET = `
+class Cap extends AudioWorkletProcessor {
+  constructor() { super(); this.buf = new Int16Array(512); this.n = 0; this.peak = 0; }
+  process(inputs) {
+    const ch = inputs[0] && inputs[0][0];
+    if (!ch) return true;
+    for (let i = 0; i < ch.length; i++) {
+      const s = Math.max(-1, Math.min(1, ch[i]));
+      this.peak = Math.max(this.peak, Math.abs(s));
+      this.buf[this.n++] = s < 0 ? s * 0x8000 : s * 0x7fff;
+      if (this.n === this.buf.length) {
+        this.port.postMessage({ pcm: this.buf.buffer.slice(0), peak: this.peak });
+        this.n = 0; this.peak = 0;
+      }
+    }
+    return true;
+  }
+}
+registerProcessor("cap", Cap);`;
+
+async function startMic() {
+  micStream = await navigator.mediaDevices.getUserMedia({
+    audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+  // A 16 kHz context makes the browser resample the mic for us (Chrome/Edge).
+  micCtx = new AudioContext({ sampleRate: 16000 });
+  const url = URL.createObjectURL(new Blob([WORKLET], { type: "application/javascript" }));
+  await micCtx.audioWorklet.addModule(url);
+  const node = new AudioWorkletNode(micCtx, "cap");
+  node.port.onmessage = ({ data }) => {
+    if (ws && ws.readyState === WebSocket.OPEN) ws.send(data.pcm);
+    $("level").style.width = Math.min(100, Math.round(data.peak * 140)) + "%";
+  };
+  micCtx.createMediaStreamSource(micStream).connect(node);
+}
+
+// ---------- playback: 24 kHz mono s16le, gapless queue ----------
+function playPcm(buf) {
+  const i16 = new Int16Array(buf);
+  const f32 = new Float32Array(i16.length);
+  for (let i = 0; i < i16.length; i++) f32[i] = i16[i] / 0x8000;
+  const ab = playCtx.createBuffer(1, f32.length, 24000);
+  ab.copyToChannel(f32, 0);
+  const src = playCtx.createBufferSource();
+  src.buffer = ab; src.connect(playCtx.destination);
+  playHead = Math.max(playHead, playCtx.currentTime + 0.03);
+  src.start(playHead);
+  playHead += ab.duration;
+  sources.push(src);
+  src.onended = () => { sources = sources.filter((s) => s !== src); };
+}
+function flushPlayback() {
+  sources.forEach((s) => { try { s.stop(); } catch (_) {} });
+  sources = []; playHead = 0;
+}
+
+// ---------- hold sound while Agentforce is thinking ----------
+function chime() {
+  const t = playCtx.currentTime;
+  [[660, 0], [880, 0.18]].forEach(([f, d]) => {
+    const o = playCtx.createOscillator(), g = playCtx.createGain();
+    o.type = "sine"; o.frequency.value = f;
+    g.gain.setValueAtTime(0, t + d);
+    g.gain.linearRampToValueAtTime(0.06, t + d + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.35);
+    o.connect(g).connect(playCtx.destination);
+    o.start(t + d); o.stop(t + d + 0.4);
+  });
+}
+function startHold() {
+  if (holding) return;
+  holding = true; render();
+  const wait = Math.max(0, playHead - playCtx.currentTime) * 1000;  // let current speech finish
+  holdTimer = setTimeout(function tick() { if (!holding) return; chime(); holdTimer = setTimeout(tick, 1500); }, wait + 300);
+}
+function stopHold() { holding = false; clearTimeout(holdTimer); render(); }
+
+// ---------- transcript ----------
+function add(cls, who, text) {
+  const d = document.createElement("div");
+  d.className = "msg " + cls;
+  if (who) { const s = document.createElement("small"); s.textContent = who; d.appendChild(s); }
+  d.appendChild(document.createTextNode(text));
+  transcript.appendChild(d);
+  transcript.scrollTop = transcript.scrollHeight;
+  return d;
+}
+function agentSays(text) {
+  if (!agentBubble) agentBubble = add("agent", "Keyburn", "");
+  agentBubble.lastChild.textContent = (agentBubble.lastChild.textContent + " " + text).trim();
+  transcript.scrollTop = transcript.scrollHeight;
+}
+function callerSays(text) { agentBubble = null; add("caller", "Caller", text); }
+
+// ---------- relay panel ----------
+function row(k, v, cls) {
+  const r = document.createElement("div"); r.className = "row";
+  const a = document.createElement("div"); a.className = "k"; a.textContent = k;
+  const b = document.createElement("div"); b.className = cls || "v"; b.textContent = v;
+  r.append(a, b); return r;
+}
+function relayStart(utterance) {
+  relayEl.querySelector(".hint")?.remove();
+  const card = document.createElement("div"); card.className = "turn pending";
+  card.append(row("Caller said", utterance), row("Agent reply", "…"), row("Latency", "waiting", "t"));
+  relayEl.appendChild(card); relayEl.scrollTop = relayEl.scrollHeight;
+  pendingTurn = card;
+}
+function relayBlocked(attempted) {
+  relayEl.querySelector(".hint")?.remove();
+  const card = document.createElement("div"); card.className = "turn blocked";
+  card.append(row("Blocked", "Nova tried to send " + JSON.stringify(attempted || "") +
+                  ", but the caller hadn't said anything new. Nothing was sent to Agentforce."));
+  relayEl.appendChild(card); relayEl.scrollTop = relayEl.scrollHeight;
+}
+function relayEnd(reply, seconds) {
+  const card = pendingTurn; pendingTurn = null;
+  if (!card) return;
+  card.classList.remove("pending");
+  card.children[1].lastChild.textContent = reply;
+  card.children[2].lastChild.textContent = seconds.toFixed(2) + " s";
+  latencies.push(seconds);
+  const avg = latencies.reduce((a, b) => a + b, 0) / latencies.length;
+  $("summary").textContent = `${latencies.length} turn${latencies.length > 1 ? "s" : ""} · Agentforce average ${avg.toFixed(2)} s · max ${Math.max(...latencies).toFixed(2)} s`;
+}
+
+// ---------- status ----------
+function render() {
+  if (!ws) { statusEl.textContent = "Not connected"; return; }
+  const s = Math.floor((Date.now() - callStart) / 1000);
+  const clock = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+  statusEl.innerHTML = callStart
+    ? `In call <b>${clock}</b>` + (holding ? ' · <span class="hold">checking with Keyburn…</span>' : "")
+    : "Connecting…";
+}
+
+// ---------- call ----------
+async function startCall() {
+  callBtn.disabled = true;
+  transcript.textContent = "";
+  agentBubble = null;
+  try {
+    playCtx = new AudioContext({ sampleRate: 24000 });
+    await startMic();
+  } catch (e) {
+    add("system", "", "Microphone unavailable: " + e.message + ". You can still type turns.");
+  }
+  ws = new WebSocket(`ws://${location.host}/ws`);
+  ws.binaryType = "arraybuffer";
+  render();
+  ws.onmessage = ({ data }) => {
+    if (data instanceof ArrayBuffer) {
+      if (holding) stopHold();
+      if (playCtx) playPcm(data);
+      return;
+    }
+    const m = JSON.parse(data);
+    switch (m.type) {
+      case "ready":
+        callStart = Date.now(); timer = setInterval(render, 1000); render();
+        callBtn.textContent = "Hang up"; callBtn.className = "hangup"; callBtn.disabled = false;
+        $("typeInput").disabled = $("typeBtn").disabled = false;
+        break;
+      case "text":
+        if (m.role === "USER") {
+          const t = m.text.trim();
+          if (t && t !== "[call connected]" && t !== lastTyped) callerSays(t);
+        }
+        else if (m.role === "ASSISTANT" && m.stage === "SPECULATIVE") agentSays(m.text);
+        break;
+      case "interrupted": flushPlayback(); break;
+      case "tool_start": relayStart(m.utterance); startHold(); break;
+      case "tool_end": relayEnd(m.reply, m.seconds); break;
+      case "tool_blocked": relayBlocked(m.attempted); break;
+      case "error": add("system", "", m.message); break;
+      case "ended": endCall(false); break;
+    }
+  };
+  ws.onclose = () => endCall(false);
+}
+
+function endCall(sendHangup) {
+  if (!ws) return;
+  if (sendHangup && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: "hangup" }));
+  const sock = ws; ws = null;
+  setTimeout(() => { try { sock.close(); } catch (_) {} }, 500);
+  stopHold(); clearInterval(timer); callStart = 0;
+  micStream?.getTracks().forEach((t) => t.stop());
+  micCtx?.close(); micCtx = null;
+  setTimeout(() => { playCtx?.close(); playCtx = null; }, 300);
+  $("level").style.width = "0";
+  $("typeInput").disabled = $("typeBtn").disabled = true;
+  callBtn.textContent = "Call Keyburn"; callBtn.className = ""; callBtn.disabled = false;
+  add("system", "", "Call ended");
+  render();
+}
+
+callBtn.onclick = () => (ws ? endCall(true) : startCall());
+$("typeForm").onsubmit = (e) => {
+  e.preventDefault();
+  const v = $("typeInput").value.trim();
+  if (!v || !ws) return;
+  ws.send(JSON.stringify({ type: "text", text: v }));
+  callerSays(v);
+  lastTyped = v;  // Nova may echo a typed turn back as caller text; don't show it twice
+  $("typeInput").value = "";
+};
+</script>
+</body>
+</html>

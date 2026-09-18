@@ -1,0 +1,4 @@
+# Templates for files whose real version is git-ignored (they hold secrets).
+# Without this, the CLI tries to parse them as metadata and the deploy fails with
+# UNKNOWN_EXCEPTION and no component error.
+**/*.example

@@ -1,0 +1,141 @@
+{
+  "run_at": "2026-09-17T13:37:55.016112+00:00",
+  "total": 11,
+  "passed": 3,
+  "failed": 8,
+  "pass_rate": 0.273,
+  "results": [
+    {
+      "id": "happy_order_status",
+      "category": "happy_path",
+      "turns": [
+        "Hi, I want to check my order status.",
+        "My email is jane.doe@example.com and my order number is ORD-1042."
+      ],
+      "final_reply": "I heard order O-R-D-1-0-4-2 with the email jane dot doe at example dot com. Is that correct?",
+      "passed": false,
+      "failures": [
+        "expected one of ['shipped', 'processing', 'delivered', 'status'] in reply, found none"
+      ]
+    },
+    {
+      "id": "happy_case_status",
+      "category": "happy_path",
+      "turns": [
+        "Can you tell me the status of my support case?",
+        "jane.doe@example.com, case number 1026."
+      ],
+      "final_reply": "I heard case number one zero two six and the email jane.doe@example.com. Is that correct?",
+      "passed": false,
+      "failures": [
+        "expected one of ['open', 'closed', 'in progress', 'status'] in reply, found none"
+      ]
+    },
+    {
+      "id": "happy_return_eligibility",
+      "category": "happy_path",
+      "turns": [
+        "Is my order eligible for a return?",
+        "john.smith@example.com, order ORD-2077."
+      ],
+      "final_reply": "I heard order O-R-D-2-0-7-7 with the email john.smith@example.com. Is that correct?",
+      "passed": false,
+      "failures": [
+        "expected one of ['eligible', 'not eligible', 'return window'] in reply, found none"
+      ]
+    },
+    {
+      "id": "happy_policy_faq",
+      "category": "happy_path",
+      "turns": [
+        "What's your return policy?"
+      ],
+      "final_reply": "Most items can be returned within 30 days of delivery if they are unused, in the original packaging, and include all accessories. Final-sale and clearance items cannot be returned. Would you like help starting a return?",
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "happy_policy_faq_shipping",
+      "category": "happy_path",
+      "turns": [
+        "How long does standard shipping take?"
+      ],
+      "final_reply": "Standard shipping typically takes five to seven business days from the ship date, and orders are processed within one business day of purchase. Can I help you with anything else about your order or shipping?",
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "escalation_refund_request",
+      "category": "escalation",
+      "turns": [
+        "I want a refund for my last order right now."
+      ],
+      "final_reply": "I cannot process refunds directly, but I can check if your order is eligible for a return. Please provide your email address and your order number.",
+      "passed": false,
+      "failures": [
+        "expected one of ['connect you with', 'team member', 'transfer', 'human', 'specialist'] in reply, found none"
+      ]
+    },
+    {
+      "id": "escalation_unverifiable_caller",
+      "category": "escalation",
+      "turns": [
+        "Can you look up an order for me?",
+        "I don't remember my email or order number, can you just search by my name?"
+      ],
+      "final_reply": "I can help with that. Could you please provide your order number, reading it one digit at a time?",
+      "passed": false,
+      "failures": [
+        "expected one of ['verify', \"can't locate\", 'unable to confirm', 'connect you with'] in reply, found none"
+      ]
+    },
+    {
+      "id": "escalation_frustrated_customer",
+      "category": "escalation",
+      "turns": [
+        "This is the third time I've called about the SAME issue and nobody has fixed it, I'm furious."
+      ],
+      "final_reply": "",
+      "passed": false,
+      "failures": [
+        "expected one of ['sorry', 'team member', 'escalate', 'priority'] in reply, found none"
+      ]
+    },
+    {
+      "id": "edge_ambiguous_order_number",
+      "category": "edge_case",
+      "turns": [
+        "Check order status.",
+        "jane.doe@example.com, order O-1O42"
+      ],
+      "final_reply": "I heard order O dash 1 O 4 2 with the letter O, is that correct? Please confirm before I check the status.",
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "edge_topic_switch_midcall",
+      "category": "edge_case",
+      "turns": [
+        "What's your return policy?",
+        "Actually, can you check my order ORD-1042 instead? jane.doe@example.com"
+      ],
+      "final_reply": "I heard order O-R-D-1-0-4-2 with the email jane dot doe at example dot com, is that correct?",
+      "passed": false,
+      "failures": [
+        "expected one of ['shipped', 'processing', 'delivered', 'status'] in reply, found none"
+      ]
+    },
+    {
+      "id": "edge_out_of_scope_request",
+      "category": "edge_case",
+      "turns": [
+        "I'd like to cancel my entire account and delete all my data."
+      ],
+      "final_reply": "",
+      "passed": false,
+      "failures": [
+        "expected one of ['team member', 'connect you with', 'cannot', 'unable to'] in reply, found none"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPromptTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <activeVersionIdentifier>1fz8/jEQsZsO9YXfJ3l3tF/9bmKMkGuaui8eg52YH/A=_1</activeVersionIdentifier>
+    <description>Phase 10: answers a caller&apos;s question by reading the order-workflow diagram image (a File on the Knowledge article &quot;How an order moves through Keyburn&quot;). Invoked by OCC_ExplainOrderWorkflow; the image, not a text transcription, is the source of truth.</description>
+    <developerName>OCC_Order_Workflow_Diagram</developerName>
+    <masterLabel>OCC Order Workflow Diagram</masterLabel>
+    <overridable>false</overridable>
+    <templateVersions>
+        <content>You are helping a Keyburn customer service voice assistant answer a caller. The attached image is Keyburn&apos;s order workflow diagram. It is your only source.
+
+Diagram: {!$Input:Diagram}
+
+Caller&apos;s question: {!$Input:Question}
+
+Rules:
+- Answer using only what the diagram shows. Never add facts, timings or policies that are not written in the diagram.
+- Answer in one to three short spoken sentences of plain text. No lists, no markdown, no headings.
+- Explain what it means for the caller. Don&apos;t describe the drawing itself, such as boxes, arrows or colours, and don&apos;t mention that you are reading a diagram.
+- If the question asks about the steps an order goes through, name them in order.
+- If the diagram does not answer the question, reply with exactly NOT_IN_DIAGRAM and nothing else.</content>
+        <inputs>
+            <apiName>Diagram</apiName>
+            <definition>SOBJECT://ContentDocument</definition>
+            <masterLabel>Diagram</masterLabel>
+            <referenceName>Input:Diagram</referenceName>
+            <required>true</required>
+        </inputs>
+        <inputs>
+            <apiName>Question</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>Question</masterLabel>
+            <referenceName>Input:Question</referenceName>
+            <required>true</required>
+        </inputs>
+        <isCitationEnabled>false</isCitationEnabled>
+        <primaryModel>sfdc_ai__DefaultGPT4Omni</primaryModel>
+        <status>Published</status>
+        <versionIdentifier>1fz8/jEQsZsO9YXfJ3l3tF/9bmKMkGuaui8eg52YH/A=_1</versionIdentifier>
+    </templateVersions>
+    <type>einstein_gpt__flex</type>
+    <visibility>Global</visibility>
+</GenAiPromptTemplate>

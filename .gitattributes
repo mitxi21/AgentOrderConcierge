@@ -1,0 +1,21 @@
+# Org identifiers are swapped for __TOKENS__ on commit; see tools/setup_redaction.ps1.
+*.md                  filter=redact
+*.xml                 filter=redact
+*.json                filter=redact
+*.genAiPlannerBundle  filter=redact
+*.cls                 filter=redact
+*.agent               filter=redact
+*.apex                filter=redact
+*.page                filter=redact
+*.html                filter=redact
+*.js                  filter=redact
+*.css                 filter=redact
+*.py                  filter=redact
+*.ps1                 filter=redact
+*.yaml                filter=redact
+*.csv                 filter=redact
+*.txt                 filter=redact
+*.example             filter=redact
+
+*.png   binary
+*.pdf   binary

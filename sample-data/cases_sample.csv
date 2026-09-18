@@ -1,0 +1,5 @@
+Subject,Status,Origin,Priority,Description,ContactId
+"Order ORD-1042 arrived damaged",Working,Phone,High,"Customer reports the Wireless Headphones from order ORD-1042 arrived with a cracked casing. Awaiting replacement decision.",jane.doe@example.com
+"Follow-up: ORD-1042 damage still unresolved",Working,Phone,High,"Second contact on the same damaged-item issue as the case above. Customer is getting frustrated that it hasn't been resolved yet - good case for testing the repeated-complaint escalation guardrail.",jane.doe@example.com
+"Question about return process for ORD-2077",New,Phone,Medium,"Customer wants to understand the return process steps before deciding whether to return the Mechanical Keyboard from ORD-2077.",john.smith@example.com
+"Shipping delay inquiry",Closed,Phone,Low,"Customer asked about a delayed shipment; delay was explained and case closed with no further action needed.",maria.garcia@example.com

@@ -1,0 +1,5 @@
+{
+  "title": "Order Delivery Map Card",
+  "description": "Live tracking for a shipped order: route image, distance and time still to drive, and a Google Maps link.",
+  "lightning:type": "@apexClassType/c__OCC_GetOrderDeliveryInfo$DeliveryMapCard"
+}

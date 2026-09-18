@@ -1,0 +1,28 @@
+{
+  "required" : [ "email", "verifyingIdentifier" ],
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "email" : {
+      "title" : "Customer Email",
+      "description" : "Email address the caller provided for verification.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "lockedEmail" : {
+      "title" : "Locked Email",
+      "description" : "Bound to the email verified earlier in this conversation. Never ask the caller for it.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "verifyingIdentifier" : {
+      "title" : "Verifying Identifier",
+      "description" : "An order number or case number the caller already confirmed in this call.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    }
+  },
+  "lightning:type" : "lightning__objectType"
+}
