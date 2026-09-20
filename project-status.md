@@ -131,6 +131,19 @@ is created in between**. So there is nothing to render live and nothing to find 
 `supportedModalities: ["Messaging", "Voice"]`, so this is not an agent misconfiguration. The
 Studio preview transcribes because it is a different surface drawing its own speech-to-text, not
 messaging entries.
+**Also checked (2026-09-20): the transcript isn't saved server-side either.** A source the builder
+found claims the WebV2 widget merely fails to *render* voice transcripts, while they are still
+"saved in the backend on the Messaging Session record ... so a human agent can read them if the
+conversation is escalated". **Not true in this org:** the builder opened the Messaging Session for a
+voice call and the Conversation tab is **empty**. The admin Connect API can't serve those entries
+either (`RECORD_NOT_FOUND` on `/connect/conversation/{id}/entries`), same blind spot as in the
+Phase 9 card work. Client-side capture and server-side record now agree: **an in-chat voice
+conversation leaves no transcript anywhere in Service Cloud.** Sharper trade-off for the deck than
+"it isn't displayed": with voice in the widget, the conversation is not auditable, which for a
+service org is a real objection — and the reason an external voice channel that keeps its own
+transcript (the Nova page, whose per-call logs include every turn and its latency) is worth
+building.
+
 **Conclusion: for the deployed chat, voice = audio only; the screen shows nothing.** Not worth
 further work before the demo. Demo split stands: website = typed chat + map card; Nova page =
 voice + transcript + map; Keyburn Service = the escalated Case. Good Issues & Trade-offs material:
