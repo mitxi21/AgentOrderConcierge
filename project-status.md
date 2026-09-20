@@ -7,6 +7,232 @@ to the entry that replaced them.
 
 ---
 
+## 2026-09-19 — Phase 12 started: deck and demo guide
+
+- **Deck** built as a claude.ai Slides artifact, "Order & Case Concierge — Builders Panel"
+  (private until shared from its Share menu): 23 slides with speaker notes and timings,
+  following the panel's four chapters. The eval slide plots all 35 saved runs (27% → 96%), with
+  agent changes and test-only fixes marked differently. There are 3 trade-off slides (accuracy,
+  latency and autonomy; platform and delivery; voice latency) plus a failures slide and a "with
+  more time" slide. Placeholders to fill in: name, current role, career examples.
+- **`docfiles/DEMO_GUIDE.md`** covers timing and what to cut, the pre-flight checklists (Tue /
+  T–60 / T–10), the script for the four demo moments (website chat + map, diagram + refused identity
+  switch, Nova call with a staged wrong digit + refund escalation, and the Case in the console),
+  failure recovery, and a design-decision crib sheet.
+- **Decision: stage the misheard number as a wrong digit** (1024 → corrected to 1042), not
+  "O-1O42", because the voice layer's O→0 conversion can skip the confirm-back.
+- Still to do on Tuesday: run the evals twice on v38, record the backup videos, rehearse twice.
+
+---
+
+## 2026-09-20 — Phase 11 CLOSED: external voice channel live, all demo surfaces verified
+
+**Builder: "now it works, phase 11 finished."** Verified by the builder end to end, with the
+laptop mic and speakers (the demo setup): the Nova call page, the branded Keyburn website (public
+site and the in-Salesforce tab), and the Keyburn Service app with the Agentforce Escalations list
+view. Apex after the Phase 11 changes: **73/73**.
+
+What Phase 11 delivered, against the runbook:
+
+1. **Agentforce stays the brain, Nova 2 Sonic is only speech** — as designed. Every caller turn
+   goes through the Agent API session the eval harness uses (`bypassUser: true`), so the identity
+   checks, `USER_MODE`, the least-privilege permset and the escalation path all still apply on the
+   new channel, and the Phase 8 eval evidence stays valid.
+2. **Two guardrails the voice layer forced on us**, both structural, not prompt-level: the relay
+   sends only what the caller was *heard* saying (Nova invented a caller "yes" to the identity
+   confirm-back), and the tool result is `say_to_caller`, a message Nova must speak and never
+   answer.
+3. **The map on the page** via `OCC_OrderMapRest`, locked to the first email Salesforce verifies.
+4. **Latency measured** per turn, which the runbook asked for: Agentforce 2.9–7.5 s (average
+   ~4.9 s), caller stops → first audio 3.8–6.7 s. A cold first turn hit 13.8 s, hence the warm-up
+   call before the demo.
+5. **Findings worth the deck:** the Agent API returns text only; in-chat voice writes nothing to
+   the conversation; a page framed in Lightning can't use the microphone; the same agent serves
+   three channels and the *channel* decides what can be shown.
+
+Deferred by choice (with more time): a dedicated integration user for the ECA so the map call
+doesn't run as admin; hosting the voice backend so the public site could offer it; an Experience
+Cloud site instead of the Visualforce page.
+
+**Next: Phase 12 only.** Freeze v38, re-run the eval suite twice, refresh the parcel position
+(`set_demo_geodata.apex`), delete eval-generated escalation Cases (00001201, 00001202 and the
+00001031+ batch) if the case list is on screen, record backup video, build the deck, rehearse.
+No new features.
+
+---
+
+## 2026-09-19 — Demo surfaces inside Salesforce: branded customer page, public site, Keyburn Service app
+
+**Decision (builder): A + C + better access through Salesforce.** An Experience Cloud site (B) was
+rejected four days before the demo: the chat would look the same, and it adds a site, publishing,
+a guest user, new CSP/CORS entries and a second republish after every agent publish. It goes in the
+deck as the production path.
+
+Built and deployed:
+
+- **`KeyburnHelp`** VF page: a branded "Keyburn · Order help" storefront page. Promo strip, header,
+  hero with "Chat with Keyburn" (calls `embeddedservice_bootstrap.utilAPI.launchChat()`),
+  popular-question buttons, four help tiles, the Draft → Delivered journey. Same bootstrap as
+  `KeyburnChatTest` (15-char org ID). When framed (i.e. opened as a tab), it shows an "Open full
+  screen" bar.
+- **Keyburn Service** console app (orange header): tabs Keyburn Website (VF tab), Cases,
+  Contacts, Orders (new `Order__c` tab: the record page has the delivery map), Knowledge. Visible
+  to System Administrator only.
+- **Case list view "Agentforce Escalations"** + `Escalation_Summary__c` on the Case layout
+  (read-only; Admin FLS read). Deployed from `mdapi/case-listview/` (see CLAUDE.md for why).
+- **Public site `Keyburn`** (Visualforce site, `…my.salesforce-sites.com/keyburn/`), guest profile
+  `Keyburn Profile` = the page + the standard error pages, no object access. CORS origin
+  `Keyburn_Sites`. The ESW site's iframe allowlist gained the Sites and Lightning domains, the
+  only change to the existing chat configuration.
+- Redaction: the site files carry the admin username, so a new `REDACT_ADMIN_USERNAME` was added
+  and `tools/setup_redaction.ps1` re-run. It wasn't in any commit before.
+
+**Public site 503 "Down For Maintenance" on every path, resolved by the builder in Setup → Sites**
+(a one-time UI step the Metadata API can't do). Checked by the builder: the public site, the
+Keyburn Website tab (chat works inside Lightning) and the Agentforce Escalations list view.
+
+**Builder test on the site: text chat fully works (answers + map card). Voice in the same chat
+window: fluent, correct answers, but no transcript in the chat window and no map card.** This
+matches the 09-17 voice-preview trace: voice runs as a separate voice connection
+(`__current_modality__: voice`, `__current_connection__: telephony`), not as messaging entries,
+and result display is unsupported there, so `show_command` never produces the card. The
+deployment config (`embeddedServiceConfigs/`) has no voice or transcript setting to change. Not
+proven from the org: the stored `MessagingSession`s don't identify which was voice. **Recommended
+demo split:** the website = typed chat + map card; the Nova voice line = voice + transcript + map;
+Keyburn Service = the escalated Case. Present the chat-voice limitation in Issues & Trade-offs, with
+the Nova page as the workaround.
+Confirmed by the builder: voice was started with the **mic button inside the chat window**
+(Agentforce Voice in Enhanced Chat v2). Salesforce's material only says text and voice can be
+switched "in the same conversation", and says nothing about showing voice turns or rich cards in
+the window.
+
+**Correction (2026-09-20): "platform limit" was concluded on bad evidence — retracted.**
+The builder then showed that **voice in the Agentforce Studio preview transcribes speech into the
+conversation without any problem**, so transcription per se is not the blocker; the deployed chat
+window is a different surface. My supporting evidence was also worthless: the per-session
+`ConversationEntry` counts were zero for *every* session, text ones included, because
+**`ConversationEntry` is empty org-wide** (0 rows unfiltered) — not queryable/populated here, so it
+proves nothing. Lesson (again): check that a query returns data for a known-good case before
+reading meaning into a zero.
+Also checked and ruled out as the place to fix it: `EmbeddedServiceConfig` (no voice or transcript
+setting; only receipts/typing/emoji toggles) and `MessagingChannel` (no voice fields). The mic
+button therefore comes from the agent's Voice connection (the LiveKit-based setup from 09-14),
+not from the deployment. **Settled by an `entries` capture (builder, 2026-09-20; kept outside the repo as
+`v38_entries.json`): in-chat voice turns are never written to the conversation.** The capture of a
+voice session contains 6 entries and exactly **one** `Message` — the greeting, sent before voice
+started. The conversation carries a `ModalityUpdate`: `activeModalities: ["Messaging"]` →
+`["Voice"]` when the mic is pressed → back to `["Messaging"]` ~98 s later, and **no Message entry
+is created in between**. So there is nothing to render live and nothing to find after a refresh
+(the builder confirmed a refresh shows nothing), and a card cannot appear either, because a card
+*is* an entry. `ParticipantChanged` shows the agent with
+`supportedModalities: ["Messaging", "Voice"]`, so this is not an agent misconfiguration. The
+Studio preview transcribes because it is a different surface drawing its own speech-to-text, not
+messaging entries.
+**Conclusion: for the deployed chat, voice = audio only; the screen shows nothing.** Not worth
+further work before the demo. Demo split stands: website = typed chat + map card; Nova page =
+voice + transcript + map; Keyburn Service = the escalated Case. Good Issues & Trade-offs material:
+the same agent behind three channels, and the channel decides what can be shown.
+
+**The microphone does not work in the Keyburn Website tab** (`/lightning/n/KeyburnHelp`), and
+can't be made to: a browser only allows an iframe to use the mic when the parent sets
+`allow="microphone"`, and the Lightning tab frame doesn't. Nothing in the page or in Setup changes
+that. It costs little, since in-chat voice shows nothing on screen anyway. The framed banner now
+says typed chat works but the mic doesn't, and links to the **public site** (top-level, mic
+allowed) instead of the framed URL. **The public site is live** (HTTP 200) after the builder's
+Setup → Sites activation.
+
+---
+
+## 2026-09-19 — Phase 11: first live voice test by the builder; delivery map added to the call page
+
+**Live mic test (builder, headset): all good except the map, which the page didn't have yet.**
+One 8-turn call (`call_logs/call_20260919_111942.json`): the spoken "one zero four two" and "jane
+dot doe at example dot com" were resolved correctly. Confirm-back → a real "yes" → tracking. Then
+return eligibility, the next status (from the workflow diagram), the current status, tracking
+again, and "I want to cancel my order" escalated. **Case 00001201 verified in the org** (High,
+`out_of_scope`, Jane Doe, created by the agent user). 0 blocked relays. Agentforce **3.2–7.5 s per
+turn, average 4.9 s**. The slowest was the diagram question (GPT-4o on the image). Demo prep: the
+parcel position was "15 hours ago", so re-run `set_demo_geodata.apex` before the demo.
+
+**Decision (builder): Option A, show the map on the call page.** The Agent API returns text only,
+so `relay.py` fetches it from `OCC_OrderMapRest` itself, under three rules:
+
+- The identity is **Agentforce's own confirm-back** ("I heard order 1042 with the email …"),
+  parsed from its reply, not from the caller's words. The call locks to the first email read back,
+  mirroring the agent's identity lock.
+- It fetches **only after Agentforce gave a tracking answer** ("… minutes by car"), so the map
+  appears only when Agentforce has already verified the caller and disclosed the location. It
+  fetches once per order, in the background, so speech isn't delayed.
+- `OCC_OrderMapRest` re-verifies email + order in Salesforce.
+
+**Trade-off for the deck:** the REST call uses the ECA token, so it runs as the **Run As user
+(admin)**, not the least-privilege agent user. The email/order verification still applies, but
+it's weaker than the agent's own action. It's also coupled to Agentforce's wording (two regexes in
+`relay.py`). The "with more time" fix is a dedicated integration user for the ECA, with the agent
+permset. The static-map URL carries the Google key to the browser, same as the deployed chat.
+
+Headless check: map event 0.8 s after the tracking reply (2.5 km / 12 min), logged under `maps` in
+the call log. That run also blocked one invented `"yes"` from Nova, so the guardrail was still
+needed.
+
+**Second live test (builder): map shows, but needed a Google Maps link, and one call lost it.**
+
+- **Link:** `OCC_OrderMapRest` now returns `directionsUrl` (the same `OCC_DeliveryMap.directionsUrl`
+  as the record page: warehouse → parcel waypoint → address, no API key). The image and an "Open
+  route in Google Maps" link use it. Test asserts added. Deployed with `OCC_OrderMapSurfacesTest`
+  5/5.
+- **Lost map (`call_20260919_113440`): my identity rule was wrong.** Nova heard "jen dot doe",
+  Agentforce read back jen.doe, the caller said "No, … jane dot doe", and Agentforce answered
+  tracking *without a new read-back*. The relay had locked to the first read-back (jen.doe), so the
+  REST call returned `found: false`. **New rule:** candidate emails = Agentforce read-backs **plus
+  emails the caller said** (spoken "x dot y at z dot com" is parsed). Newest is tried first, and the
+  call locks to the **first email Salesforce verifies**. Trying a candidate is safe: the endpoint
+  needs a matching email + order, the same bar as the agent. A replay of all three recorded calls
+  against the live endpoint: map + directions link in each, including the jen.doe call.
+- **Agent observation (not a page issue):** after the correction, Agentforce went straight to the
+  answer without reading the corrected email back. That's arguably fine, since the caller spelled it
+  out, but it differs from the v15 "a correction earns one new combined question" rule. Watch it in
+  voice.
+- **Agent observation, `call_20260919_113555`:** the caller couldn't end the call by voice. "No"
+  got a goodbye. A following "oh no" re-triggered tracking. Spanish "ya no te voy a ayudar más"
+  (probably said to someone in the room) was read as frustration and **escalated: Case 00001202,
+  High, `frustration`** (real, in the org; delete before the demo). "Hang up" was misheard as
+  "hunt up", then "just hang up" drew generic replies. Nothing ends a call except the page's Hang up
+  button. For the demo, hang up with the button. An optional fix: the page ends the call when
+  Agentforce's reply is a goodbye.
+
+**Third live test: good (builder). Decision (builder): auto hang-up after Agentforce's goodbye.**
+The goodbye is detected on the **Agentforce reply** (`relay.is_goodbye`: "have a great day" /
+"goodbye" / "thank you for calling", and **no question mark**, so "Anything else?" never ends a
+call). This leaves the agent script untouched. The server sends `goodbye`; the page waits for Nova's
+`END_TURN` plus local playback, then hangs up ("Keyburn ended the call after saying goodbye").
+There's a 20 s fallback timer, and anything the caller says or types first cancels it.
+Checked against all 45 logged replies: 4 flagged, all real closing lines. The greeting ("Thanks for
+calling Keyburn … What can I help you with today?") isn't flagged. Headless call: no `goodbye`
+after the policy answer (it ends in a question), `goodbye` right after "no, that's all". The page
+loads without script errors. **The browser-side hang-up timing still needs one live call.**
+
+**Fourth live test (builder): 1 perfect, 2 didn't hang up, 3 (laptop mic + speakers) got no map.**
+Demo requirement from the builder: **laptop mic and speakers**, so the audience hears both sides.
+
+- **Test 2, no hang-up:** the goodbye was detected ("…Have a great day!"). The page then cancelled
+  the hang-up on *any* USER transcript text, most likely a late second ASR fragment of "forget it,
+  that's all". With speakers, Nova's own voice through the mic would do the same. **Fix:** only a
+  real new relay (`tool_start`) cancels a pending hang-up. Page-only change.
+- **Test 3, no map: ASR, not speakers.** The laptop mic heard "**what** is my order 1042" for
+  "where is …", so Agentforce gave a *status* answer ("… was shipped and was expected to arrive by
+  September 11"), and the map only triggered on a tracking answer. The rest of the call was
+  clean through the speakers: confirm-back, real "yes", 0 blocked relays, no echo loop.
+  **Decision (builder): the map also shows after a status answer that says the order shipped**
+  (`SHIPPED_ANSWER`: "is / was / has been (currently) shipped"). Deliberately not matched: "once it
+  has shipped …" in workflow answers, and negations. Checked on 57 logged replies: it matches only
+  the 3 real status answers. The endpoint still returns a map only for a Shipped order with a
+  position. Replaying test 3 now shows the map; test 2 (no email given) shows none.
+- First turn of test 1 took **13.8 s** in Agentforce (cold start after idle). Before the demo, make
+  one warm-up call.
+
+---
+
 ## 2026-09-19 — Moved out of OneDrive; published to GitHub (public)
 
 **Decision:** projects live in a local `Projects` folder rather than OneDrive, with GitHub for

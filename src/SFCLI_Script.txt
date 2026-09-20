@@ -19,3 +19,6 @@ sf apex run --file scripts\test_actions.apex --target-org devorg
 
 //change agent username in script
 sf apex run --file scripts\assign_agent_permset.apex --target-org devorg
+
+//geo data update on orders
+sf apex run --file scripts\set_demo_geodata.apex --target-org devorg

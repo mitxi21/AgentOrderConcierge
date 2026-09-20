@@ -55,10 +55,15 @@ async def main(wavs):
                     if m["contentType"] == "AUDIO" and m["stopReason"] == "END_TURN" and (
                             state["tool_end"] or not caller_turn_start):
                         turn_done.set()
+                elif k == "map":
+                    # mapUrl carries the Google key: never print it
+                    log(f"MAP order {m['order']}: {m['distanceKm']} km, {m['driveMinutes']} min, "
+                        f"{m['locationAge']}, url {'present' if m.get('mapUrl') else 'MISSING'}")
                 elif k == "tool_end":
                     state["tool_end"] = True
                     log(f"tool_end ({m['seconds']}s): {m['reply']}")
-                elif k in ("tool_start", "tool_blocked", "ready", "error", "ended", "interrupted"):
+                elif k in ("tool_start", "tool_blocked", "ready", "error", "ended", "interrupted",
+                           "goodbye"):
                     log(f"{k}: {json.dumps({x: y for x, y in m.items() if x != 'type'})}")
                     if k in ("error", "ended"):
                         turn_done.set()

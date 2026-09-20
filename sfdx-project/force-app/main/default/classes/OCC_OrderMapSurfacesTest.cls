@@ -100,6 +100,8 @@ private class OCC_OrderMapSurfacesTest {
         System.assertEquals(true, resp.inTransit);
         System.assertEquals(7.0, resp.distanceKm);
         System.assert(resp.mapUrl.contains('staticmap'), resp.mapUrl);
+        System.assert(resp.directionsUrl.startsWith('https://www.google.com/maps/dir/?api=1'), resp.directionsUrl);
+        System.assert(!resp.directionsUrl.contains('key='), 'The interactive link needs no API key');
     }
 
     @isTest
@@ -111,6 +113,7 @@ private class OCC_OrderMapSurfacesTest {
 
         System.assertEquals(false, resp.found);
         System.assertEquals(null, resp.mapUrl, 'No map may be built for an order the caller cannot prove is theirs');
+        System.assertEquals(null, resp.directionsUrl, 'No directions for an unverified order either');
     }
 
     @isTest

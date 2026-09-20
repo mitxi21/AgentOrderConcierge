@@ -24,7 +24,7 @@ import time
 from aiohttp import WSMsgType, web
 
 from nova_session import CALL_CONNECTED, NovaSession
-from relay import KeyburnRelay
+from relay import KeyburnRelay, is_goodbye
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST, PORT = "127.0.0.1", int(os.environ.get("VOICE_PAGE_PORT", "8765"))
@@ -39,7 +39,7 @@ async def call(request):
     ws = web.WebSocketResponse(max_msg_size=4 * 1024 * 1024)
     await ws.prepare(request)
     started = time.time()
-    relay = KeyburnRelay()
+    relay = KeyburnRelay(on_map=lambda data: send_json({"type": "map", **data}))
     nova = None
     blocked = []
 
@@ -58,6 +58,9 @@ async def call(request):
             await send_json({"type": "error", "message": data})
         else:
             await send_json({"type": kind, **(data or {})})
+            if kind == "tool_end" and is_goodbye(data.get("reply")):
+                # The page hangs up once Nova has finished speaking this reply.
+                await send_json({"type": "goodbye"})
 
     try:
         greeting = await relay.start()
@@ -87,13 +90,13 @@ async def call(request):
             await relay.close()
         except Exception:
             pass
-        _save_log(started, relay.turns, blocked)
+        _save_log(started, relay.turns, blocked, relay.maps)
         await send_json({"type": "ended"})
         await ws.close()
     return ws
 
 
-def _save_log(started, turns, blocked):
+def _save_log(started, turns, blocked, maps):
     """Per-call relay log with Agentforce latency per turn (runbook step 6), plus any tool calls
     blocked because the caller hadn't said anything (Nova trying to speak for the caller)."""
     if not turns and not blocked:
@@ -102,7 +105,7 @@ def _save_log(started, turns, blocked):
     name = time.strftime("call_%Y%m%d_%H%M%S.json", time.localtime(started))
     with open(os.path.join(LOG_DIR, name), "w", encoding="utf-8") as f:
         json.dump({"started": time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(started)),
-                   "turns": turns, "blocked_relays": blocked}, f, indent=2)
+                   "turns": turns, "blocked_relays": blocked, "maps": maps}, f, indent=2)
     print(f"[call] {len(turns)} turns, {len(blocked)} blocked -> call_logs/{name}", flush=True)
 
 

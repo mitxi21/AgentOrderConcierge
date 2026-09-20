@@ -37,6 +37,7 @@ the tree — if one appears under `sfdx-project/`, delete it rather than maintai
 | `BUILDERS_PANEL_BRIEF.md` | Panel format (45 min) + evaluation criteria |
 | `project-status.md` | Decision + status log. Append to it when a decision is made or a phase completes |
 | `docfiles/Agentforce_FDE_Panel_Prep.md` | Agent design + deck narrative / talk track. Git-ignored (local only) |
+| `docfiles/DEMO_GUIDE.md` | Phase 12: demo script, pre-flight checklists, failure recovery, design-decision crib sheet (the deck itself is a claude.ai Slides artifact) |
 | `docfiles/BUILD_RUNBOOK.md` | Phased build plan (phases 0–12; 9–11 features added 2026-09-17, 12 = demo + deck, always last) |
 | `docfiles/agent_builder_topics.md` | Paste-ready instructions per topic/subagent + eval→topic mapping |
 | `docfiles/README_eval_harness.md` | Agent API / External Client App setup for the eval harness |
@@ -457,18 +458,49 @@ Phases 9–12 are planned in detail, with spikes and cut-offs, in `docfiles/BUIL
   `filter_from_agent: True`: it is the same flag as `is_displayable: False`, so the two together
   mark the card hidden and nothing renders. Put the card on an action the agent already calls —
   an optional second action gets skipped by the model.
-- **Phase 11 — in progress (2026-09-18).** External call page using Amazon Bedrock Nova 2
+- **Phase 11 — done (2026-09-20).** External call page using Amazon Bedrock Nova 2
   Sonic. Agentforce stays the brain; Nova only handles speech and relays turns through the Agent
   API. AWS account `__AWS_ACCOUNT_ID__`, region `eu-north-1`; **IAM access keys** in `secrets.env` (a
   Bedrock API key can't open the bidirectional stream). Run: `. .\load_secrets.ps1; py -3.12
-  bedrock-voice\server.py` → `http://localhost:8765` (Chrome/Edge, headset). Rules:
+  bedrock-voice\server.py` → `http://localhost:8765` (Chrome/Edge). Rules:
   - **The relay sends only what the caller was heard saying** (Nova's USER transcript or a typed
     turn), never Nova's tool argument. Nova once invented a caller "yes" to the identity
     confirm-back. Don't relax this.
   - The tool result key is `say_to_caller`: a message for the caller, often a question Nova must
     ask and never answer.
+  - **Demo setup = laptop mic + speakers** (the audience must hear both sides), not a headset.
+    Make one warm-up call first: a cold first Agentforce turn took 13.8 s.
+  - **Delivery map on the page** (2026-09-19): `relay.py` calls `OCC_OrderMapRest` only after a
+    tracking answer ("minutes by car") or a status answer saying the order shipped (the laptop mic
+    can hear "where is" as "what is"). Candidate emails are Agentforce's confirm-backs plus emails
+    the caller said. The call locks to the **first email Salesforce verifies**, never to the first
+    read-back, because a read-back can be a mishearing the caller corrects. The response
+    includes `directionsUrl` (Google Maps link, no key). If the agent's confirm-back or tracking
+    wording changes, update the regexes in `relay.py`.
+  - **Auto hang-up** (2026-09-19): the server sends `goodbye` when Agentforce's reply matches
+    `relay.is_goodbye` (a closing phrase and no `?`). The page hangs up after Nova's `END_TURN` and
+    local playback. Only a new relayed caller turn (`tool_start`) cancels it, never transcript text
+    alone (ASR fragments, or speaker echo).
+    The REST call runs as the ECA's Run As user (admin); that's a known trade-off.
   - Use `aws-sdk-bedrock-runtime` 0.11 API (`AsyncBedrockRuntimeConfig.resolve(...,
     transport=AWSCRTHTTPClient())`), not the older `amazon-nova-samples` code.
+- **Demo surfaces in Salesforce (2026-09-19):**
+  - `KeyburnHelp` VF page = branded "Keyburn · Order help" customer website with the deployed
+    Embedded Messaging chat. `KeyburnChatTest` stays as the plain debug page.
+  - The page is reached two ways:
+    - the **Keyburn Website** tab in the **Keyburn Service** console app (orange header), which
+      also has Cases, Contacts, Orders and Knowledge;
+    - the public Force.com site **`Keyburn`**: `https://<my-domain>.my.salesforce-sites.com/keyburn/`.
+      The guest profile `Keyburn Profile` gets page access only.
+  - Chat embedding: the ESW site's `siteIframeWhiteListUrls` (in `sites/ESW_…site-meta.xml`) must
+    list every domain that embeds the chat (VF, Sites, Lightning), plus a CORS origin for each
+    (`Keyburn_Sites`).
+  - Case list view **Agentforce Escalations** (subject starts with "Agent escalation"), and
+    `Escalation_Summary__c` is on the Case layout.
+  - **The list view lives in `sfdx-project/mdapi/case-listview/`** (metadata-API format). A
+    source-format ListView needs a `Case.object-meta.xml` parent, which this project deliberately
+    doesn't have. Deploy it with `sf project deploy start --metadata-dir mdapi/case-listview`.
+  - `sites/*.site-meta.xml` contain the admin username → redacted as `__ADMIN_USERNAME__`.
 - Phase 12 — demo + deck. **Always the last phase**; no new features on Tue 22.
 
 Carried over:

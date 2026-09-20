@@ -1,0 +1,227 @@
+<apex:page showHeader="false" sidebar="false" standardStylesheets="false" applyHtmlTag="false" applyBodyTag="false" docType="html-5.0">
+<html lang="en">
+<head>
+    <title>Keyburn · Order help</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        :root {
+            --ink: #1b1d22; --muted: #5b6270; --line: #e4e6eb; --bg: #ffffff; --soft: #f6f5f2;
+            --brand: #e8531f; --brand-dark: #b83c10; --brand-soft: #fdeee7; --night: #17191e;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: var(--bg); color: var(--ink);
+               font: 16px/1.5 system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        a { color: inherit; }
+        .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+        /* promo strip + header */
+        .promo { background: var(--night); color: #d8dbe2; font-size: 13px; text-align: center; padding: 7px 16px; }
+        .promo b { color: #fff; }
+        header { border-bottom: 1px solid var(--line); background: #fff; position: sticky; top: 0; z-index: 5; }
+        header .wrap { display: flex; align-items: center; gap: 32px; height: 68px; }
+        .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 22px;
+                letter-spacing: -0.02em; text-decoration: none; }
+        .logo svg { width: 34px; height: 34px; }
+        nav { display: flex; gap: 24px; font-size: 15px; }
+        nav a { text-decoration: none; color: var(--muted); }
+        nav a.on { color: var(--ink); font-weight: 600; box-shadow: inset 0 -2px 0 var(--brand); padding-bottom: 4px; }
+        .tools { margin-left: auto; display: flex; gap: 18px; color: var(--muted); font-size: 14px; }
+        @media (max-width: 760px) { nav, .tools { display: none; } }
+
+        /* hero */
+        .hero { background: linear-gradient(135deg, var(--soft) 0%, #fff 70%); border-bottom: 1px solid var(--line); }
+        .hero .wrap { display: grid; grid-template-columns: 1.2fr 1fr; gap: 48px; align-items: center; padding-top: 56px; padding-bottom: 56px; }
+        @media (max-width: 860px) { .hero .wrap { grid-template-columns: 1fr; gap: 28px; padding-top: 36px; padding-bottom: 36px; } }
+        .eyebrow { color: var(--brand-dark); font-weight: 700; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; margin: 0 0 10px; }
+        h1 { font-size: clamp(30px, 4.2vw, 46px); line-height: 1.1; letter-spacing: -0.03em; margin: 0 0 16px; }
+        .hero p.lead { color: var(--muted); font-size: 18px; margin: 0 0 28px; max-width: 34em; }
+        .btn { display: inline-flex; align-items: center; gap: 10px; border: 0; border-radius: 999px; cursor: pointer;
+               font: inherit; font-weight: 650; padding: 13px 24px; text-decoration: none; }
+        .btn.primary { background: var(--brand); color: #fff; box-shadow: 0 6px 18px rgba(232, 83, 31, .28); }
+        .btn.primary:hover { background: var(--brand-dark); }
+        .btn.ghost { background: #fff; color: var(--ink); border: 1px solid var(--line); margin-left: 8px; }
+        .btn svg { width: 18px; height: 18px; }
+        .assist { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 22px 22px 18px;
+                  box-shadow: 0 18px 40px rgba(23, 25, 30, .08); }
+        .assist h2 { font-size: 16px; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+        .assist .dot { width: 9px; height: 9px; border-radius: 50%; background: #2eb872; box-shadow: 0 0 0 4px rgba(46,184,114,.18); }
+        .assist p { color: var(--muted); font-size: 14px; margin: 0 0 14px; }
+        .ask { display: block; width: 100%; text-align: left; font: inherit; font-size: 14.5px; color: var(--ink);
+               background: var(--soft); border: 1px solid transparent; border-radius: 12px; padding: 11px 14px;
+               margin-top: 8px; cursor: pointer; }
+        .ask:hover { border-color: var(--brand); background: var(--brand-soft); }
+        .ask::before { content: "\201C"; color: var(--brand); font-weight: 800; margin-right: 4px; }
+        .ask::after { content: "\201D"; color: var(--brand); font-weight: 800; margin-left: 2px; }
+        .assist small { display: block; color: var(--muted); font-size: 12px; margin-top: 12px; }
+
+        /* help tiles */
+        section.help { padding: 56px 0 24px; }
+        section.help h2 { font-size: 26px; letter-spacing: -0.02em; margin: 0 0 6px; }
+        section.help > .wrap > p { color: var(--muted); margin: 0 0 28px; }
+        .tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+        @media (max-width: 960px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 560px) { .tiles { grid-template-columns: 1fr; } }
+        .tile { border: 1px solid var(--line); border-radius: 16px; padding: 20px; background: #fff; }
+        .tile .ic { width: 42px; height: 42px; border-radius: 12px; background: var(--brand-soft); color: var(--brand-dark);
+                    display: grid; place-items: center; margin-bottom: 14px; }
+        .tile .ic svg { width: 22px; height: 22px; }
+        .tile h3 { font-size: 16.5px; margin: 0 0 6px; }
+        .tile p { color: var(--muted); font-size: 14px; margin: 0; }
+
+        /* order journey */
+        section.journey { padding: 32px 0 64px; }
+        .steps { display: flex; gap: 0; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: var(--soft); }
+        .step { flex: 1; padding: 18px 20px; position: relative; }
+        .step + .step { border-left: 1px solid var(--line); }
+        .step b { display: block; font-size: 15px; }
+        .step span { color: var(--muted); font-size: 13px; }
+        .step .n { color: var(--brand-dark); font-weight: 800; font-size: 12px; letter-spacing: .08em; }
+        @media (max-width: 760px) { .steps { flex-direction: column; } .step + .step { border-left: 0; border-top: 1px solid var(--line); } }
+
+        footer { background: var(--night); color: #9aa1ad; font-size: 13.5px; padding: 32px 0; }
+        footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+        footer b { color: #fff; }
+
+        /* shown only when the page is framed (e.g. opened as a tab inside Salesforce) */
+        .framed { display: none; background: #fff7e6; border-bottom: 1px solid #f3d9a4; color: #6b4a00; font-size: 14px; }
+        .framed .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 8px; padding-bottom: 8px; }
+        .framed a { font-weight: 700; color: var(--brand-dark); }
+        #err { color: #b3261e; }
+    </style>
+</head>
+<body>
+    <div class="framed" id="framed"><div class="wrap">
+        <span>You're viewing the Keyburn customer website inside Salesforce. Typed chat works here;
+            the microphone doesn't, because a page inside Salesforce isn't allowed to use it.</span>
+        <a id="openFull" href="#" target="_blank" rel="noopener">Open the real site ↗</a>
+    </div></div>
+
+    <div class="promo">Free delivery on orders over €50 · <b>30-day returns</b> on unused items</div>
+
+    <header><div class="wrap">
+        <a class="logo" href="#" aria-label="Keyburn home">
+            <svg viewBox="0 0 34 34" aria-hidden="true">
+                <rect x="1" y="1" width="32" height="32" rx="9" fill="#17191e"/>
+                <path d="M17.6 6.5c1.2 3.1-.6 4.9-2.1 6.6-1.4 1.6-2.7 3.1-2.1 5.6.4-1.5 1.4-2.3 2.4-3.1-.4 2.5.9 3.9 2.1 5.2 1 1.1 1.9 2.1 1.6 3.9 2.3-1.3 3.6-3.6 3.6-6.2 0-4.3-3.1-6.3-5.5-12z" fill="#e8531f"/>
+                <rect x="9" y="23.5" width="16" height="3.2" rx="1.6" fill="#fff"/>
+            </svg>
+            Keyburn
+        </a>
+        <nav>
+            <a href="#">Shop</a><a href="#">Audio</a><a href="#">Keyboards</a><a href="#">Deals</a>
+            <a class="on" href="#">Order help</a>
+        </nav>
+        <div class="tools"><span>Search</span><span>Account</span><span>Basket (0)</span></div>
+    </div></header>
+
+    <section class="hero"><div class="wrap">
+        <div>
+            <p class="eyebrow">Order &amp; case help</p>
+            <h1>Where's my order? Ask us, we'll check it for you.</h1>
+            <p class="lead">Track a delivery, check a return, follow up on a support case or ask about
+                our policies. Our assistant looks it up in seconds, day or night.</p>
+            <button class="btn primary" type="button" onclick="openChat()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>
+                Chat with Keyburn
+            </button>
+            <a class="btn ghost" href="#help">Browse help topics</a>
+            <p id="err"></p>
+        </div>
+        <aside class="assist" aria-label="Popular questions">
+            <h2><span class="dot"></span>Keyburn Assistant is online</h2>
+            <p>Have your order number and email to hand. Popular questions:</p>
+            <button class="ask" type="button" onclick="openChat()">Where is my order 1042?</button>
+            <button class="ask" type="button" onclick="openChat()">Can I return my headphones?</button>
+            <button class="ask" type="button" onclick="openChat()">What happens after I place an order?</button>
+            <button class="ask" type="button" onclick="openChat()">What's the status of my support case?</button>
+            <small>Need a person? Just ask, and we'll open a case for a team member to follow up.</small>
+        </aside>
+    </div></section>
+
+    <section class="help" id="help"><div class="wrap">
+        <h2>Help topics</h2>
+        <p>Everything our assistant can help you with.</p>
+        <div class="tiles">
+            <div class="tile">
+                <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div>
+                <h3>Track your order</h3>
+                <p>Live position, distance and driving time for orders on their way.</p>
+            </div>
+            <div class="tile">
+                <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></div>
+                <h3>Returns &amp; eligibility</h3>
+                <p>Check if an order can be returned, and how our 30-day window works.</p>
+            </div>
+            <div class="tile">
+                <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h5"/></svg></div>
+                <h3>Support cases</h3>
+                <p>Status of an open case, add an update, or open a new one.</p>
+            </div>
+            <div class="tile">
+                <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01"/></svg></div>
+                <h3>Policies &amp; FAQ</h3>
+                <p>Shipping times, returns, warranties, and how an order moves through Keyburn.</p>
+            </div>
+        </div>
+    </div></section>
+
+    <section class="journey"><div class="wrap">
+        <div class="steps" aria-label="How an order moves through Keyburn">
+            <div class="step"><span class="n">01</span><b>Draft</b><span>Saved, not submitted yet</span></div>
+            <div class="step"><span class="n">02</span><b>Processing</b><span>Paid and being packed</span></div>
+            <div class="step"><span class="n">03</span><b>Shipped</b><span>On its way, trackable</span></div>
+            <div class="step"><span class="n">04</span><b>Delivered</b><span>Returns open for 30 days</span></div>
+        </div>
+    </div></section>
+
+    <footer><div class="wrap">
+        <span><b>Keyburn</b> · Audio, keyboards and desk gear</span>
+        <span>Help · Delivery · Returns · Contact · Privacy</span>
+    </div></footer>
+
+    <script type="text/javascript">
+        // Inside a Salesforce tab the page is framed. Browsers only allow the microphone in an
+        // iframe whose parent sets allow="microphone", and the Lightning tab frame does not, so
+        // point at the public site (top-level, mic allowed) instead.
+        var PUBLIC_SITE = "https://__MY_DOMAIN__.develop.my.salesforce-sites.com/keyburn/";
+        if (window.self !== window.top) {
+            document.getElementById("framed").style.display = "block";
+            document.getElementById("openFull").href = PUBLIC_SITE;
+        }
+
+        var chatReady = false;
+        window.addEventListener("onEmbeddedMessagingReady", function () { chatReady = true; });
+
+        function openChat() {
+            try {
+                if (chatReady && embeddedservice_bootstrap.utilAPI) {
+                    embeddedservice_bootstrap.utilAPI.launchChat();
+                } else {
+                    document.getElementById("err").textContent = "The chat is still loading, try again in a moment.";
+                }
+            } catch (e) {
+                document.getElementById("err").textContent = "Use the chat button in the bottom-right corner.";
+            }
+        }
+
+        function initEmbeddedMessaging() {
+            try {
+                embeddedservice_bootstrap.settings.language = "en_US";
+                embeddedservice_bootstrap.init(
+                    "__ORG_ID_15__", // 15-char org ID: the 18-char form makes every live event poll fail with HTTP 400
+                    "Agentforce_Service_Agent",
+                    "https://__MY_DOMAIN__.develop.my.site.com/ESWAgentforceServiceAge1789407438343",
+                    { scrt2URL: "https://__MY_DOMAIN__.develop.my.salesforce-scrt.com" }
+                );
+            } catch (err) {
+                document.getElementById("err").textContent = "The chat could not start. " + err;
+            }
+        }
+    </script>
+    <script type="text/javascript"
+        src="https://__MY_DOMAIN__.develop.my.site.com/ESWAgentforceServiceAge1789407438343/assets/js/bootstrap.min.js"
+        onload="initEmbeddedMessaging()"></script>
+</body>
+</html>
+</apex:page>

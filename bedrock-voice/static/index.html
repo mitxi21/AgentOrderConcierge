@@ -65,6 +65,14 @@
   .turn.blocked { border-color: var(--danger); }
   .turn.blocked .k { color: var(--danger); font-weight: 600; }
   .turn.blocked .v { font-family: inherit; font-size: 13px; }
+  .map { border-bottom: 1px solid var(--line); }
+  .map img { display: block; width: 100%; height: auto; }
+  .map p { margin: 0; padding: 8px 16px 12px; font-size: 13px; color: var(--muted); }
+  .map p b { color: var(--ink); }
+  .map p + p { padding-top: 0; }
+  .map .maplink { color: var(--brand); font-weight: 600; text-decoration: none; }
+  .map .maplink:hover { text-decoration: underline; }
+  .relay.with-map { max-height: calc(100vh - 170px - 360px); }
   .summary { padding: 10px 16px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
 </style>
 </head>
@@ -88,6 +96,12 @@
     </form>
   </section>
   <section>
+    <div class="map" id="map" hidden>
+      <h2>Delivery map</h2>
+      <a id="mapLink" target="_blank" rel="noopener"><img id="mapImg" alt="Delivery route map"></a>
+      <p id="mapCaption"></p>
+      <p><a id="mapDirections" class="maplink" target="_blank" rel="noopener">Open route in Google Maps ↗</a></p>
+    </div>
     <h2>Behind the call: Agentforce relay</h2>
     <div class="relay" id="relay">
       <p class="hint">Each caller turn is sent verbatim to the Keyburn Agentforce agent over the
@@ -219,6 +233,48 @@ function relayStart(utterance) {
   relayEl.appendChild(card); relayEl.scrollTop = relayEl.scrollHeight;
   pendingTurn = card;
 }
+// ---------- automatic hang-up after Agentforce's goodbye ----------
+// Server sends "goodbye" when Agentforce's reply is a closing line. Nova then speaks it; once its
+// turn ends (END_TURN) and local playback has drained, the page hangs up. A fallback timer covers
+// a missed END_TURN. A new caller turn relayed in between (tool_start) cancels it.
+let hangupArmed = false, hangupTimer = null;
+function armHangup() {
+  hangupArmed = true;
+  clearTimeout(hangupTimer);
+  hangupTimer = setTimeout(hangupAfterPlayback, 20000);
+}
+function disarmHangup() { hangupArmed = false; clearTimeout(hangupTimer); }
+function hangupAfterPlayback() {
+  if (!hangupArmed || !ws) return;
+  clearTimeout(hangupTimer);
+  const remaining = playCtx ? Math.max(0, playHead - playCtx.currentTime) : 0;
+  hangupTimer = setTimeout(() => {
+    if (!hangupArmed || !ws) return;
+    hangupArmed = false;
+    add("system", "", "Keyburn ended the call after saying goodbye");
+    endCall(true);
+  }, remaining * 1000 + 800);
+}
+
+// ---------- delivery map (fetched by the server from OCC_OrderMapRest after a tracking answer) ----------
+function showMap(m) {
+  $("mapImg").src = m.mapUrl;
+  // Interactive Google Maps directions (warehouse → parcel → address); the image alone is static.
+  const target = m.directionsUrl || m.mapUrl;
+  $("mapLink").href = target;
+  $("mapLink").title = "Open route in Google Maps";
+  $("mapDirections").href = target;
+  $("mapDirections").parentElement.hidden = !m.directionsUrl;
+  const cap = $("mapCaption");
+  cap.textContent = "";
+  const b = document.createElement("b");
+  b.textContent = `Order ${m.order}: ${m.distanceKm} km, about ${m.driveMinutes} min by car`;
+  cap.append(b, document.createTextNode(
+    ` · position reported ${m.locationAge}` + (m.estimated ? " · straight-line estimate" : "") +
+    " · warehouse → parcel → delivery address"));
+  $("map").hidden = false;
+  relayEl.classList.add("with-map");
+}
 function relayBlocked(attempted) {
   relayEl.querySelector(".hint")?.remove();
   const card = document.createElement("div"); card.className = "turn blocked";
@@ -252,6 +308,8 @@ async function startCall() {
   callBtn.disabled = true;
   transcript.textContent = "";
   agentBubble = null;
+  $("map").hidden = true;
+  relayEl.classList.remove("with-map");
   try {
     playCtx = new AudioContext({ sampleRate: 24000 });
     await startMic();
@@ -282,9 +340,17 @@ async function startCall() {
         else if (m.role === "ASSISTANT" && m.stage === "SPECULATIVE") agentSays(m.text);
         break;
       case "interrupted": flushPlayback(); break;
-      case "tool_start": relayStart(m.utterance); startHold(); break;
+      // Only a real new caller turn (relayed to Agentforce) cancels a pending hang-up. Transcript
+      // text alone doesn't: a late ASR fragment, or Nova's own voice picked up by the laptop mic,
+      // would otherwise keep the call open.
+      case "tool_start": disarmHangup(); relayStart(m.utterance); startHold(); break;
       case "tool_end": relayEnd(m.reply, m.seconds); break;
       case "tool_blocked": relayBlocked(m.attempted); break;
+      case "map": showMap(m); break;
+      case "goodbye": armHangup(); break;
+      case "content_end":
+        if (hangupArmed && m.contentType === "AUDIO" && m.stopReason === "END_TURN") hangupAfterPlayback();
+        break;
       case "error": add("system", "", m.message); break;
       case "ended": endCall(false); break;
     }
@@ -294,6 +360,7 @@ async function startCall() {
 
 function endCall(sendHangup) {
   if (!ws) return;
+  disarmHangup();
   if (sendHangup && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: "hangup" }));
   const sock = ws; ws = null;
   setTimeout(() => { try { sock.close(); } catch (_) {} }, 500);
@@ -314,6 +381,7 @@ $("typeForm").onsubmit = (e) => {
   const v = $("typeInput").value.trim();
   if (!v || !ws) return;
   ws.send(JSON.stringify({ type: "text", text: v }));
+  disarmHangup();
   callerSays(v);
   lastTyped = v;  // Nova may echo a typed turn back as caller text; don't show it twice
   $("typeInput").value = "";

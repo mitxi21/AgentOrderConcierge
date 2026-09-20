@@ -16,6 +16,7 @@ global with sharing class OCC_OrderMapRest {
         global Boolean inTransit = false;
         global String message;
         global String mapUrl;
+        global String directionsUrl;
         global Decimal distanceKm;
         global Integer driveMinutes;
         global String locationAge;
@@ -81,6 +82,9 @@ global with sharing class OCC_OrderMapRest {
             out.mapUrl = OCC_DeliveryMap.staticMapUrl(config,
                 matched.Current_Location__Latitude__s, matched.Current_Location__Longitude__s,
                 matched.Contact__r.MailingLatitude, matched.Contact__r.MailingLongitude, leg.polyline, '800x450');
+            out.directionsUrl = OCC_DeliveryMap.directionsUrl(config,
+                matched.Current_Location__Latitude__s, matched.Current_Location__Longitude__s,
+                matched.Contact__r.MailingLatitude, matched.Contact__r.MailingLongitude);
             out.message = leg.distanceKm + ' km away, about ' + leg.minutes + ' min by car.';
             return out;
         } catch (Exception e) {
