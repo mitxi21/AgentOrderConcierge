@@ -114,10 +114,13 @@ window is a different surface. My supporting evidence was also worthless: the pe
 **`ConversationEntry` is empty org-wide** (0 rows unfiltered) — not queryable/populated here, so it
 proves nothing. Lesson (again): check that a query returns data for a known-good case before
 reading meaning into a zero.
-Also checked and ruled out as the place to fix it: `EmbeddedServiceConfig` (no voice or transcript
-setting; only receipts/typing/emoji toggles) and `MessagingChannel` (no voice fields). The mic
-button therefore comes from the agent's Voice connection (the LiveKit-based setup from 09-14),
-not from the deployment. **Settled by an `entries` capture (builder, 2026-09-20; kept outside the repo as
+Also checked as the place to fix it: `EmbeddedServiceConfig` has no voice or transcript setting
+(only receipts/typing/emoji toggles). **Correction (2026-09-20): I wrote that `MessagingChannel`
+has no voice fields — wrong; I had queried the SOQL object, not the metadata.** The retrieved
+`MessagingChannel` carries **`<isVoiceModeEnabled>true</isVoiceModeEnabled>`** (the mic button)
+plus the Omni wiring `sessionHandlerAsa: Keyburn_Customer_Service` /
+`sessionHandlerQueue: Service_Agent_Queue`. There is still no transcript setting anywhere, so the
+finding above stands; only the "where voice is configured" claim was wrong. **Settled by an `entries` capture (builder, 2026-09-20; kept outside the repo as
 `v38_entries.json`): in-chat voice turns are never written to the conversation.** The capture of a
 voice session contains 6 entries and exactly **one** `Message` — the greeting, sent before voice
 started. The conversation carries a `ModalityUpdate`: `activeModalities: ["Messaging"]` →

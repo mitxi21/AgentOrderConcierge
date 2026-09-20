@@ -501,6 +501,13 @@ Phases 9–12 are planned in detail, with spikes and cut-offs, in `docfiles/BUIL
     source-format ListView needs a `Case.object-meta.xml` parent, which this project deliberately
     doesn't have. Deploy it with `sf project deploy start --metadata-dir mdapi/case-listview`.
   - `sites/*.site-meta.xml` contain the admin username → redacted as `__ADMIN_USERNAME__`.
+  - **Channel + routing + voice are in source control** (retrieved 2026-09-20):
+    `messagingChannels/Agentforce_Service_Agent` holds `isVoiceModeEnabled` (the mic button in the
+    chat) and the Omni wiring `sessionHandlerAsa` = the agent, `sessionHandlerQueue` =
+    `Service_Agent_Queue`; plus `queues/`, `queueRoutingConfigs/`, `serviceChannels/`,
+    `presenceUserConfigs/`, `servicePresenceStatuses/`. The Order record page is
+    `flexipages/Order_Record_Page` **and** the two `View`/`Flexipage` `actionOverrides` in
+    `Order__c.object-meta.xml` — the page alone doesn't assign itself.
 - Phase 12 — demo + deck. **Always the last phase**; no new features on Tue 22.
 
 Carried over:
