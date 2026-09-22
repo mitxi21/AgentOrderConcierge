@@ -28,8 +28,22 @@ not a mapping/tagging problem - untagged fields would empty only the `__dlm` sid
   Stream wizard offers only CSV/Parquet for this connection, i.e. the structured path. There is no
   Refresh action on the object and no unstructured endpoint in the API at 67.0.
 
-**Conclusion:** the cataloguing job never ran and cannot be started from the CLI. Possibly a
-Developer Edition limit on unstructured/file federation. **Fallback taken** (as the runbook's Phase
+**Root cause found** (Salesforce guide *Set Up Unstructured Data from Amazon S3*,
+`developer.salesforce.com/docs/data/data-cloud-int/guide/c360-a-awss3-udlo.html`): **an S3 UDLO is
+catalogued by a file-notification pipeline, not by a refresh.** The guide is explicit about the
+order - connect the blob store, **then set up file notifications, and only then put the files in the
+bucket**. There is no Refresh action because nothing polls: Data Cloud learns about a file when AWS
+notifies it. Our files were uploaded at 13:18 and the UDLO created at 13:31, with no pipeline ever
+built, so nothing was ever announced to Data Cloud. This also answers the Phase 13 spike question
+(step 3 of the runbook): notifications are needed for the **first** ingest, not only for incremental
+sync.
+
+**What building it takes:** an RSA key pair and x509 certificate, a connected app using JWT with the
+`cdp_ingest_api` scope, an AWS Lambda plus Secrets Manager secret and IAM roles created by the
+installer from `forcedotcom/file-notifier-for-blob-store`, the AWS CLI and jq (neither installed
+here), and then a re-upload of the documents so they are announced. Roughly 1.5-2 hours, and it needs
+AWS rights (`iam:CreateRole`, `lambda:CreateFunction`, `secretsmanager:CreateSecret`) that the
+dedicated read-only S3 user deliberately does not have. **Fallback taken** (as the runbook's Phase
 13b cut-off allows): 13/13b go into the deck as *designed and built, not ingested*, with Phase 10
 standing as the working proof that the agent reads images. Nothing already built is wasted, and the
 honest version of this story - structure healthy, platform reporting success everywhere, zero rows -
