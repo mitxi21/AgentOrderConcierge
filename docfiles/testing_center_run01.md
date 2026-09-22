@@ -202,6 +202,11 @@ the agent user, so **live actions do work in voice** - only the structured captu
   Resolution, Quality, Deflection, Abandonment) and leave Subagent and Action Evaluation off.
 - V3's Task Resolution "Fail" is correct behaviour scored as failure: an escalation is *meant* to end
   in a handoff. Read escalation rows' resolution and deflection scores with that in mind.
+- **The scorer catalogue differs by output mode.** Text only offers Response, Coherence,
+  Completeness, Conciseness, Latency and Instruction Adherence; **Text and voice offers only
+  Subagent Evaluation, Actions Evaluation and Task Resolution** - so a voice suite is scored at
+  conversation level, and its two assertions should be left unticked at creation (they cannot be
+  changed later; "Select Scorers..." edits only the custom scorers).
 - 3 voice conversations = ~36 MB of recordings, over the org's 20 MB cap on their own. Purge
   immediately after each voice run.
 

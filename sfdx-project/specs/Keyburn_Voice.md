@@ -11,6 +11,11 @@ and blocks every upload afterwards (see `docfiles/testing_center_run01.md`). Run
 `sf apex run --file scripts/purge_voice_recordings.apex -o devorg` immediately after, and check
 `sf org list limits` shows FileStorageMB back at 20.
 
+**The scorer catalogue depends on the output mode.** A *Text only* suite offers the full set
+(Response, Coherence, Completeness, Conciseness, Latency, Instruction Adherence). A *Text and voice*
+suite offers exactly three: Subagent Evaluation, Actions Evaluation and Task Resolution - and the two
+assertions can never populate in a conversation run. Voice scoring is conversation-level by design.
+
 **Scorer selection is fixed when the suite is created.** On the wizard's **Scorers** step, leave the
 two **Assertions** (Subagent Evaluation, Actions Evaluation) **unticked** and tick only **Task
 Resolution**: a conversation suite never captures subagent or action data, so an enabled assertion is
