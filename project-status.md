@@ -160,10 +160,25 @@ Left behind for cleanup (this user cannot delete secrets): `keyburn-probe-delete
 **INGESTION WORKS (23:17).** `Keyburn_Policy_Docs_v3__dll` holds the 3 HTML policy documents, while
 `Keyburn_Policy_Docs` and `_v2` stay at 0 from the identical uploads.
 
-**The rule, proven:** a UDLO created **before** the file-notification pipeline never receives
-anything - the Lambda reports `Beacon Response - {'accepted': True}` for it just the same. Only a
-UDLO created **after** the pipeline exists ingests. So the guide's ordering (connect, notify, then
-upload) is not advice; it binds the object to the pipeline at creation.
+**Why - NOT yet established. Two variables changed at once:**
+
+| Object | Created relative to the pipeline | File name pattern |
+|---|---|---|
+| `Keyburn_Policy_Docs`, `_v2` | before | `html` |
+| `Keyburn_Policy_Docs_v3` | after | `*.html` |
+
+So either the guide's ordering binds an object to the pipeline at creation, **or** the earlier
+objects simply had a pattern that matched no file. The second is at least as likely and is the
+cheaper explanation. **Do not put the ordering claim in the deck until one of them is ruled out.**
+
+**The discriminating test** (2 minutes): create another UDLO now - so, after the pipeline - with the
+plain `html` pattern, and re-upload. If it ingests, the pattern was the cause; if it stays empty,
+the ordering was. Until then, the honest statement is: "the notification is accepted either way, and
+the object only fills when both its pattern matches and it was created after the pipeline - we
+isolated the ordering variable but not the pattern."
+
+What *is* certain: the beacon is accepted for objects that never fill, so `accepted: True` says
+nothing about whether a document will be catalogued.
 
 Each hop was instrumented to find this, and every one was healthy: the S3 `ObjectCreated:Put` event,
 the Lambda (600 ms, no errors), its JWT auth, and Salesforce accepting the beacon. A JWT probe run
