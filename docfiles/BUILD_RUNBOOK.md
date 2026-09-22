@@ -186,16 +186,16 @@ before running the eval suite. Isolate auth problems from harness problems.
 
 > **Phase 8 closed 2026-09-17** at 14/15, stable across two runs on agent v4.
 > Phases 9–11 below were added on 2026-09-17. The demo and deck moved to
-> **Phase 12, which always stays last**.
+> **Phase 18 (demo + deck; numbered 12 until 2026-09-22), which always stays last**.
 
 ---
 
 ## Rules for every phase from 9 onwards
 
-- **Agent v4 is the frozen, demo-safe fallback.** Every phase publishes a new
-  version. If a phase is incomplete by its cut-off, reactivate the last good
-  version, and the feature appears in the deck as design or next steps, not in
-  the live demo.
+- **The demo-safe fallback is v38** (Phases 9–10 complete; older fallbacks v33,
+  then v4). Every phase publishes a new version. If a phase is incomplete by its
+  cut-off, reactivate the last good version, and the feature appears in the deck
+  as design or next steps, not in the live demo.
 - **A phase is done only when:**
   1. new eval cases exist for the feature;
   2. the full suite has been re-run twice with no regression;
@@ -380,51 +380,284 @@ so the plan is complete; re-scope it when Phase 10 closes.
    brain). Add a manual script of 3 spoken calls through the external page, and
    log latency per turn.
 
-## Phase 12 — Prepare the demo and the deck (4–6 hours) — always last
+## Phases 12–17 — panel feedback (added 2026-09-22)
 
-1. **Freeze** the agent version to present, and re-run the full eval suite on
-   it twice. Delete eval-generated escalation cases from the org if the case
-   list will be on screen.
-2. **Pick the demo moments.** Candidates: a happy path; an escalation (case
-   number spoken, Case visible in the org); a misheard order number
-   (**rehearse in voice**, because the platform's O→0 conversion may pre-empt
-   it; a misheard digit is more reliable); "where is my order" on the map
-   (Phase 9); the order workflow explained from the diagram (Phase 10); a call
-   placed from the external Bedrock page (Phase 11). Choose 3–4; don't try to
-   show everything.
-3. **Record a backup video** of each chosen moment running correctly,
-   including the Bedrock call.
-4. **Build the deck** against the four required chapters. Keep slides sparse:
-   the demo is the asset, slides are scaffolding. The eval run history
-   (3/11 → 14/15, with test fixes and agent fixes labelled separately) is the
-   Reliability & Evaluation slide.
-5. **Architecture diagram**, one slide: caller (Builder voice / Bedrock Nova 2
-   Sonic page) → Agent API / channel → router → subagents → Apex actions →
-   Salesforce data + Data Library, with the guardrail points marked
-   (identity verification in Apex, `USER_MODE`, least-privilege permset,
-   escalation safety net).
-6. **Rehearse against the clock twice**, out loud. Time the 30-minute Asset
-   block; it's the one that overruns.
-7. **After the demo:** rotate the ECA client secret.
+A Salesforce reviewer looked at the build on 2026-09-22 and asked for more of
+the platform's own enterprise tooling:
+
+1. verify the caller with **Send Email with Verification Code** before any
+   order is shown;
+2. a **data pipeline from S3** into Data 360 (an Agentforce Data Library alone
+   is "too basic");
+3. a **Knowledge evaluation** with `salesforce/agentforce-knowledge-readiness`;
+4. **Testing Center**, including voice testing (GA for Service Agent);
+5. **observability**;
+6. **Sessions & Intents** and **Agent Analytics**.
+
+The builder's decision: build all six, and use Wednesday 23 (planned as freeze
+day) for build work. The phases are ordered by **lead time**. Things that need
+data or indexing time to accumulate start first. The one change to the agent's
+core flow (Phase 16) runs when there's a full day to test it. The "Rules for
+every phase from 9 onwards" above apply unchanged.
+
+## Phase 12 — Observability foundation (Tue 22, ~1 h) — start first
+
+**Goal:** from this point on, every conversation is traced into Data 360, so
+Phase 17 has real sessions to analyse. Dashboards need data and time; turning
+them on the evening before the demo would show empty screens.
+
+1. **Spike (15 min):** check that the org has the `PlatformObservability`
+   permission and Session Tracing. Run one `sf agent preview` session and check
+   that its trace lands. If this DEV org lacks the feature, record that as a
+   finding in `project-status.md`, and Phase 17 uses its fallback.
+2. **Enable Session Tracing.** It writes every turn, LLM call, action and
+   guardrail check into the Session Tracing Data Model (STDM) in Data 360. There
+   are two routes:
+   - Setup (Einstein Audit & Feedback / Agentforce Session Tracing);
+   - the `AgentforcePlatformTracingSettings` metadata (API 68,
+     `enableAgentforcePlatformTracing`). Reference:
+     `sf-skills-1.55.0/skills/platform-tracing-agentforce-configure`.
+3. **Setup → Agent Analytics → install Service Agent Analytics.** Enable
+   **Agentforce Optimization** (Sessions & Intents).
+4. **Seed traffic:** run the Python eval suite once tonight. From here on,
+   every eval run, Testing Center run and voice call is also observability data.
+5. Retrieve the settings into `sfdx-project/` (a `package.xml` at API 67+,
+   because the project's API 61 skips these types silently).
+
+## Phase 13 — S3 → Data 360 unstructured data pipeline (start Tue 22, wire in Wed 23)
+
+**Goal:** policy documents that live in the customer's own data lake (an S3
+bucket) are grounded into the agent through Data 360. They are referenced in
+place: an unstructured data lake object (UDLO) points at the files and a search
+index is built over them, instead of copying the text into Knowledge.
+
+1. **Content:** new `s3-docs/` folder with 3–4 policy documents (PDF or HTML)
+   that are **not** in Knowledge, e.g. carrier & delivery SLA, warranty terms,
+   damaged-parcel procedure. **At least one fact exists only in S3**, so an eval
+   can prove the S3 path is used (the same trick as Phase 10's image-only facts).
+2. **AWS** (the existing account, `eu-north-1`):
+   - bucket `keyburn-policy-docs-<suffix>`;
+   - a dedicated IAM user with read-only access to that bucket only;
+   - its keys go in `secrets.env` as `AWS_S3_*` lines (template lines in
+     `secrets.env.example`), never in the repo.
+3. **Spike (≤ 1 h):** does the S3 UDLO need the file-notification setup (an AWS
+   Lambda/SNS pipeline) for the first ingest, or only for incremental sync?
+   Follow the Data 360 guide "Set Up Unstructured Data from Amazon S3".
+4. **Data 360:** Amazon S3 connector → UDLO (its UDMO is created with it) →
+   search index (hybrid, default chunking) → retriever. **Start this on Tuesday
+   night** so indexing runs overnight.
+5. **Agent (Wednesday):**
+   - new Flex prompt template `OCC_Policy_Docs_Answer`, grounded on the S3
+     retriever;
+   - add it as a Policy/FAQ action next to `streamKnowledgeSearch`;
+   - the instructions send contractual / SLA questions to it. Knowledge stays
+     the source for articles (Phase 14 grades those).
+   - Deploy with `--api-version 67.0`, then retrieve for the platform-generated
+     `versionIdentifier` (Phase 10 lesson).
+6. **Evals:** 2–3 `s3_*` cases, one of them asserting the S3-only fact.
+7. **Panel-facing point:** enterprise content stays in the customer's lake,
+   referenced without copying it, indexed and retrieved in Data 360. The Data
+   Library is the managed shortcut for Knowledge; this is the route for
+   everything else.
+
+## Phase 14 — Knowledge readiness evaluation (Tue 22 night / Wed 23 morning, ~2–3 h)
+
+**Goal:** measure the quality of the Knowledge the agent answers from, not only
+the agent itself. Then improve it and measure again.
+
+1. Clone `salesforce/agentforce-knowledge-readiness` into
+   `tools/knowledge-readiness/` (git-ignored, vendored like `sf-skills`). It is
+   a separate sfdx project, so its API version doesn't collide with ours.
+2. **Prerequisites:**
+   - Salesforce CLI v66+, Einstein Generative AI, Lightning Knowledge;
+   - a Data 360 **semantic search index over Knowledge**. Check whether the
+     Data Library's index qualifies before creating another one.
+3. Deploy it, `sf org assign permset --name KB_Assessment_Admin`, open the
+   `KB_Readiness_Assessment` app. Run it over the six `Policy_FAQ` articles.
+4. It scores each article 0–100 on Completeness, Structure, Clarity, Freshness,
+   Duplication and Conflict. Save the per-article scores to
+   `docfiles/knowledge_readiness_run01.md`.
+5. **Fix the lowest scorers.**
+   - Review its AI draft rewrites; don't publish them unread.
+   - Update `docfiles/knowledge_articles.md` and republish.
+   - Re-run the tool → `run02`.
+   - Re-run the Python suite to prove the Policy/FAQ answers didn't regress.
+6. **Panel-facing point:** the before/after readiness score is the Knowledge
+   counterpart of the eval pass-rate climb.
+
+## Phase 15 — Testing Center (Tue 22 night baseline on v38; updated after Phase 16)
+
+**Goal:** the regression suite runs on the platform's own test tooling, with
+routing and action assertions, and voice is tested there too.
+
+1. **Convert** `src/eval_cases.yaml` into an `AiEvaluationDefinition` test spec,
+   `sfdx-project/specs/Keyburn_Regression.yaml`:
+   - multi-turn cases use `conversationHistory` (setup turns), and the final
+     caller turn is the `utterance`;
+   - `expectedTopic` / `expectedActions` assert routing and action calls, which
+     the Python harness can't do;
+   - `expectedOutcome` is scored by an LLM judge.
+   Validate the spec locally first. One malformed case rejects the whole spec,
+   and the error doesn't say which case. Reference:
+   `sf-skills-1.55.0/skills/agentforce-test`.
+2. `sf agent test create --spec specs/Keyburn_Regression.yaml --api-name
+   Keyburn_Regression`, then `sf agent test run --api-name Keyburn_Regression
+   --wait 10 --result-format junit`. Retrieve the definition into `force-app`.
+   The first run on v38 is the baseline.
+3. **Voice testing (Testing Center UI only; the CLI tests text only):** a small
+   voice test set with these cases:
+   - happy-path order status;
+   - a **misheard digit** (the long-carried "rehearse the misheard number" item);
+   - an escalation.
+   Screenshot the results.
+4. **Keep the Python harness.** It is the only path that scores the full OTP
+   loop (Phase 16) and the Nova relay. Deck line: Testing Center = the
+   platform's regression gate; the harness = end-to-end and channel-specific.
+5. The eval data rules still apply: `maria.garcia` gets no cases, and
+   escalation Cases are cleaned up before the demo.
+
+## Phase 16 — Email verification gate (Wed 23, ~5–6 h)
+
+**Goal:** before any order or case data is read out, the caller proves they own
+the email address. They read back a code sent to it by the standard **Send
+Email with Verification Code** action. This is the only phase that changes the
+agent's core flow, so it gets a full day and a hard cut-off.
+
+1. **Spike (≤ 1.5 h):**
+   - add the standard **Send Email with Verification Code** and **Verify
+     Customer** actions in Agent Builder;
+   - retrieve the bundle (manifest at API 67) to learn their exact Agent Script
+     targets, inputs and outputs (`verificationCode`, `isVerified`, customer Id);
+   - Setup → Deliverability = **All email**, and check that the agent user may
+     send email.
+2. **Design: defence in depth, not a replacement.** The code proves ownership of
+   the email. The existing Apex lock (`OCC_CaseLookupUtil.violatesLock` +
+   `@variables.verified_email`) keeps the session bound to it.
+   - New `customer_verification` subagent.
+   - Order Status, tracking, Return Eligibility and Case Status are gated on
+     `@variables.email_verified == True`. The router sends unverified callers
+     to verification first.
+   - `verified_email` is set **only** after Verify Customer succeeds.
+   - Policy/FAQ, the workflow diagram, the S3 documents and Escalation stay
+     ungated; `unverifiable_identity` escalation keeps working.
+   - The code must be a structural gate (a variable the instructions branch on),
+     like the escalation case number, not a prompt request.
+3. **Demo inbox:**
+   - The demo Contact (the `jane.doe` record) gets a real mailbox.
+   - Its address is stored as `REDACT_DEMO_INBOX` in `secrets.env`. Add the
+     redaction line and re-run `tools/setup_redaction.ps1`, so the address never
+     reaches the public repo.
+   - Other eval Contacts get plus-addressed aliases of the same mailbox, so one
+     inbox receives every code.
+   - `sample-data/contacts_sample.csv` and `eval_cases.yaml` use placeholders
+     that are filled at run time.
+4. **Harness:**
+   - `run_eval.py` gets an `otp` turn type: it polls the inbox over IMAP (app
+     password in `secrets.env`) and sends the code as the caller's turn.
+   - Testing Center cases assert the gate itself:
+     - the agent asks for the code;
+     - it refuses order data without the code;
+     - it rejects a wrong code.
+5. **Voice:** the caller speaks a six-digit code. Test it in the Builder voice
+   preview and on the Nova page.
+   - The relay's "only what the caller was heard saying" rule already covers it.
+   - Update the confirm-back regexes in `bedrock-voice/relay.py` if the agent's
+     wording changes.
+6. **Evals:** OTP happy path (order status after the code); wrong code; no code
+   → no order data; verified caller asks about a second order → no second code;
+   Policy/FAQ question → no code asked.
+7. **Cut-off Wed 18:00:** if the suite isn't green twice, reactivate v38. The
+   Apex and data from the other phases stay. The gate goes into the deck as
+   design plus its Testing Center evidence.
+8. **Panel-facing point:** identity is now proven, not asserted. It's layered:
+   the OTP proves the email, the Apex lock pins the session, `USER_MODE` +
+   least-privilege permset limit what the agent can read at all.
+
+## Phase 17 — Observability readout: Agent Analytics, Sessions & Intents, health (Wed 23 evening, ~1.5 h)
+
+**Goal:** show how the agent is monitored and improved in production, using the
+traffic generated by Phases 12–16.
+
+1. **Agent Analytics:** containment, escalation rate, volume per subagent.
+2. **Sessions & Intents** (Agentforce Optimization):
+   - the intent clusters;
+   - one session drilled down to its reasoning chain, ideally an escalation.
+3. **Agent Health Monitoring:** one alert on escalation rate.
+4. **Screenshot everything.** Dashboards can lag or be empty on the day; the
+   screenshots are the backup.
+5. **Fallback if the dashboards stay empty:** STDM `findSessions` queries
+   (`sf-skills-1.55.0/skills/agentforce-observe`) plus `sf agent trace read`,
+   shown as the observability story.
+6. **Panel-facing point:** the loop is now closed. Tests before release (Testing
+   Center + harness); traces and analytics after release; findings go back into
+   evals.
+
+## Phase 18 — Prepare the demo and the deck — always last
+
+1. **Freeze** the agent version to present (Phase 16's version, or v38), and
+   re-run both suites on it twice: Python harness and Testing Center. Delete
+   eval-generated escalation cases from the org if the case list will be on
+   screen.
+2. **Demo moments** (choose 3–4; 8 minutes):
+   - "where is my order?": the verification email arrives on screen, the code is
+     spoken, then status + map;
+   - an escalation;
+   - an S3-grounded answer;
+   - a call from the external Nova page.
+   Rehearse the misheard-digit moment in voice.
+3. **Record a backup video** of each chosen moment, including the email arriving
+   and the Nova call with sound.
+4. **Rebuild the deck.** Read the existing claude.ai Slides artifact and update
+   it in place (same URL). Changes:
+   - **Data:** S3 → UDLO → search index → retriever, next to Knowledge / Data
+     Library.
+   - **Guardrails:** the OTP gate as the first layer of the stack.
+   - **Reliability:** Python harness climb + Testing Center (text and voice) +
+     Knowledge readiness before/after.
+   - **New observability slide:** tracing → Agent Analytics → Sessions &
+     Intents → health alert.
+   - **Trade-offs:**
+     - the OTP adds a turn and friction;
+     - S3 pipeline vs Data Library;
+     - Testing Center vs our own harness.
+5. **Architecture diagram:** add the S3 / Data 360 path, the verification step
+   and the observability layer (traces into Data 360).
+6. **Update `docfiles/DEMO_GUIDE.md`:**
+   - pre-flight: demo inbox open, S3 index healthy, active version;
+   - failure recovery: email slow or missing → fallback v38 or the recording;
+   - a crib-sheet entry for each new decision.
+7. **Rehearse against the clock**, out loud (Thursday morning at the latest).
+   Time the 30-minute Asset block; it's the one that overruns.
+8. **After the demo:** rotate the ECA client secret, the Google key, and the
+   new S3 IAM keys and IMAP app password.
 
 ---
 
-## Calendar from 2026-09-17 (demo Thursday 2026-09-24, 14:45; moved from Wednesday 23)
+## Calendar from 2026-09-22 (demo Thursday 2026-09-24, 14:45)
 
 | When | Phase | Cut-off / fallback |
 |---|---|---|
-| Thu 17 (rest of day) | Phase 9 spike (map rendering) + data model | — |
-| Fri 18 | Phase 9 build, evals | Not demoable by Fri night → voice speaks location only, map drops |
-| Sat 19 | Phase 10 (image spike first, then build) | Image not readable → option (a) text description |
-| Sun 20 – Mon 21 | Phase 11 | No end-to-end call by Mon night → deck shows architecture only, live demo stays on Builder voice |
-| Tue 22 | Phase 12 (deck, demo guide, Case naming fixes) | No new features from Tuesday |
-| Wed 23 | Phase 12 freeze: backup recordings, two eval runs, rehearse twice | — |
-| Thu 24 | Demo, 14:45, Salesforce Madrid office | — |
+| Tue 22 afternoon | Commit; Phase 12 (tracing on, analytics installed); Phase 13 AWS + connector + index started | Tracing unavailable → record it; Phase 17 uses the STDM / trace fallback |
+| Tue 22 night | Phase 14 deploy + run01; Phase 15 spec + baseline on v38 | — |
+| Wed 23 morning | Phase 16 spike + build | Spike not passing by 11:00 → gate designed, not built |
+| Wed 23 afternoon | Phase 16 evals; Phase 13 S3 answer wired into Policy/FAQ; Phase 14 fixes + run02 | **18:00: agent version frozen** (new version or v38) |
+| Wed 23 evening | Phase 15 re-run incl. voice; Phase 17 readout + screenshots | — |
+| Wed 23 night | Phase 18: deck, demo guide, backup recordings | — |
+| Thu 24 morning | Phase 18: one timed rehearsal, pre-flight | Demo 14:45, Salesforce Madrid office |
 
-This leaves about 3.5 build days for three features plus a day for Phase 12,
-which is tight. The cut-offs are there so an overrunning feature can't eat
-Phase 12. Phase 11 is the riskiest (new cloud account, streaming audio,
-latency) and comes last, so a slip only costs that feature.
+There is no freeze day anymore, so the cut-offs carry the risk: Phase 16 is the
+only change to the agent's core flow and has a hard 18:00 stop. Every other
+phase adds something beside the working agent, so a slip costs that feature,
+not the demo.
+
+## Calendar from 2026-09-17 (superseded 2026-09-22)
+
+| When | Phase | Result |
+|---|---|---|
+| Thu 17 – Fri 18 | Phase 9 | Done (v16, map in the deployed chat from v30) |
+| Sat 19 | Phase 10 | Done (v38) |
+| Sun 20 – Mon 21 | Phase 11 | Done (2026-09-20) |
+| Tue 22 | Demo + deck (then Phase 12) | Reopened by panel feedback → Phases 12–17 |
 
 ---
 
@@ -437,7 +670,7 @@ latency) and comes last, so a slip only costs that feature.
 | Day 3 | Phase 4 (agent), Phase 5 (voice), Phase 6 |
 | Day 4 | Phase 7 (ECA), start Phase 8 (evals) |
 | Day 5 | Finish Phase 8 — this is where the iteration happens |
-| Day 6 | Demo, deck, recording (now Phase 12) |
+| Day 6 | Demo, deck, recording (now Phase 18) |
 | Day 7 | Rehearse, buffer for whatever broke |
 
 If you have fewer days than that, cut Phase 2 (drop to 3 topics, no Data

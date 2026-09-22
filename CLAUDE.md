@@ -38,8 +38,8 @@ the tree — if one appears under `sfdx-project/`, delete it rather than maintai
 | `BUILDERS_PANEL_BRIEF.md` | Panel format (45 min) + evaluation criteria |
 | `project-status.md` | Decision + status log. Append to it when a decision is made or a phase completes |
 | `docfiles/Agentforce_FDE_Panel_Prep.md` | Agent design + deck narrative / talk track. Git-ignored (local only) |
-| `docfiles/DEMO_GUIDE.md` | Phase 12: demo script, pre-flight checklists, failure recovery, design-decision crib sheet (the deck itself is a claude.ai Slides artifact) |
-| `docfiles/BUILD_RUNBOOK.md` | Phased build plan (phases 0–12; 9–11 features added 2026-09-17, 12 = demo + deck, always last) |
+| `docfiles/DEMO_GUIDE.md` | Phase 18: demo script, pre-flight checklists, failure recovery, design-decision crib sheet (the deck itself is a claude.ai Slides artifact) |
+| `docfiles/BUILD_RUNBOOK.md` | Phased build plan (phases 0–18; 9–11 added 2026-09-17, 12–17 from panel feedback 2026-09-22, 18 = demo + deck, always last) |
 | `docfiles/agent_builder_topics.md` | Paste-ready instructions per topic/subagent + eval→topic mapping |
 | `docfiles/README_eval_harness.md` | Agent API / External Client App setup for the eval harness |
 | `docfiles/knowledge_articles.md` | Source text of the 5 Policy/FAQ Knowledge articles |
@@ -54,6 +54,9 @@ the tree — if one appears under `sfdx-project/`, delete it rather than maintai
 | `sfdx-project/` | Deployable metadata (Apex, objects, permission sets) + anonymous-Apex scripts |
 | `sf-skills-1.55.0/` | Vendored third-party Salesforce skills library — not project code; exclude from searches. Git-ignored (local only) |
 | `tools/setup_redaction.ps1`, `.gitattributes` | Git filter that keeps org identifiers out of the public repo (see top of this file) |
+| `s3-docs/` | Phase 13 (planned): policy documents uploaded to the S3 bucket that Data 360 indexes as an unstructured data lake object |
+| `sfdx-project/specs/` | Phase 15 (planned): Testing Center test specs (`AiEvaluationDefinition` YAML) |
+| `tools/knowledge-readiness/` | Phase 14 (planned): vendored `salesforce/agentforce-knowledge-readiness`, its own sfdx project. Git-ignored (local only) |
 
 `sfdx-project/` stays a nested subfolder rather than being hoisted to the repo root: the only
 thing that buys is dropping a `cd`, and it would cost manual file moves, `.sf` source-tracking
@@ -374,8 +377,12 @@ cd src; py -3.8 run_eval.py eval_cases.yaml
 
 ## Remaining work
 
-Phase 8 is **closed** (14/15 on agent v4, stable). **Agent v4 is the frozen demo-safe fallback.**
-Phases 9–12 are planned in detail, with spikes and cut-offs, in `docfiles/BUILD_RUNBOOK.md`:
+Phase 8 is **closed** (14/15 on agent v4, stable). The demo-safe fallback is now **v38** (then v33, v4).
+Phases 9–18 are planned in detail, with spikes and cut-offs, in `docfiles/BUILD_RUNBOOK.md`.
+**Panel feedback on 2026-09-22 reopened the scope:** Phases 12–17 add observability (Session Tracing,
+Agent Analytics, Sessions & Intents), an S3 → Data 360 unstructured pipeline, a Knowledge readiness
+evaluation, Testing Center (text + voice) and an email verification (OTP) gate, built Tue 22 – Wed 23.
+Phase 16 (the OTP gate) is the only change to the agent's core flow; its cut-off is Wed 23 18:00.
 
 - **The Builder preview is not the deployed chat client.** Rich UI (the `OrderDeliveryMap` Custom
   Lightning Type) renders only in the deployed Embedded Messaging client, via the type's
@@ -511,7 +518,8 @@ Phases 9–12 are planned in detail, with spikes and cut-offs, in `docfiles/BUIL
     `presenceUserConfigs/`, `servicePresenceStatuses/`. The Order record page is
     `flexipages/Order_Record_Page` **and** the two `View`/`Flexipage` `actionOverrides` in
     `Order__c.object-meta.xml` — the page alone doesn't assign itself.
-- Phase 12 — demo + deck. **Always the last phase**; no new features on Tue 22.
+- Phase 18 — demo + deck (was Phase 12 until 2026-09-22). **Always the last phase**; the agent
+  version is frozen at Wed 23 18:00.
 
 Carried over:
 

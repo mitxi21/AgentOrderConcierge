@@ -4,6 +4,11 @@ Companion to the deck ("Order & Case Concierge — Builders Panel", 13 slides pl
 speaker notes on each slide). This file is the operational side: what to check before, what to say and type
 during the demo, what to do when something breaks, and how to explain each design decision.
 
+> **Being reworked (2026-09-22).** Panel feedback added Phases 12–17 (observability, S3 pipeline,
+> Knowledge readiness, Testing Center, email verification). Wednesday 23 is now a build day, and
+> the agent version freezes at Wed 23 18:00. This guide is rewritten in Phase 18 (see
+> `BUILD_RUNBOOK.md`). Until then, the v38 content below is the fallback demo.
+
 Presented version: **agent v38** (fallback **v33**, then **v4**). No agent edits after Tuesday
 evening; Wednesday 23 is freeze, recordings and rehearsal only.
 

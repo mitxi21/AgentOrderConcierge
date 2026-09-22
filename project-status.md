@@ -7,7 +7,52 @@ to the entry that replaced them.
 
 ---
 
-## 2026-09-22 — Phase 12: deck refactor before the freeze (12 → 13 slides)
+## 2026-09-22 — Panel feedback reopens the scope: Phases 12–17 added, demo + deck becomes Phase 18
+
+A Salesforce reviewer looked at the build and the deck. The agent is solid, but the reviewer
+wants more of the platform's own enterprise tooling:
+
+1. **Send Email with Verification Code** before any order is shown.
+2. **A data pipeline from S3** into Data 360 (unstructured data lake object). The Agentforce Data
+   Library alone is "too basic".
+3. **A Knowledge evaluation** with `salesforce/agentforce-knowledge-readiness`.
+4. **Testing Center**, including voice testing (GA for Service Agent).
+5. **Observability**.
+6. **Sessions & Intents** and **Agent Analytics**.
+
+**Decision (builder): build all six before the demo.** Wednesday 23, planned as freeze day, becomes
+a build day. The demo is still Thu 24 at 14:45.
+
+The phases are ordered by lead time. The steps that need data or indexing time go first, so
+observability and the S3 index start on Tuesday. Phase 16 (the OTP gate) is the only change to the
+agent's core flow, so it gets Wednesday and a hard cut-off.
+
+| Phase | Content | When |
+|---|---|---|
+| 12 | Observability foundation: Session Tracing on, Service Agent Analytics installed, seed traffic | Tue 22 |
+| 13 | S3 → Data 360 UDLO → search index → retriever → Flex prompt template on Policy/FAQ | Tue 22 start, Wed 23 wire |
+| 14 | Knowledge readiness tool: score, fix, re-score (before/after) | Tue 22 night / Wed 23 |
+| 15 | Testing Center: `eval_cases.yaml` converted to an `AiEvaluationDefinition` spec, plus a voice test set | Tue 22 night baseline, Wed 23 re-run |
+| 16 | Email verification gate (standard actions), demo Contact on a real inbox, IMAP step in the harness | Wed 23, **cut-off 18:00** |
+| 17 | Readout: Agent Analytics, Sessions & Intents, one health alert, screenshots | Wed 23 evening |
+| 18 | Demo + deck rebuild (was Phase 12) | Wed 23 night – Thu 24 morning |
+
+- **Design choices already made:**
+  - The OTP is **added to** the Apex identity lock, not a replacement: the code proves ownership
+    of the email, and `violatesLock` keeps the session pinned to it.
+  - The Python harness is kept next to Testing Center. It is the only path that can score the
+    full OTP loop and the Nova relay.
+  - The demo inbox address is a new `REDACT_DEMO_INBOX` key, so it never reaches the public repo.
+- **Fallback:** v38 stays the demo-safe version. A phase that misses its cut-off goes into the
+  deck as design, not into the live demo.
+- **Research note:** the vendored `agentforce-test` skill says the CLI tests text only, so voice
+  tests are built in the Testing Center UI.
+
+Plan: `docfiles/BUILD_RUNBOOK.md`, Phases 12–18 and "Calendar from 2026-09-22".
+
+---
+
+## 2026-09-22 — Phase 12 (now Phase 18): deck refactor before the freeze (12 → 13 slides)
 
 Presentation material only. **No org, agent or eval changes — v38 stays frozen.**
 
