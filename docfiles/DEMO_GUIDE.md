@@ -49,10 +49,17 @@ rehearsal, check the clock when leaving the demo (target 16:30 into the talk). I
 
 ### Wednesday 23 (freeze day)
 
-- [ ] Confirm **v38 is active** (Setup → Agentforce Agents → Keyburn Customer Service → versions).
-- [ ] Run the eval suite **twice** on v38 and save both runs (`run28_…`, `run29_…`) in
-      `src/eval_reports/`. Expect 26–27/27. The slide says 26/27 on v38 — update the slide if the
-      new runs differ.
+- [ ] Decide the version to present and confirm it is active (Setup → Agentforce Agents → Keyburn
+      Customer Service → versions). **v40** carries the Phase 16 verification gate; **v39** is the
+      same agent without it; **v38** is the pre-gate fallback that every earlier eval run used.
+- [ ] **If presenting v40, check the gate end to end once**: ask for an order, read the code from the
+      Verification tab, then confirm the answer arrives. The gate refuses the lookup until then.
+- [ ] Confirm `Keyburn_Setting__mdt.Default.Test_Mode__c` is **true**, and know why you are saying so
+      (below). With it false, the code is emailed and this org's mail fails Proton's domain
+      authentication checks and is capped at 15 a day.
+- [ ] Run the eval suite **twice** on the version you will present and save both runs in
+      `src/eval_reports/`. On v38/v39 expect 26–29 of 29; **on v40 every lookup case needs the extra
+      verification turn**, so use the runs from the version you actually present.
 - [ ] Record a **backup video** of each of the four demo moments (below), including the Nova
       call with sound. Keep them on the laptop desktop, not in the cloud only.
 - [ ] Rehearse the whole 45 minutes out loud **twice** against a timer, reading from the speaker
@@ -80,6 +87,12 @@ rehearsal, check the clock when leaving the demo (target 16:30 into the talk). I
       warm too.
 - [ ] If anything was published since the freeze: **republish the Embedded Service deployment**
       `Agentforce_Service_Agent`, or the map card is sent but not drawn.
+- [ ] **Purge the noise**: `sf apex run --file scripts/purge_eval_cases.apex -o devorg` (agent-created
+      Cases) and `sf apex run --file scripts/purge_voice_recordings.apex -o devorg` (a voice test run
+      stores ~12 MB per conversation against this org's 20 MB file limit and then blocks every
+      upload). Check `sf org list limits` shows FileStorageMB back at 20.
+- [ ] If presenting the gate: open the **Verification** tab in the Keyburn Service console as a tab,
+      so reading the code back is one click, and delete old verification rows so the newest is on top.
 
 ### T–10 min (14:35)
 

@@ -7,6 +7,85 @@ to the entry that replaced them.
 
 ---
 
+## 2026-09-22 — Phase 17 built (pre-freeze): STDM readout, Sessions & Intents, one health alert
+
+**Scope decision:** the runbook puts Phase 17 on Wed 23 evening, after the freeze. Built the whole
+readout tonight on v38/v39/v40 traffic instead, and **re-run it as `run02` after the freeze** so the
+numbers describe the demoed version. Screenshots get retaken then too.
+
+**No Apex class deployed for observability.** The skill's `AgentforceOptimizeService` was
+deliberately skipped: two anonymous-Apex scripts over `ConnectApi.CdpQuery.queryAnsiSqlV2` (the
+Phase 12 route) do the same job without a new class, without `classAccesses` in two permission sets,
+and without widening what the agent user can reach.
+
+- `sfdx-project/scripts/observability_readout.apex` — volume, versions, channels, subagents, step
+  types, action calls + errors, escalation rate, latency, intents, quality/deflection/abandonment
+  tags, escalated session ids.
+- `sfdx-project/scripts/observability_session_detail.apex` — one session reconstructed turn by turn,
+  with the action's real input and output.
+- Results: `docfiles/observability_readout_run01.md`.
+
+**Numbers (12:26–19:50 UTC): 403 sessions, 1,431 turns, 5,829 steps, 297 action calls, 0 step
+errors, escalation 61/403 = 15.1%, average turn 1.78 s.** Quality Score 4–5 on 77% of scored
+moments, none scored 1.
+
+**Five things learned that the docs don't say:**
+
+1. **Rows come back as `ConnectApi.CdpQueryV2Row`**, not `List<Object>` — read `row.rowData`. And
+   **column order is in `metadata.get(col).placeInOrder`**, not `keySet()` order, so a naive
+   `SELECT *` dump pairs the wrong values with the wrong names.
+2. **The subagent name carries the planner id of the version that ran it**
+   (`order_status_16jak000003GChp`), so the same subagent appears once per agent version until the
+   suffix is stripped. The agent *version* is on the session participant row, which is what makes a
+   per-version readout possible at all.
+3. **One moment carries several tag types** (Quality Score 1–5, Deflection Score 1–5, Abandonment
+   TRUE/FALSE/Unsure). Grouping by tag value alone mixes them into one meaningless column; join
+   `AiAgentTagDefinition`. The value is text, so a numeric comparison needs a cast — and the cast
+   fails on `TRUE`/`Unsure`, so match `IN ('1','2')` instead.
+4. **`NOT_SET` is the STDM sentinel for empty**, not null. An error count that only tests
+   `IS NOT NULL` counts every step as failed.
+5. **Deleting Cases does not delete traces.** 61 escalation actions are in the trace; only 31 agent
+   Cases survive, because Phase 15 purged eval Cases this afternoon. Good panel line — the trace is
+   the durable record — but the two numbers must never be shown side by side without that sentence.
+
+**Scores must be read with the channel mix.** 150 sessions are tagged abandoned and 95 moments score
+1 on deflection, because an eval-harness session sends its scripted turns and stops; nobody says
+goodbye. That is a property of the traffic, not the agent. Real traffic is what would make these
+numbers mean something — which is the argument for the readout existing at all.
+
+**Agent Health Monitoring alert** `3VRak00000007BBGAY`: Escalation Rate ≥ `0.1` (raw ratio, = 10%)
+over the last 24 h, filtered to `Keyburn_Customer_Service`, checked every 15 min, notification +
+email to the admin. Set deliberately below today's 15.1% so it fires and there is an Incidents entry
+to screenshot.
+
+- `minuteLevelFrequency` accepts **15 and 30 only** — 60 and 1440 are rejected with
+  `POST_BODY_PARSE_ERROR ... invalid minuteLevelFrequency`.
+- This org's SDMs are labelled **Service/Employee Agent Analytics *Base* and *Extension***, not
+  "… SDM" as the skill reference expects; match on `app`, not on the label. Base carries all 24
+  `_mtc` metrics.
+- `sf api request rest --method DELETE` fails with *"No 'mode' found in 'body' entry"* unless a body
+  file `{"mode":"raw","raw":""}` is passed with `-b`. (Learned by creating a duplicate alert in a
+  retry loop and having to remove it. Don't loop over candidate values against a creating endpoint.)
+- The POST response's `filterContext` comes back `[]`; the real filter lives on the auto-created
+  sub-metric (`1HUak000005cT4XGAU`), which was fetched and verified.
+
+**Findings for the deck (from the traces, not from tests):**
+
+- **A chit-chat tail in voice**: up to 7 consecutive `Chit_Chat` turns where caller and agent take
+  turns being polite and neither ends the call. The Nova page's auto hang-up covers this; the
+  Builder voice preview does not.
+- **Two malformed outputs** in ~700 (`"0 -"`, `"Hello - "`), both voice-preview turns.
+- **The 15 moments scoring 2 are mostly the identity confirm-back** — correct behaviour, scored as a
+  poor answer. Same lesson as Phase 8: a scored failure is not automatically an agent defect.
+- **Voice is the slowest channel** (2.18 s average turn vs 1.59 s internal / 1.77 s API), which is
+  why the demo pre-flight includes a warm-up call.
+
+**Best single artefact:** session `01a0ca6f-a0d0-743d-b8e4-1537a25cce15` (voice, v39) — router →
+escalation subagent → `CreateEscalationCase` with its real input and output → groundedness check →
+instruction adherence → the spoken case number, all on one screen.
+
+---
+
 ## 2026-09-22 — Phase 13/13b blocked: the S3 documents are never catalogued
 
 **State:** the structure is all there and empty. Both unstructured data lake objects

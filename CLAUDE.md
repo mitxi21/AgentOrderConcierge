@@ -301,6 +301,10 @@ sf apex run --file scripts/assign_agent_permset.apex --target-org devorg       #
 sf apex run --file scripts/set_demo_geodata.apex --target-org devorg           # Phase 9 addresses + parcel positions
 sf apex run --file scripts/set_keyburn_settings.apex --target-org devorg       # warehouse + Google key (generate from .example, see below)
 
+# Phase 17: read the Session Tracing tables (PowerShell; pipe through Select-String "READOUT\|" / "DETAIL\|")
+sf apex run --file scripts/observability_readout.apex --target-org devorg        # volume, actions, escalation rate, quality
+sf apex run --file scripts/observability_session_detail.apex --target-org devorg # one session, turn by turn (edit SESSION_ID)
+
 # Phase 10: workflow diagram (regenerate PNG from the repo root) and its Knowledge article
 powershell -File ..\docfiles\make_order_workflow_diagram.ps1
 powershell -File scripts\create_order_workflow_article.ps1   # article + File + agent-user share + publish
@@ -582,6 +586,24 @@ Phase 16 (the OTP gate) is the only change to the agent's core flow; its cut-off
   versions, so in between the article is simply missing. To check, compare `SourceRecordId__c` in
   `KA_Agent_Library_Data_Space_chunk__dlm` with the online `Knowledge__kav` Ids. **No Knowledge edits
   after Wed 23.** The readiness tool's **Rerun** re-scores a run in place, so save its numbers first.
+- **Phase 17 — built 2026-09-22 (pre-freeze); re-run as `run02` after the freeze.**
+  `scripts/observability_readout.apex` and `scripts/observability_session_detail.apex` read the
+  Session Tracing tables through `ConnectApi.CdpQuery.queryAnsiSqlV2` (run from PowerShell; grep
+  `READOUT|` / `DETAIL|`). Results: `docfiles/observability_readout_run01.md`. **No Apex class is
+  deployed for observability** — the skill's `AgentforceOptimizeService` was skipped so no
+  permission set has to grant it. Reading the trace tables:
+  - rows are `ConnectApi.CdpQueryV2Row` (`row.rowData`), and column order comes from
+    `metadata.get(col).placeInOrder`, not `keySet()`;
+  - `NOT_SET` is the sentinel for empty, not null;
+  - the subagent name carries the planner id of the version that ran it
+    (`order_status_16jak000003GChp`); the agent version itself is on the participant row;
+  - a moment carries several tag types (Quality / Deflection / Abandonment) — join
+    `AiAgentTagDefinition` or the values come out mixed; values are text.
+  - **Deleting Cases doesn't delete traces**, so trace counts and Case counts diverge after a purge.
+  Agent Health Monitoring alert `3VRak00000007BBGAY` (Escalation Rate ≥ 0.1 raw ratio over 24 h,
+  filtered to this agent, every 15 min). `minuteLevelFrequency` accepts **only 15 or 30**, this org's
+  SDMs are labelled *Base* / *Extension* (match on `app`, not the label), and
+  `sf api request rest --method DELETE` needs a `-b` body file `{"mode":"raw","raw":""}`.
 - Phase 18 — demo + deck (was Phase 12 until 2026-09-22). **Always the last phase**; the agent
   version is frozen at Wed 23 18:00.
 
