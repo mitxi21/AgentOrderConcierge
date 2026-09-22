@@ -41,17 +41,10 @@ public with sharing class OCC_ListOpenCases {
         return results;
     }
 
-    // Escalation cases carry an internal subject ("Agent escalation: financial_request"). The reason
-    // code is for the human team, not something to read back to the caller.
-    @TestVisible
-    private static String spokenSubject(String subject) {
-        if (subject != null && subject.startsWith(ESCALATION_SUBJECT_PREFIX)) {
-            return 'a request for a team member to follow up';
-        }
-        return subject;
-    }
-
-    private static final String ESCALATION_SUBJECT_PREFIX = 'Agent escalation:';
+    // Subjects are read back to the caller as stored. That is safe because every Case the agent
+    // creates is named in caller-facing words: OCC_CreateEscalationCase maps its reason codes to
+    // real subjects ("Refund request"), and support cases carry the caller's own wording. Before
+    // that, escalations were "Agent escalation: financial_request" and had to be masked here.
 
     private static Response listCases(Request req) {
         Response resp = new Response();
@@ -88,7 +81,7 @@ public with sharing class OCC_ListOpenCases {
 
             List<String> spoken = new List<String>();
             for (Integer i = 0; i < openCases.size() && i < MAX_CASES_SPOKEN; i++) {
-                spoken.add('case ' + openCases[i].CaseNumber + ', ' + spokenSubject(openCases[i].Subject));
+                spoken.add('case ' + openCases[i].CaseNumber + ', ' + openCases[i].Subject);
             }
             String countText = openCases.size() == 1 ? 'one open case' : openCases.size() + ' open cases';
             resp.message = 'You have ' + countText + '. '

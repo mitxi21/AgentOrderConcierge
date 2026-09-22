@@ -79,18 +79,24 @@ private class OCC_ListOpenCasesTest {
     }
 
     @isTest
-    static void testEscalationReasonCodeNotSpoken() {
+    static void testEscalationSubjectIsSpokenAndCarriesNoReasonCode() {
+        // Escalations are named by OCC_CreateEscalationCase, so the stored subject is already
+        // caller-safe and is read back as-is. The old masking is gone; this asserts the guarantee
+        // that replaced it - no internal code can reach the caller, because none is ever stored.
         Contact jane = [SELECT Id FROM Contact WHERE Email = 'jane.doe@example.com' LIMIT 1];
-        insert new Case(Subject = 'Agent escalation: financial_request', Priority = 'High', ContactId = jane.Id);
+        Case escalation = OCC_CreateEscalationCase.named('financial_request');
+        escalation.Priority = 'High';
+        escalation.ContactId = jane.Id;
+        insert escalation;
 
         Test.startTest();
         OCC_ListOpenCases.Response resp = call('jane.doe@example.com', 'ORD-1042');
         Test.stopTest();
 
         System.assertEquals(3, resp.openCaseCount);
+        System.assert(resp.message.contains('Refund request'), resp.message);
         System.assert(!resp.message.contains('financial_request'), resp.message);
         System.assert(!resp.message.contains('Agent escalation'), resp.message);
-        System.assert(resp.message.contains('a request for a team member to follow up'), resp.message);
     }
 
     @isTest

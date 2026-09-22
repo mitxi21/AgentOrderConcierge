@@ -65,11 +65,14 @@ public with sharing class OCC_CreateSupportCase {
                 return resp;
             }
 
-            // Subject, Priority and ContactId only: the agent permission set grants no other Case
-            // field, and this action deliberately doesn't need one.
+            // The caller's own words are the subject, as a human agent would type them. Origin
+            // marks every Case the agent opens, whatever the channel. No Type is set: this action
+            // doesn't know what the issue is about, and guessing one would be worse than a blank.
             Case supportCase = new Case(
                 Subject = req.issueSummary.trim().abbreviate(SUBJECT_MAX),
                 Priority = 'Medium',
+                Origin = OCC_CreateEscalationCase.AGENT_ORIGIN,
+                Reason = 'Other',
                 ContactId = contactId
             );
             insert as user supportCase;

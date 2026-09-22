@@ -151,7 +151,7 @@ directory looking for `sfdx-project.json`, so every `sf` command must run from i
 | `OCC_CheckReturnEligibility` | Return Eligibility | email + order # → eligible flag + one-line reason (reads `Return_Eligible__c`) |
 | `OCC_GetCaseStatus` | Case Status | email + case # → status, subject, priority, `openRelatedCaseCount` (repeat-complaint signal) |
 | `OCC_UpdateCase` | Case Status | appends a published `CaseComment`; never changes status/priority/owner |
-| `OCC_CreateEscalationCase` | Escalation | creates High-priority Case with `Escalation_Summary__c`; reason codes `financial_request`, `unverifiable_identity`, `frustration`, `out_of_scope` (+ `unlogged_escalation` from the script's safety net) |
+| `OCC_CreateEscalationCase` | Escalation | creates High-priority Case with `Escalation_Summary__c`. The model's reason codes (`financial_request`, `unverifiable_identity`, `frustration`, `out_of_scope`, anything else → fallback) are mapped by `named()` to a production-style Subject + Type + Reason; `Origin` = `Agentforce Agent` on every agent Case. **Never store a reason code on a Case** |
 | `OCC_GetOrderDeliveryInfo` | Order Status | email + order # → remaining distance, driving time, position age, static-map URL/`<img>` (Google Routes + Static Maps; callout) |
 | `OCC_DeliveryMap` | shared | route + static-map + haversine fallback + "9 minutes ago"; used by the action, the record page and the REST endpoint |
 | `OCC_OrderMapController` | record page | `occOrderDeliveryMap` LWC on `Order__c`; record access governs, so no email check |
@@ -495,7 +495,7 @@ Phases 9–12 are planned in detail, with spikes and cut-offs, in `docfiles/BUIL
   - Chat embedding: the ESW site's `siteIframeWhiteListUrls` (in `sites/ESW_…site-meta.xml`) must
     list every domain that embeds the chat (VF, Sites, Lightning), plus a CORS origin for each
     (`Keyburn_Sites`).
-  - Case list view **Agentforce Escalations** (subject starts with "Agent escalation"), and
+  - Case list view **Agentforce Escalations** (`Origin` = Agentforce Agent + `Priority` = High), and
     `Escalation_Summary__c` is on the Case layout.
   - **The list view lives in `sfdx-project/mdapi/case-listview/`** (metadata-API format). A
     source-format ListView needs a `Case.object-meta.xml` parent, which this project deliberately

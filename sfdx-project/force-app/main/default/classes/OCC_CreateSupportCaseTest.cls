@@ -33,10 +33,14 @@ private class OCC_CreateSupportCaseTest {
         System.assert(resp.message.contains(resp.caseNumber), resp.message);
 
         Contact maria = [SELECT Id FROM Contact WHERE Email = 'maria.garcia@example.com' LIMIT 1];
-        Case created = [SELECT Subject, Priority, ContactId FROM Case WHERE CaseNumber = :resp.caseNumber];
+        Case created = [SELECT Subject, Priority, Origin, Reason, Type, ContactId
+                        FROM Case WHERE CaseNumber = :resp.caseNumber];
         System.assertEquals('Tablet stand order has not shipped yet', created.Subject);
         System.assertEquals('Medium', created.Priority);
         System.assertEquals(maria.Id, created.ContactId);
+        System.assertEquals('Agentforce Agent', created.Origin);
+        System.assertEquals('Other', created.Reason);
+        System.assertEquals(null, created.Type, 'This action must not guess a Type');
     }
 
     @isTest

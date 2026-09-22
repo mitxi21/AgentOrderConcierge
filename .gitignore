@@ -34,3 +34,6 @@ __pycache__/
 
 # Eval harness scratch output. Keep the saved runs in src/eval_reports/ — those are demo evidence.
 src/eval_report.json
+
+# Phase 12: personal read-aloud demo script (local only)
+HumanScript.txt

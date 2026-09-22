@@ -1,7 +1,7 @@
 # Demo guide — Builders Panel, Wednesday 2026-09-23
 
-Companion to the deck ("Order & Case Concierge — Builders Panel", 23 slides, speaker notes on
-each slide). This file is the operational side: what to check before, what to say and type
+Companion to the deck ("Order & Case Concierge — Builders Panel", 13 slides plus two appendix slides,
+speaker notes on each slide). This file is the operational side: what to check before, what to say and type
 during the demo, what to do when something breaks, and how to explain each design decision.
 
 Presented version: **agent v38** (fallback **v33**, then **v4**). No agent edits after Monday
@@ -11,19 +11,29 @@ evening; Tuesday is freeze, recordings and rehearsal only.
 
 ## 1. Timing (45 min)
 
-| Block | Slides | Time | Cut first if running late |
-| --- | --- | --- | --- |
-| Introduction | cover, about, agenda | 5:00 | agenda (say it, don't show it) |
-| The agent | problem, metrics | 3:30 | — |
-| **Live demo** | demo | 8:00 | moment 2's identity-switch step |
-| AI tooling | architecture, stack1, stack2, contribution | 6:00 | stack2 (answer in Q&A) |
-| Guardrails | scope, layers, escalation | 5:00 | escalation (already shown live) |
-| Reliability | evals, evallessons | 3:00 | evallessons |
-| Issues & trade-offs | failures, tradeoffs1, tradeoffs2, latency, moretime | 4:30 | latency, tradeoffs2 |
-| Why me | whyme | 10:00 | — |
-| Q&A | questions, backup | 10:00 | — |
+13 slides plus two appendix slides. Several of them carry two or three minutes of talking, so
+the speaker notes matter more than the slide count — rehearse against the notes, not the
+bullets. **Run the deck in Present mode**: the architecture slide builds one column at a time
+and only animates there.
 
-Asset block (problem → moretime) must land at **30 min**. It's the part that overruns: at
+| Block | Slides | Time | If running late |
+| --- | --- | --- | --- |
+| Introduction | cover, about | 5:00 | Agenda is spoken, never shown |
+| The agent | agent (job to be done, metrics, what containment is worth) | 3:00 | Keep the ROI sentence, cut the per-tile detail |
+| **Live demo** | demo | 8:00 | Drop moment 2's identity-switch step |
+| AI tooling | architecture, data, choices | 6:00 | `choices`: the two marked rows only |
+| Guardrails | guardrails | 4:00 | Read the layer stack bottom-up, skip the scope column |
+| Reliability | evals | 3:00 | State the gate, skip the run-by-run detail |
+| Issues & trade-offs | failures, tradeoffs | 5:00 | The two marked rows on each |
+| Why me | whyme | 10:00 | — |
+| Q&A | questions (+ 2 appendix slides) | 10:00 | — |
+
+**Two slides carry the most weight and are the easiest to rush: `agent` (what was measured and
+what wasn't) and `failures` (how the root causes were found). Both are marked SLOW DOWN in the
+notes.** On `choices` and `tradeoffs`, narrate only the two tinted rows and leave the rest for
+the panel to read.
+
+Asset block (agent → tradeoffs) must land at **30 min**. It's the part that overruns: at
 rehearsal, check the clock when leaving the demo (target 16:30 into the talk). If you're past
 19:00, skip the slides in the last column.
 
@@ -39,7 +49,9 @@ rehearsal, check the clock when leaving the demo (target 16:30 into the talk). I
       new runs differ.
 - [ ] Record a **backup video** of each of the four demo moments (below), including the Nova
       call with sound. Keep them on the laptop desktop, not in the cloud only.
-- [ ] Rehearse the whole 45 minutes out loud **twice** against a timer.
+- [ ] Rehearse the whole 45 minutes out loud **twice** against a timer, reading from the speaker
+      notes: the deck is 13 slides, so each one carries several minutes of talking. Rehearse in
+      Present mode, so the architecture build is part of the rhythm.
 - [ ] Fill the deck placeholders: `[Your name]` (cover), `[Current role and employer]` and
       `[Two or three customer programmes…]` (about), `[Your customer-facing example]` (whyme),
       plus one career example per card in the whyme notes.
@@ -51,7 +63,7 @@ rehearsal, check the clock when leaving the demo (target 16:30 into the talk). I
       go stale ("15 hours ago" on 09-19). Run it from `sfdx-project/`.
 - [ ] **Delete eval-generated escalation Cases** so the "Agentforce Escalations" list view shows
       only what you create live:
-      `SELECT Id, CaseNumber, Subject FROM Case WHERE Subject LIKE 'Agent escalation%'` → delete.
+      `SELECT Id, CaseNumber, Subject FROM Case WHERE Origin = 'Agentforce Agent'` → delete.
       Leave the sample-data Cases alone. `maria.garcia@example.com` must still have **no open
       cases**.
 - [ ] Load secrets and start the voice page: `. .\load_secrets.ps1; py -3.12 bedrock-voice\server.py`,
@@ -128,8 +140,10 @@ Write down the case number you hear.
 
 Surface: Keyburn Service app → Cases → **Agentforce Escalations**. Open the Case just created.
 
-Point at: High priority, reason `financial_request`, the contact is Jane Doe, **created by the
-agent user**, and the `Escalation Summary` field. Line: *"The human calling back doesn't have to
+Point at: Subject "Refund request", Type **Billing**, Reason **Refund request**, Origin
+**Agentforce Agent**, High priority, the contact is Jane Doe, **created by the agent user**, and
+the `Escalation Summary` field. (The agent classifies internally with its own reason codes; Apex
+maps them to these fields, so nothing machine-shaped is ever stored on the Case.) Line: *"The human calling back doesn't have to
 ask Jane anything again."*
 
 ### Transition back to the deck
@@ -176,13 +190,36 @@ One line each, for the moment a panelist asks "why?". The deck carries the long 
 | One map card per conversation | "A platform behaviour. I ran one structured experiment, documented it, and stopped." | More versions chasing it |
 | VF page + Force.com site, not Experience Cloud | "Same chat, a fraction of the moving parts four days before the demo. Experience Cloud is the production path." | Experience Cloud now |
 
-Trade-offs to volunteer (they're on slides tradeoffs1/tradeoffs2): latency vs accuracy
-(confirm-back), autonomy vs containment (no money, comments only), safety net vs false
-escalations, admin Run As on the Nova map call, email+order identity vs real authentication.
+| Containment is worth something | "At 10,000 contacts a month and a four-minute handle time, 40% containment is about 265 hours a month back to the team — roughly 1.5 FTE. Assumptions, not measurements." | Quoting a containment number as if it were measured in a dev org |
+| The eval harness is a release gate | "In an enterprise org you can't activate a new prompt version blind. This is the deployment gatekeeper: 27 conversations against the live API, as the agent user, and nothing goes live without a green run." | Calling it "testing" — it undersells the governance point |
+| Cutting the 13.8 s cold start | "Shipped: hold sound plus a warm-up call. Buildable: open the session at call setup, keep-alive, no callout on the first turn, streamed replies, cached diagram reading. The rest is platform-side — instrument it and take numbers to the platform team." | Leaving the hold sound as the whole answer |
+| The workflow diagram stays a picture | "A Knowledge article is where a service org keeps a picture, so the picture stays the source of truth and the agent reads it with a multimodal template at question time." | Transcribing it into text: two sources that drift |
+
+Trade-offs to volunteer (they're on the `tradeoffs` slide): latency vs accuracy (confirm-back),
+autonomy vs containment (no money, comments only), safety net vs false escalations, admin Run As
+on the Nova map call, email+order identity vs real authentication.
 
 ---
 
-## 6. After the demo
+## 6. The one failing eval case — you will be asked
+
+`edge_topic_switch_midcall` is the single red case on agent v38 (run 27, 26/27).
+
+- The turns: "What's your return policy?" → "Actually, can you check my order ORD-1042
+  instead? jane.doe@example.com" → "Yes, that's correct."
+- The test asserts a **status** word (shipped / processing / delivered / status). On that run
+  the agent answered **return eligibility**: *"Order 1042 is not eligible for return because it
+  is outside the standard return window."*
+- Why that's defensible: the agent's own previous turn ended with *"Is there a specific order
+  you'd like to check for return eligibility?"*, so "check my order instead" reads as an answer
+  to its question. The same case **passes in runs 24b, 25 and 26** with a status answer, so this
+  is the nondeterminism the suite is there to expose, not a broken path.
+- Why it's still red: weakening the assertion to accept either answer would make the case
+  untestable. A suite that always passes isn't testing anything.
+
+---
+
+## 7. After the demo
 
 - Rotate the **Salesforce ECA consumer secret** and the **Google Maps key** (both passed through
   a chat transcript). Split the Google key into server-only (Routes) and referrer-restricted

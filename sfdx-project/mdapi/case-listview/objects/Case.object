@@ -9,15 +9,24 @@
         <columns>CASES.CASE_NUMBER</columns>
         <columns>CASES.SUBJECT</columns>
         <columns>NAME</columns>
+        <columns>CASES.TYPE</columns>
+        <columns>CASES.REASON</columns>
         <columns>CASES.PRIORITY</columns>
         <columns>CASES.STATUS</columns>
         <columns>CASES.CREATED_DATE_DATE_ONLY</columns>
         <columns>CORE.USERS.ALIAS</columns>
         <filterScope>Everything</filterScope>
+        <!-- Origin + Priority, the way a service org segments this. It used to match on the
+             subject prefix "Agent escalation", which was the internal naming now gone. -->
         <filters>
-            <field>CASES.SUBJECT</field>
-            <operation>startsWith</operation>
-            <value>Agent escalation</value>
+            <field>CASES.ORIGIN</field>
+            <operation>equals</operation>
+            <value>Agentforce Agent</value>
+        </filters>
+        <filters>
+            <field>CASES.PRIORITY</field>
+            <operation>equals</operation>
+            <value>High</value>
         </filters>
         <label>Agentforce Escalations</label>
     </listViews>

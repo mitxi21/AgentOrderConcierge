@@ -124,6 +124,21 @@
         <editable>true</editable>
     </fieldPermissions>
     <fieldPermissions>
+        <field>Case.Type</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <field>Case.Reason</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <field>Case.Origin</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+    <fieldPermissions>
         <field>Order__c.Order_Number__c</field>
         <readable>true</readable>
         <editable>false</editable>

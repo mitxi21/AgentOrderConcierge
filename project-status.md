@@ -7,14 +7,50 @@ to the entry that replaced them.
 
 ---
 
+## 2026-09-22 — Phase 12: deck refactor before the freeze (12 → 13 slides)
+
+Presentation material only. **No org, agent or eval changes — v38 stays frozen.**
+
+- **Business impact beside the success metrics.** The containment tile on the agent slide now
+  carries the arithmetic it implies: 10,000 contacts/month × 40% contained × ~4 min average
+  handle time ≈ 265 hours/month (~1.5 FTE). Every input is labelled an assumption on the slide,
+  because a dev org has no traffic to measure. Rationale: the technical metrics said nothing
+  about what the architecture is worth to the business.
+- **A data-provenance slide added** (`data`, after `architecture`): CRM records, Knowledge in
+  Data Cloud, the workflow **image**, and the live Google API, with the actual
+  `docfiles/order_workflow_diagram.png` on the slide (uploaded as an artifact asset) and the two
+  facts that exist only in the picture called out. This is the slide that ties grounding,
+  guardrails and the demo together, and it makes the "a second LLM reads a picture from a
+  Knowledge article" point visible rather than implied.
+- **The architecture slide is now a staged build** — four pinned columns with `data-build-in`,
+  revealed left to right, so the whole diagram doesn't land at once. It only animates in
+  **Present mode**; the flow-layout version is kept in the scratchpad as a fallback.
+- **The eval harness is framed as governance, not testing**: "the release gate for agent
+  versions — 27 conversations against the live Agent API as the agent user, no version activated
+  without a green run". The four habits moved into the speaker notes.
+- **Two rows are tinted on each of the `choices` and `tradeoffs` tables** with a ▸ marker, and
+  the notes say to narrate only those. The tables stay on screen as evidence to read and to
+  answer from.
+- **The cold-start answer is written down** (trade-offs notes + appendix): shipped = hold sound +
+  warm-up call; buildable = session opened at call setup, keep-alive, no callout on the first
+  turn, streamed replies, cached diagram reading; the remainder is platform-side and gets
+  instrumented rather than guessed at.
+- Appendix split into two slides so the question tables fit; `agent` and `failures` marked
+  SLOW DOWN in the notes. `docfiles/DEMO_GUIDE.md` (timing, crib sheet) and the local read-aloud
+  script updated to match.
+
+---
+
 ## 2026-09-19 — Phase 12 started: deck and demo guide
 
 - **Deck** built as a claude.ai Slides artifact, "Order & Case Concierge — Builders Panel"
-  (private until shared from its Share menu): 23 slides with speaker notes and timings,
-  following the panel's four chapters. The eval slide plots all 35 saved runs (27% → 96%), with
-  agent changes and test-only fixes marked differently. There are 3 trade-off slides (accuracy,
-  latency and autonomy; platform and delivery; voice latency) plus a failures slide and a "with
-  more time" slide. Placeholders to fill in: name, current role, career examples.
+  (private until shared from its Share menu). First draft was 23 slides; **the builder cut it to
+  12 presented slides plus an appendix** — at 45 minutes a 23-slide deck forces a slide a minute,
+  and the demo, not the deck, is the asset. Merged: job-to-be-done + metrics; scope + guardrail
+  layers + escalation; both tooling tables; failures stayed separate but the three trade-off
+  slides, latency and "with more time" became one. Detail moved into the speaker notes.
+  The eval slide plots all 35 saved runs (27% → 96%), agent changes and test-only fixes marked
+  differently. Placeholders to fill in: name, current role, career examples.
 - **`docfiles/DEMO_GUIDE.md`** covers timing and what to cut, the pre-flight checklists (Tue /
   T–60 / T–10), the script for the four demo moments (website chat + map, diagram + refused identity
   switch, Nova call with a staged wrong digit + refund escalation, and the Case in the console),
@@ -22,6 +58,46 @@ to the entry that replaced them.
 - **Decision: stage the misheard number as a wrong digit** (1024 → corrected to 1042), not
   "O-1O42", because the voice layer's O→0 conversion can skip the confirm-back.
 - Still to do on Tuesday: run the evals twice on v38, record the backup videos, rehearse twice.
+
+---
+
+## 2026-09-22 — Agent-created Cases now look like a production org
+
+Cases carried the model's own vocabulary: `Subject = 'Agent escalation: ' + reasonCode`, with
+`Type`, `Reason` and `Origin` all blank. The demo shows this list view and a Case record, so it
+read like a test harness. **Decision (builder): full categorisation** (Subject + Type + Reason +
+Origin), plain customer-service wording, existing Cases renamed in place.
+
+- **Mapping lives in Apex** (`OCC_CreateEscalationCase.named()`): `financial_request` → Refund
+  request / Billing / Refund request; `unverifiable_identity` → Unable to verify caller identity /
+  Account / Identity verification; `frustration` → Repeat contact - unresolved issue / Support /
+  Customer dissatisfaction; `out_of_scope` → Request outside supported scope / Account / Out of
+  scope request; anything unknown or blank → Customer escalation / Support / Other. Every agent
+  Case gets `Origin = 'Agentforce Agent'`. **The reason codes themselves didn't change**, so the
+  agent script is untouched — no publish, no activate, no eval-behaviour change the day before the
+  demo.
+- The old code also produced `'Agent escalation: null'` for a missing code; the fallback row now
+  covers that, with a test.
+- **The mask in `OCC_ListOpenCases` is gone.** `spokenSubject()` existed only to hide the reason
+  code from the caller; subjects are caller-safe by construction now, so the real subject is read
+  back ("all about refund requests"). This also fixes `OCC_GetCaseStatus`, which returned the raw
+  subject and never had a mask.
+- Picklist values **added, not replaced**: ~30 of the org's 205 Cases still use the stock
+  manufacturing values, and removing those would orphan them. New: Type + Order/Delivery/Returns/
+  Billing/Account/Support, Reason + the four above, Origin + Agentforce Agent.
+- `Case.Type`, `Case.Reason`, `Case.Origin` added to **both** permission sets (constraint 4); none
+  was rejected as a platform-required field.
+- List view **Agentforce Escalations** now filters `Origin = Agentforce Agent` + `Priority = High`
+  instead of matching subject text, with Type and Reason columns.
+- Backfill `scripts/rename_agent_cases.apex` (idempotent, reuses `named()` so it can't drift):
+  **142 escalations renamed, 33 support Cases stamped, 175 total**; zero Cases with the old
+  subject remain.
+
+**Verified as the agent user, not just by tests** (`test_actions.apex`-style admin runs prove
+logic, not permissions): a live `sf agent preview` escalation created **00001206 — Refund request /
+Billing / Refund request / Agentforce Agent / High**, created by the
+agent running user. Apex **75/75** (two new tests: the fallback row, and case-insensitive
+code matching).
 
 ---
 
