@@ -338,7 +338,8 @@ cd src; py -3.8 run_eval.py eval_cases.yaml
   04 agent v3 12/15 (original 11: 10/11; 4 `open_cases` cases added) → 05 stricter tests 13/15
   → 06 agent v4 14/15 → 06b repeat 14/15 (same single failure: test wording) → 07 agent v5 with
   3 `tracking` cases 18/18 → 08 stricter map-claim tests 16/18 → 09 agent v6 18/18 → 09b
-  repeat 18/18.
+  repeat 18/18. … → 27 v38 26/27 → 28 v38 26/27 (first traced run) → 29 / 29b v38 + rewritten
+  Knowledge 29/29 (2 `knowledge_*` cases added).
 - Nondeterminism is real (a skipped action was ~1 in 5 in traces). Repeat a run before calling
   something fixed, and trace failures with `sf agent preview` + `sf agent trace read` rather than
   guessing from the reply text.
@@ -530,6 +531,14 @@ Phase 16 (the OTP gate) is the only change to the agent's core flow; its cut-off
   `AgentforcePlatformTracingSettings` needs API 68 and isn't available in this org.
   Agent Analytics (Service + Employee) is installed. The templates only appeared once the admin had
   **Tableau Next Limited Consumer** and at least one session had been traced.
+- **Phase 14 — done (2026-09-22).** Knowledge readiness tool (`tools/knowledge-readiness/`, vendored,
+  git-ignored) scored 68 → 85 after its *Fix with AI* retitled Warranty/Returns/Exchange (reports:
+  `docfiles/knowledge_readiness_run01.md` / `_run02.md`). Evals: run 29 and run 29b, **29/29 twice** on v38.
+  **A published Knowledge change is invisible to the agent until the data stream refreshes and the
+  Data Library index re-chunks.** Publishing archives the old version, and the search ignores archived
+  versions, so in between the article is simply missing. To check, compare `SourceRecordId__c` in
+  `KA_Agent_Library_Data_Space_chunk__dlm` with the online `Knowledge__kav` Ids. **No Knowledge edits
+  after Wed 23.** The readiness tool's **Rerun** re-scores a run in place, so save its numbers first.
 - Phase 18 — demo + deck (was Phase 12 until 2026-09-22). **Always the last phase**; the agent
   version is frozen at Wed 23 18:00.
 

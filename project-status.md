@@ -7,7 +7,7 @@ to the entry that replaced them.
 
 ---
 
-## 2026-09-22 — Phase 14: Knowledge readiness 68 → 85; the rewrite made the agent worse for a while
+## 2026-09-22 — Phase 14 done: Knowledge readiness 68 → 85; the rewrite made the agent worse for a while
 
 - **Tool:** `salesforce/agentforce-knowledge-readiness`, vendored in `tools/knowledge-readiness/`
   (git-ignored) and deployed from there.
@@ -41,7 +41,18 @@ to the entry that replaced them.
   `ssot__Id__c` in `ssot__KnowledgeArticleVersion__dlm`.
 - **Rule:** no Knowledge edits after Wed 23. A content change needs a stream refresh **and** an index
   rebuild before the agent sees it.
-- **Open at the time of writing:** index re-chunk; the Exchange v3 stream refresh; Policy/FAQ evals.
+- **Resolved the same afternoon:**
+  - A manual index rebuild chunked Warranty v2 and Returns v2 (and Exchange v2).
+  - Exchange v3 then needed its own cycle. The stream refresh was pending, the previous one had
+    failed, and the error text isn't exposed through the API. v3 reached the data object and was
+    chunked about 5 minutes later.
+  - The Policy/FAQ subset went 7/9 → 8/9 → 9/9.
+  - **Full suite on v38 with the rewritten Knowledge: run 29 = 29/29, run 29b = 29/29.** It's the
+    first full 100% in the project. `escalation_frustrated_customer` (the run 28 wording failure)
+    passed both times: the agent's phrasing varies between runs, and this time it matched.
+- **Watch for Exchange:** each correction creates a new version, and every new version goes through
+  the same lag again. The v3 fix removed one invented phrase and cost another 25 minutes of
+  exchange answers.
 
 ---
 
