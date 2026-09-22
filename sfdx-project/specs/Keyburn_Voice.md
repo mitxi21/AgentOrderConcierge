@@ -11,6 +11,15 @@ and blocks every upload afterwards (see `docfiles/testing_center_run01.md`). Run
 `sf apex run --file scripts/purge_voice_recordings.apex -o devorg` immediately after, and check
 `sf org list limits` shows FileStorageMB back at 20.
 
+**Scorer selection is fixed when the suite is created.** On the wizard's **Scorers** step, leave the
+two **Assertions** (Subagent Evaluation, Actions Evaluation) **unticked** and tick only **Task
+Resolution**: a conversation suite never captures subagent or action data, so an enabled assertion is
+guaranteed red. The "Select Scorers..." button on an existing suite only edits the custom scorers
+(Quality / Deflection / Abandonment), so a suite created with assertions on cannot be fixed - make a
+new one. `Keyburn_Voice_upload_noassert.csv` is the same three cases with the expectation columns
+left empty, and with each conversation's resolved ending described so Task Resolution judges the
+escalation fairly.
+
 Settings: Text and voice, **Default persona** (Accent persona is the interesting one for a second
 run, but it doubles the recordings), live actions, and the same scorers as the other suites —
 Response, Subagent, Action, Coherence, Latency; Completeness and Conciseness **off**.

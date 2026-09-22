@@ -1,0 +1,4 @@
+Conversation,Expected Actions,Expected Subagents
+"User asks where order 1042 is right now, gives the email jane.doe@example.com when asked, confirms when the agent reads both back, hears how far away it is, and thanks the agent",,
+"User asks for the status of order 1024 with the email jane.doe@example.com, corrects the order number to 1042 when the agent reads it back, confirms, hears the order status, and thanks the agent",,
+"User demands a refund for their last order right now, is told a team member will follow up within one business day, is given a case number, and accepts that as the resolution",,
