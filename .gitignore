@@ -38,3 +38,9 @@ src/eval_report.json
 # Phase 12: personal demo sheet and rehearsal script (local only)
 HumanScript.txt
 RehearsalScript.txt
+
+# Playwright MCP snapshots/logs (local only)
+.playwright-mcp/
+
+# Phase 14: vendored salesforce/agentforce-knowledge-readiness (its own sfdx project, local only)
+tools/knowledge-readiness/
