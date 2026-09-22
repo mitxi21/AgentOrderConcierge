@@ -7,6 +7,48 @@ to the entry that replaced them.
 
 ---
 
+## 2026-09-22 — Phase 12: Session Tracing on; Agent Analytics blocked on templates
+
+**Starting state:** Data Cloud on, Standard Data Model 1.132 (≥ 1.130 required), `default` data
+space ACTIVE. None of the Session Tracing or audit data objects existed, so nothing was ever traced
+before today. Tracing doesn't backfill, so v1–v38 history isn't in it.
+
+**Done:**
+- `EinsteinAISettings` deployed with `enableAgentHealthMonitoringGA=true` (for Phase 17) and
+  `enableAIFeedbackWithDC=true` (Audit & Feedback). Both confirmed by a second retrieve.
+- **Agentforce Session Tracing** turned on in Setup → Einstein Audit, Analytics, and Monitoring.
+- **Go/no-go check passed:** one preview session was in Data Cloud about 3 minutes later (1 session,
+  3 interactions, 8 steps in `ssot__AiAgentSession__dlm` / `…Interaction__dlm` /
+  `…InteractionStep__dlm`).
+- Eval suite run to generate traffic.
+
+**Root cause of "Data space not ready":**
+- Enabling Audit & Feedback through a metadata deploy flips the flag but skips the step where the
+  setup page records the data space. The page's Data Space field stayed blank, nothing was
+  provisioned, and the Session Tracing toggle then refused to switch on.
+- Fixed by switching Audit & Feedback off and on in the UI.
+- **Rule:** switch on anything that provisions Data Cloud objects in the UI, not by metadata.
+
+**Not available here:**
+- `AgentforcePlatformTracingSettings` needs API 68. The org maximum is 67.0.
+
+**Agent Analytics: open.**
+- Setup → Agent Analytics says "You don't have any templates yet. Enable Agentforce Session Tracing
+  and complete your agent-specific requirements".
+- Tableau Next Limited Consumer (license + permission set) is now assigned to the admin.
+- *Tableau Next Platform Analyst*, listed by third-party guides as a prerequisite, doesn't exist in
+  this org. If it is required, this Developer Edition can't install the templates.
+- Fallback for Phase 17: raw data from the trace objects + Agent Optimization + Health Monitoring.
+
+**Tooling notes:**
+- The CLI access token gets 401 on `/services/data/vXX/ssot/query-sql` (no Data Cloud scope). Query
+  trace data with `ConnectApi.CdpQuery.queryAnsiSqlV2` from anonymous Apex instead.
+- `sf api request rest` and `sf data query` fail in Git Bash with a `"C:\Program"` path error. Run
+  them from PowerShell.
+- `sfdx-project.json` is already at API 67.0; `CLAUDE.md` said 61.0 (now corrected).
+
+---
+
 ## 2026-09-22 — Panel feedback reopens the scope: Phases 12–17 added, demo + deck becomes Phase 18
 
 A Salesforce reviewer looked at the build and the deck. The agent is solid, but the reviewer

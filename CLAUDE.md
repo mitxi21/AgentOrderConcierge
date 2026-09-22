@@ -116,9 +116,10 @@ directory looking for `sfdx-project.json`, so every `sf` command must run from i
   - Publishing does not activate. A saved Agent Builder edit isn't live until it's published
     **and** activated. The 09-15 confirm-back edit sat unpublished for two days because of this.
   - If you edit in Agent Builder instead, retrieve right after or the local draft goes stale.
-    `AiAuthoringBundle` / `GenAiPlannerBundle` don't exist at the project's API 61.0, so plain
+    `AiAuthoringBundle` / `GenAiPlannerBundle` didn't exist at the project's old API 61.0, so plain
     `sf project retrieve start --metadata ...` silently skips them. Retrieve with a
-    `package.xml` whose `<version>` is 67.0 via `--manifest`.
+    `package.xml` whose `<version>` is 67.0 via `--manifest`. (`sfdx-project.json` is now at 67.0,
+    which is also the org's maximum; the manifest route is still the proven one.)
   - `docfiles/agent_builder_topics.md` is the original design text and is **not** in sync. The
     `.agent` file wins.
 - 5 subagents behind `agent_router`: Order Status, Case Status, Return Eligibility, Policy/FAQ,
@@ -257,7 +258,7 @@ out of the agent transcript. Revert it immediately after — see constraint 6.
 
 ## Commands
 
-Salesforce CLI, org alias `devorg`. **Run from `sfdx-project/`** (source format, API 61.0).
+Salesforce CLI, org alias `devorg`. **Run from `sfdx-project/`** (source format, API 67.0 — the org's maximum).
 
 ```powershell
 sf org login web --alias devorg
@@ -518,6 +519,15 @@ Phase 16 (the OTP gate) is the only change to the agent's core flow; its cut-off
     `presenceUserConfigs/`, `servicePresenceStatuses/`. The Order record page is
     `flexipages/Order_Record_Page` **and** the two `View`/`Flexipage` `actionOverrides` in
     `Order__c.object-meta.xml` — the page alone doesn't assign itself.
+- **Phase 12 — done (2026-09-22).** Session Tracing is on, and a preview session reaches Data Cloud in about
+  3 minutes (`ssot__AiAgentSession__dlm` / `…Interaction__dlm` / `…InteractionStep__dlm`). Check it with
+  `ConnectApi.CdpQuery.queryAnsiSqlV2` from anonymous Apex. The CLI token gets 401 on `/ssot/query-sql`
+  (no Data Cloud scope), and `sf api request` / `sf data query` break in Git Bash ("C:\Program" path
+  bug), so use PowerShell.
+  **Turn on anything that provisions Data Cloud objects in the Setup UI, never through a metadata deploy.**
+  `EinsteinAISettings.enableAIFeedbackWithDC=true` deployed the flag but left the page's Data Space blank,
+  and Session Tracing then failed with "Data space not ready". Switching it off and on in the UI fixed it.
+  `AgentforcePlatformTracingSettings` needs API 68 and isn't available in this org.
 - Phase 18 — demo + deck (was Phase 12 until 2026-09-22). **Always the last phase**; the agent
   version is frozen at Wed 23 18:00.
 
