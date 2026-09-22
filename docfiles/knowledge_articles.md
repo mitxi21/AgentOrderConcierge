@@ -9,22 +9,31 @@ Each article is short on purpose — the agent is instructed to answer in 2-3
 sentences, so a bloated source article doesn't help retrieval quality, it just
 makes the vector chunks noisier.
 
+> **2026-09-22 (Phase 14):** Articles 1, 3 and 4 were rewritten with the Knowledge Readiness tool's
+> *Fix with AI* and reviewed before publishing. The text below matches the published versions. The
+> first Exchange draft invented "style, or version"; v3 removed it. See
+> `knowledge_readiness_run02.md`.
+
 ---
 
 ## Article 1: Return Policy
 
-**Title:** Return Policy
+**Title:** 30-Day Return Policy and Refund Process (v2, 2026-09-22; was "Return Policy")
 
 **Summary:** How long customers have to return an item and what condition it must be in.
 
 **Body:**
 ```
-Most items can be returned within 30 days of the delivery date for a full
-refund to the original payment method. Items must be unused, in their
-original packaging, and include all accessories. Final-sale and clearance
-items are not eligible for return. To start a return, contact support with
-your order number — a team member will provide a prepaid return label and
-process the refund once the item is received and inspected.
+Return window. Most items can be returned within 30 days of the delivery
+date for a full refund.
+Refund method. Refunds are issued to the original payment method, such as
+the card used for the purchase.
+Item condition. Items must be unused, in their original packaging, and
+include all accessories.
+Exclusions. Final-sale and clearance items are not eligible for return.
+How to start a return. Contact support with your order number. A team
+member will provide a prepaid return label. The team will process the
+refund after the returned item is received and inspected by the team.
 ```
 
 ---
@@ -47,34 +56,38 @@ remote areas. Once an order ships, a tracking number is sent by email.
 
 ## Article 3: Warranty Terms
 
-**Title:** Warranty Terms
+**Title:** Manufacturer Warranty Coverage, Exclusions, and Claim Process (v2, 2026-09-22; was "Warranty Terms")
 
 **Summary:** What the standard manufacturer warranty covers and how to file a claim.
 
 **Body:**
 ```
-All products include a 1-year manufacturer warranty covering defects in
-materials and workmanship. The warranty does not cover accidental damage,
-misuse, or normal wear and tear. To file a warranty claim, contact support
-with your order number and a description of the issue; approved claims are
-resolved with a repair, replacement, or store credit at our discretion.
+All products include a 1-year manufacturer warranty for products that are
+broken or stop working because of defects in materials or workmanship.
+The warranty does not cover:
+- accidental damage
+- misuse
+- normal wear and tear
+To file a warranty claim, contact support with your order number and a
+description of the issue. If the claim is approved, the resolution is a
+repair, replacement, or store credit.
 ```
 
 ---
 
 ## Article 4: Exchange Process
 
-**Title:** Exchange Process
+**Title:** Item Exchange Eligibility and Process (v3, 2026-09-22; was "Exchange Process")
 
 **Summary:** How to exchange an item for a different size, color, or model within the return window.
 
 **Body:**
 ```
-Items can be exchanged for a different size, color, or model within the
-same 30-day window as our return policy, as long as the item is unused and
-in its original packaging. There is no restocking fee for exchanges.
-Contact support with your order number to start an exchange; once the
-original item is received, the replacement ships within 1-2 business days.
+Items can be exchanged for a different size, color, or model within 30
+days, as long as the item is unused and in its original packaging. There
+is no restocking fee for exchanges. Contact support with your order number
+to start an exchange. Once the original item is received, the replacement
+ships within 1-2 business days.
 ```
 
 ---
