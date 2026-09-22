@@ -1,6 +1,7 @@
 # Builders Panel — Brief (Salesforce, FDE role)
 
-Source: `Builders_Panel_.pdf` (Salesforce recruitment deck). Demo date: **2026-09-23**.
+Source: `Builders_Panel_.pdf` (Salesforce recruitment deck). Demo date: **2026-09-24, 14:45,
+Salesforce Madrid office** (moved from 2026-09-23).
 
 ## Format
 

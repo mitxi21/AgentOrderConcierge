@@ -347,8 +347,8 @@ page shows the transcript and results.
 **Deferred by the builder on 2026-09-17 — do Phases 9 and 10 first.** Kept here
 so the plan is complete; re-scope it when Phase 10 closes.
 
-1. **Prerequisites — confirmed:** AWS account `__AWS_ACCOUNT_ID__`, region
-   `eu-north-1` (Stockholm), Bedrock access to Nova 2 Sonic already granted.
+1. **Prerequisites — confirmed:** AWS account (`REDACT_AWS_ACCOUNT_ID` in
+   `secrets.env`), region `eu-north-1` (Stockholm), Bedrock access to Nova 2 Sonic already granted.
    Still to confirm: IAM credentials for local use, and which SDK supports
    Bedrock's bidirectional streaming API
    (`InvokeModelWithBidirectionalStream`) in the chosen language. Phase 10 no
@@ -409,7 +409,7 @@ so the plan is complete; re-scope it when Phase 10 closes.
 
 ---
 
-## Calendar from 2026-09-17 (demo Wednesday 2026-09-23)
+## Calendar from 2026-09-17 (demo Thursday 2026-09-24, 14:45; moved from Wednesday 23)
 
 | When | Phase | Cut-off / fallback |
 |---|---|---|
@@ -417,8 +417,9 @@ so the plan is complete; re-scope it when Phase 10 closes.
 | Fri 18 | Phase 9 build, evals | Not demoable by Fri night → voice speaks location only, map drops |
 | Sat 19 | Phase 10 (image spike first, then build) | Image not readable → option (a) text description |
 | Sun 20 – Mon 21 | Phase 11 | No end-to-end call by Mon night → deck shows architecture only, live demo stays on Builder voice |
-| Tue 22 | Phase 12 (freeze, backup recordings, deck, rehearse) | No new features on Tuesday |
-| Wed 23 | Demo | — |
+| Tue 22 | Phase 12 (deck, demo guide, Case naming fixes) | No new features from Tuesday |
+| Wed 23 | Phase 12 freeze: backup recordings, two eval runs, rehearse twice | — |
+| Thu 24 | Demo, 14:45, Salesforce Madrid office | — |
 
 This leaves about 3.5 build days for three features plus a day for Phase 12,
 which is tight. The cut-offs are there so an overrunning feature can't eat

@@ -751,8 +751,8 @@ negative results, all of which were tested only in the preview.
 
 Required to reach the deployed client, each a hard prerequisite:
 
-1. `KeyburnChatTest` Visualforce page hosting the Embedded Messaging bootstrap snippet (org
-   `__ORG_ID_18__`, deployment `Agentforce_Service_Agent`, site
+1. `KeyburnChatTest` Visualforce page hosting the Embedded Messaging bootstrap snippet (the
+   18-character org ID, deployment `Agentforce_Service_Agent`, site
    `ESWAgentforceServiceAge1789407438343`, scrt2 `…my.salesforce-scrt.com`).
 2. CSP Trusted Sites for the site and scrt domains, and CORS origins for the VF, Lightning and site
    domains, so the site's `frame-ancestors` includes the VF domain and the chat iframe can load
@@ -771,10 +771,11 @@ Phase 11 custom client.
 
 **Resolved — "Reconnecting…" and replies appearing only after refresh:** the live event stream
 (`/eventrouter/v1/sse`, then `/eventrouter/v1/poll`) returned 400 with *"OrgId in the header and
-token must match, but got '__ORG_ID_18__' in the header and '__ORG_ID_15__' in the token"*.
+token must match"* — the 18-character ID in the header against the 15-character one in the token.
 The test pages passed the **18-character** org ID to `embeddedservice_bootstrap.init()`; the
 messaging token carries the **15-character** one and the event router compares them literally.
-Both pages now use `__ORG_ID_15__`. The CORS origin added for the site domain is harmless and
+Both pages now use the 15-character ID (`REDACT_ORG_ID_15`). The CORS origin added for the site
+domain is harmless and
 stays.
 
 **For Phase 11:** the messaging token endpoint rejects Web deployments — *"The deploymentType 'Web'
@@ -988,7 +989,8 @@ Decisions recorded with the plan:
 **Requirements:**
 
 1. **Channel: voice chat with a screen**, not a blind phone call.
-2. **AWS:** account `__AWS_ACCOUNT_ID__`, region `eu-north-1`, Bedrock access to Nova 2 Sonic granted.
+2. **AWS:** account in `secrets.env` (`REDACT_AWS_ACCOUNT_ID`), region `eu-north-1`, Bedrock
+   access to Nova 2 Sonic granted.
 3. **Phase 10:** the agent must genuinely analyse the image; a pre-written text description is not
    acceptable.
 4. **Phase 9:** the map is *embedded* in the chat (not a link), orders carry live GPS coordinates,

@@ -43,15 +43,17 @@ chat or by voice. Built for a Salesforce Forward Deployed Engineer Builders Pane
 Requires the Salesforce CLI and an org with Agentforce, Data Cloud and Knowledge enabled.
 
 1. Copy `secrets.env.example` to `secrets.env` and fill it in. It is git-ignored.
-2. Replace the `__PLACEHOLDER__` tokens (org ID, My Domain, agent user) with your org's values,
+2. Replace the double-underscore placeholder tokens (org ID, My Domain, agent user) with your
+   org's values,
    or fill in the `REDACT_*` lines and run `tools\setup_redaction.ps1` (see below).
 3. Deploy in the order given in `src/SFCLI_Script.txt`. Every `sf` command runs from
    `sfdx-project/`.
 4. Run the evals: `. .\load_secrets.ps1`, then `cd src; py run_eval.py eval_cases.yaml`.
 
 **Why the placeholders:** org identifiers are kept out of this repo by a git clean/smudge filter
-(`.gitattributes` + `tools/setup_redaction.ps1`). Committed files contain tokens such as
-`__MY_DOMAIN__`, while a configured working copy has the real values and deploys as-is.
+(`.gitattributes` + `tools/setup_redaction.ps1`). Committed files contain one token per value —
+the `REDACT_*` key name wrapped in double underscores — while a configured working copy has the
+real values and deploys as-is.
 
 ## Status
 

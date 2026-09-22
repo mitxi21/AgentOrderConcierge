@@ -1,11 +1,11 @@
-# Demo guide — Builders Panel, Wednesday 2026-09-23
+# Demo guide — Builders Panel, Thursday 2026-09-24, 14:45, Salesforce Madrid office
 
 Companion to the deck ("Order & Case Concierge — Builders Panel", 13 slides plus two appendix slides,
 speaker notes on each slide). This file is the operational side: what to check before, what to say and type
 during the demo, what to do when something breaks, and how to explain each design decision.
 
-Presented version: **agent v38** (fallback **v33**, then **v4**). No agent edits after Monday
-evening; Tuesday is freeze, recordings and rehearsal only.
+Presented version: **agent v38** (fallback **v33**, then **v4**). No agent edits after Tuesday
+evening; Wednesday 23 is freeze, recordings and rehearsal only.
 
 ---
 
@@ -13,15 +13,16 @@ evening; Tuesday is freeze, recordings and rehearsal only.
 
 13 slides plus two appendix slides. Several of them carry two or three minutes of talking, so
 the speaker notes matter more than the slide count — rehearse against the notes, not the
-bullets. **Run the deck in Present mode**: the architecture slide builds one column at a time
-and only animates there.
+bullets. The architecture slide is **four slides that build one diagram** (channels → Agentforce
+→ actions → data); they share the footer number, so the deck is still 13 numbered slides. Built
+that way on purpose: exports (PPTX, Google Slides, PDF) carry no animation.
 
 | Block | Slides | Time | If running late |
 | --- | --- | --- | --- |
 | Introduction | cover, about | 5:00 | Agenda is spoken, never shown |
 | The agent | agent (job to be done, metrics, what containment is worth) | 3:00 | Keep the ROI sentence, cut the per-tile detail |
 | **Live demo** | demo | 8:00 | Drop moment 2's identity-switch step |
-| AI tooling | architecture, data, choices | 6:00 | `choices`: the two marked rows only |
+| AI tooling | architecture ×4, data, choices | 6:00 | `choices`: the two marked rows only |
 | Guardrails | guardrails | 4:00 | Read the layer stack bottom-up, skip the scope column |
 | Reliability | evals | 3:00 | State the gate, skip the run-by-run detail |
 | Issues & trade-offs | failures, tradeoffs | 5:00 | The two marked rows on each |
@@ -41,7 +42,7 @@ rehearsal, check the clock when leaving the demo (target 16:30 into the talk). I
 
 ## 2. Pre-flight
 
-### Tuesday 22 (freeze day)
+### Wednesday 23 (freeze day)
 
 - [ ] Confirm **v38 is active** (Setup → Agentforce Agents → Keyburn Customer Service → versions).
 - [ ] Run the eval suite **twice** on v38 and save both runs (`run28_…`, `run29_…`) in
@@ -50,14 +51,14 @@ rehearsal, check the clock when leaving the demo (target 16:30 into the talk). I
 - [ ] Record a **backup video** of each of the four demo moments (below), including the Nova
       call with sound. Keep them on the laptop desktop, not in the cloud only.
 - [ ] Rehearse the whole 45 minutes out loud **twice** against a timer, reading from the speaker
-      notes: the deck is 13 slides, so each one carries several minutes of talking. Rehearse in
-      Present mode, so the architecture build is part of the rhythm.
+      notes: the deck is 13 numbered slides, so each one carries several minutes of talking.
+      Rehearse from Google Slides, so the four-slide architecture build is part of the rhythm.
 - [ ] Fill the deck placeholders: `[Your name]` (cover), `[Current role and employer]` and
       `[Two or three customer programmes…]` (about), `[Your customer-facing example]` (whyme),
       plus one career example per card in the whyme notes.
 - [ ] Share the deck from its Share menu if the panel should get the link (it is private).
 
-### Demo morning (T–60 min)
+### Demo day, Thursday 24 (T–60 min, so by 13:45)
 
 - [ ] `sf apex run --file scripts/set_demo_geodata.apex --target-org devorg` — parcel positions
       go stale ("15 hours ago" on 09-19). Run it from `sfdx-project/`.
@@ -72,12 +73,12 @@ rehearsal, check the clock when leaving the demo (target 16:30 into the talk). I
       turn took 13.8 s.
 - [ ] Warm-up chat on the public Keyburn site (one tracking question), so the website moment is
       warm too.
-- [ ] If anything was published since Monday: **republish the Embedded Service deployment**
+- [ ] If anything was published since the freeze: **republish the Embedded Service deployment**
       `Agentforce_Service_Agent`, or the map card is sent but not drawn.
 
-### T–10 min
+### T–10 min (14:35)
 
-- [ ] Browser tabs, in order: (1) deck in Present mode, (2) public Keyburn site
+- [ ] Browser tabs, in order: (1) the deck in the presenter view you rehearsed with, (2) public Keyburn site
       `https://<my-domain>.my.salesforce-sites.com/keyburn/`, (3) Nova page
       `http://localhost:8765`, (4) Keyburn Service console → Agentforce Escalations list view.
 - [ ] Chrome/Edge microphone permission granted for `localhost`; **laptop mic and speakers**
@@ -193,6 +194,9 @@ One line each, for the moment a panelist asks "why?". The deck carries the long 
 | Containment is worth something | "At 10,000 contacts a month and a four-minute handle time, 40% containment is about 265 hours a month back to the team — roughly 1.5 FTE. Assumptions, not measurements." | Quoting a containment number as if it were measured in a dev org |
 | The eval harness is a release gate | "In an enterprise org you can't activate a new prompt version blind. This is the deployment gatekeeper: 27 conversations against the live API, as the agent user, and nothing goes live without a green run." | Calling it "testing" — it undersells the governance point |
 | Cutting the 13.8 s cold start | "Shipped: hold sound plus a warm-up call. Buildable: open the session at call setup, keep-alive, no callout on the first turn, streamed replies, cached diagram reading. The rest is platform-side — instrument it and take numbers to the platform team." | Leaving the hold sound as the whole answer |
+| Agent Cases are named like a human's | "The model classifies with its own reason codes; Apex maps each to the subject, type and reason a human agent would have typed, and Origin = Agentforce Agent marks every one. The queue filters on Origin + Priority." | Storing the reason code as the subject: the record then reads like a test harness |
+| Shipping a change is CI/CD | "Edit the script locally, validate, publish a version, activate, re-run the suite, roll back by activating the previous version. The gap is the trigger — it's manual today, GitHub Actions next." | Editing in the Builder and hoping |
+| The Python suite is a real test | "It runs against the live org over the Agent API, as the agent user, and writes real Cases. Apex tests cover the deterministic half; this covers routing and refusals, which Apex can't reach." | Calling it a smoke test, or claiming it's CI when the trigger is manual |
 | The workflow diagram stays a picture | "A Knowledge article is where a service org keeps a picture, so the picture stays the source of truth and the agent reads it with a multimodal template at question time." | Transcribing it into text: two sources that drift |
 
 Trade-offs to volunteer (they're on the `tradeoffs` slide): latency vs accuracy (confirm-back),

@@ -1,7 +1,7 @@
 # AgentFDE — Order & Case Concierge
 
 Voice-enabled Agentforce Service Cloud agent built in a Salesforce **DEV org**, for a Forward
-Deployed Engineer Builders Panel at Salesforce. **Demo: 2026-09-23.**
+Deployed Engineer Builders Panel at Salesforce. **Demo: 2026-09-24, 14:45, Salesforce Madrid office.**
 
 Salesforce agent name: "Keyburn Customer Service" (dev name `Keyburn_Customer_Service`),
 presented as "Order & Case Concierge". Fictional company: Keyburn.
@@ -11,8 +11,9 @@ before risky edits so there is history to fall back on.
 
 **Org identifiers are redacted by a git filter.** `.gitattributes` routes text files through a
 `redact` clean/smudge filter: the working copy keeps the real org ID, My Domain, agent username,
-agent user ID and AWS account ID (deployable), and commits contain `__ORG_ID_15__`,
-`__MY_DOMAIN__` etc. instead. Values come from the `REDACT_*` lines in `secrets.env`, and
+agent user ID and AWS account ID (deployable), and commits contain a placeholder in their place:
+each `REDACT_*` key name wrapped in double underscores. Values come from the `REDACT_*` lines in
+`secrets.env` (never repeat a value in a doc — reference its key name, as this file does), and
 `tools/setup_redaction.ps1` writes the filter into `.git/config` (re-run it after a fresh clone or a
 new value). Before any push, check nothing leaked: `git grep -n -e <value>` on the committed tree
 must be empty. A new identifier that must stay private needs a new `REDACT_*` line, not a
@@ -192,8 +193,9 @@ demo.
 Deploying a permission set does **not** assign it. `PermissionSetAssignment` is a data
 operation — that's what `scripts/assign_agent_permset.apex` is for.
 
-Agent running user: `__AGENT_USERNAME__`
-(Id `__AGENT_USER_ID__`, license *Einstein Agent*, profile *Einstein Agent User*).
+Agent running user: the `REDACT_AGENT_USERNAME` value in `secrets.env` (its Id is
+`REDACT_AGENT_USER_ID`; license *Einstein Agent*, profile *Einstein Agent User*). Identifiers
+live only in `secrets.env` — don't paste them back into this file.
 
 ## Standing constraints — do not violate
 
@@ -239,7 +241,8 @@ it returns real access after CRUD, FLS *and* sharing:
 
 ```sql
 SELECT RecordId, HasReadAccess, MaxAccessLevel FROM UserRecordAccess
-WHERE UserId = '__AGENT_USER_ID__' AND RecordId IN ('003...','500...')
+WHERE UserId = '<agent user Id — REDACT_AGENT_USER_ID in secrets.env>'
+  AND RecordId IN ('003...','500...')
 ```
 
 `HasReadAccess=false, MaxAccessLevel=None` on a record that exists = a sharing gap. Reach for
@@ -381,7 +384,7 @@ Phases 9–12 are planned in detail, with spikes and cut-offs, in `docfiles/BUIL
   trusted sites, CORS origins, guest access on the deployment and Omni-Channel routing to the agent
   — see `project-status.md` 2026-09-18.
 - **Embedded Messaging needs the 15-character org ID** in `embeddedservice_bootstrap.init()`
-  (`__ORG_ID_15__`). With the 18-character ID the chat loads and messages send, but every live
+  (`REDACT_ORG_ID_15` in `secrets.env`). With the 18-character ID the chat loads and messages send, but every live
   event poll returns 400 — *"OrgId in the header and token must match"* — so replies only appear
   after a page refresh.
 - **What a Custom Lightning Type card needs in the deployed chat** (all proven 2026-09-18, v30;
@@ -460,7 +463,7 @@ Phases 9–12 are planned in detail, with spikes and cut-offs, in `docfiles/BUIL
   an optional second action gets skipped by the model.
 - **Phase 11 — done (2026-09-20).** External call page using Amazon Bedrock Nova 2
   Sonic. Agentforce stays the brain; Nova only handles speech and relays turns through the Agent
-  API. AWS account `__AWS_ACCOUNT_ID__`, region `eu-north-1`; **IAM access keys** in `secrets.env` (a
+  API. AWS account and region `eu-north-1` (`REDACT_AWS_ACCOUNT_ID`); **IAM access keys** in `secrets.env` (a
   Bedrock API key can't open the bidirectional stream). Run: `. .\load_secrets.ps1; py -3.12
   bedrock-voice\server.py` → `http://localhost:8765` (Chrome/Edge). Rules:
   - **The relay sends only what the caller was heard saying** (Nova's USER transcript or a typed
@@ -500,7 +503,7 @@ Phases 9–12 are planned in detail, with spikes and cut-offs, in `docfiles/BUIL
   - **The list view lives in `sfdx-project/mdapi/case-listview/`** (metadata-API format). A
     source-format ListView needs a `Case.object-meta.xml` parent, which this project deliberately
     doesn't have. Deploy it with `sf project deploy start --metadata-dir mdapi/case-listview`.
-  - `sites/*.site-meta.xml` contain the admin username → redacted as `__ADMIN_USERNAME__`.
+  - `sites/*.site-meta.xml` contain the admin username → redacted through `REDACT_ADMIN_USERNAME`.
   - **Channel + routing + voice are in source control** (retrieved 2026-09-20):
     `messagingChannels/Agentforce_Service_Agent` holds `isVoiceModeEnabled` (the mic button in the
     chat) and the Omni wiring `sessionHandlerAsa` = the agent, `sessionHandlerQueue` =
