@@ -49,9 +49,38 @@ standing as the working proof that the agent reads images. Nothing already built
 honest version of this story - structure healthy, platform reporting success everywhere, zero rows -
 is itself good panel material.
 
-**If it is revisited:** check whether the S3 connection is the structured connector type rather than
-the file-storage one; the unstructured flow needs the latter before the stream wizard offers
-HTML/PDF.
+**Built anyway, later the same night.** The file-notification pipeline now exists:
+
+- Connected app **`Keyburn_File_Notifier`** (JWT, x509 certificate generated locally and kept outside
+  the repo; consumer key in `secrets.env` as `SF_NOTIFIER_CONSUMER_KEY`, stripped from the committed
+  metadata). Its `cdp_ingest_api` scope and pre-authorization are set in the UI - the metadata enum
+  `ConnectedAppOauthAccessScope` rejects both `CdpIngestApi` and `CDPIngestApi`.
+- AWS, via `forcedotcom/file-notifier-for-blob-store` (all 16 steps green): IAM role
+  `keyburn-notifier-lambda-role`, secrets `keyburn-s3-consumer-key` and `keyburn-s3-rsa-private-key`,
+  code bucket `keyburn-notifier-code-s1`, Lambda `keyburn-notifier-lambda-fn`, and an
+  `ObjectCreated`/`ObjectRemoved` notification over the whole `__S3_BUCKET__` bucket.
+- A dedicated IAM user `keyburn_notif_user` (IAMFullAccess + SecretsManagerReadWrite) ran it; the
+  read-only `keyburn-datacloud-s3` user cannot write to the bucket, which is why re-uploads use the
+  installer user.
+
+**Three traps worth keeping:**
+
+1. **The installer demands `AWS_SESSION_TOKEN`, but AWS forbids IAM calls with `GetSessionToken`
+   credentials unless MFA was used** - so it fails at role creation with `InvalidClientTokenId`. The
+   local copy is patched to accept a long-lived key (original kept as `.orig`).
+2. **Its region check calls `ec2:DescribeRegions`**, a permission the installer user otherwise needs
+   for nothing; patched to validate the region's shape instead.
+3. **It decides a secret exists by grepping for `ResourceNotFoundException`**, so any other error -
+   an `AccessDenied` during IAM propagation - reads as "already exists", and it skips creation and
+   fails later at `put-resource-policy`. IAM propagation after attaching a policy was genuinely
+   flaky: the same `CreateSecret` was denied and then allowed a minute later.
+
+Left behind for cleanup (this user cannot delete secrets): `keyburn-probe-delete-me`,
+`keyburn-probe2-delete-me`, `keyburn-s3-consumer-key2`.
+
+**If ingestion still does not happen:** read the Lambda's CloudWatch logs (the installer user lacks
+`logs:DescribeLogStreams`, so grant that or use the console), and check whether the S3 connection in
+Data Cloud is the structured connector type rather than the file-storage one.
 
 ---
 

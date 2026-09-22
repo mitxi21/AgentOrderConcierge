@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ConnectedApp xmlns="http://soap.sforce.com/2006/04/metadata">
+    <contactEmail>__DEMO_INBOX__</contactEmail>
+    <description>Server-to-server app for the S3 file-notification pipeline that catalogues unstructured documents into Data 360.</description>
+    <label>Keyburn File Notifier</label>
+    <oauthConfig>
+        <callbackUrl>http://localhost:1717/OauthRedirect</callbackUrl>
+        <certificate>MIIDgTCCAmmgAwIBAgIUEp1hJCbjI0AafQ3TjIzueuluFrYwDQYJKoZIhvcNAQELBQAwUDELMAkGA1UEBhMCRVMxDzANBgNVBAgMBk1hZHJpZDEQMA4GA1UECgwHS2V5YnVybjEeMBwGA1UEAwwVa2V5YnVybi1maWxlLW5vdGlmaWVyMB4XDTI2MDkyMjIwMTIyNVoXDTI3MDkyMjIwMTIyNVowUDELMAkGA1UEBhMCRVMxDzANBgNVBAgMBk1hZHJpZDEQMA4GA1UECgwHS2V5YnVybjEeMBwGA1UEAwwVa2V5YnVybi1maWxlLW5vdGlmaWVyMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAumjZx/omZ/lOHo2wr4XEfgW0Je0UpOzPImIZTcQBIvM/auGYCFYVj7svK1d69rguhntXSPojxhF4hCRDtJJ/8HgMXqStwB7G1XU+Ie/fZhnt4hYzR0J3Fof2ZGvt/HseuC95WwBOgzmBdYaN//pSpwuRxkm+FRo5b5UtAVugHd9QW27mwiehcrbfn57tjR1LmiCknhbgnVu8k+qC4wnNH1aNjXwcqx6TZYPmV63sjgF5gSTK1AiVGL5Df2nAEmZSEh5//WtJtsAx0wn1R2O4Ewh6/zjZlxpxk5tAnBEd7TOCmybc/Z0w90InncPjx/OQFWQXCZTLHjtvf0AD5UGjDQIDAQABo1MwUTAdBgNVHQ4EFgQUGh30/gb+yG3WLcLx5f96iWfIcJ0wHwYDVR0jBBgwFoAUGh30/gb+yG3WLcLx5f96iWfIcJ0wDwYDVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAUfUoEGxQbgyuDRcLlXgUqLbYn/EAIwDoBYnkei/7DEcU39vsHDG1acL7TSFsxnYn+Of0yZdAYIfcjqEu82zs51zmrYjOwrxDDkUeGgE3JFXxalKOEDuArTJmyAgGcM/5ikGIt0z6B8cQH/hQhRQyaNfpW2XLK+0UXce+X02qPim9L21S4M7+YWqumA0W9XPlKRdH/hcIjgdy9u2zhmtDt5DyxjqnKXQM2G0+bNbhY2kfKZJX3s5eKDoNs0nikuTUjLtBIBLixKVkWoAu+9AuJ8pZFgICBuuKmft6goBPEuMFDh1oi+kHp1McQIU57Y7TW0JJ8cxTjB2q90+U2u4TVQ==</certificate>
+        <isAdminApproved>true</isAdminApproved>
+        <isClientCredentialEnabled>false</isClientCredentialEnabled>
+        <isCodeCredentialEnabled>false</isCodeCredentialEnabled>
+        <isCodeCredentialPostOnly>false</isCodeCredentialPostOnly>
+        <isConsumerSecretOptional>false</isConsumerSecretOptional>
+        <isIntrospectAllTokens>false</isIntrospectAllTokens>
+        <isNamedUserJwtEnabled>false</isNamedUserJwtEnabled>
+        <isPkceRequired>true</isPkceRequired>
+        <isRefreshTokenRotationEnabled>true</isRefreshTokenRotationEnabled>
+        <isSecretRequiredForRefreshToken>false</isSecretRequiredForRefreshToken>
+        <isSecretRequiredForTokenExchange>false</isSecretRequiredForTokenExchange>
+        <isTokenExchangeEnabled>false</isTokenExchangeEnabled>
+        <scopes>Api</scopes>
+        <scopes>RefreshToken</scopes>
+    </oauthConfig>
+    <oauthPolicy>
+        <ipRelaxation>ENFORCE</ipRelaxation>
+        <isTokenExchangeFlowEnabled>false</isTokenExchangeFlowEnabled>
+        <refreshTokenPolicy>infinite</refreshTokenPolicy>
+    </oauthPolicy>
+    <profileName>System Administrator</profileName>
+</ConnectedApp>
