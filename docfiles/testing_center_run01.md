@@ -185,6 +185,26 @@ test-case CSV.
 - **`case_list_open_some` is nondeterministic**: the agent sometimes answers at once and sometimes
   confirms first. The spec now scripts the confirmation and asserts the action on the next turn.
 
+## Studio suites, final shape (2026-09-22 night)
+
+**Single-turn action suite: 10/10 at 5/5.** `specs/Keyburn_Regression_upload.csv` with Action
+Evaluation on and live actions. This is the Studio screenshot worth showing.
+
+**Voice suite (3 cases, `specs/Keyburn_Voice_upload.csv`): the conversations ran, the assertions
+could not.** `Actual Subagent` and `Actual Actions` were `content:[]` on all three, exactly as in the
+text conversation suite. Task Resolution passed V1 and V2. V3 (refund) really logged Case 00001277 as
+the agent user, so **live actions do work in voice** - only the structured capture is missing.
+
+- This settles the earlier open question: the empty capture follows the **conversation runner**, not
+  voice and not the personas. The single-turn text suite captures actions fine; the conversation
+  suite doesn't, in text or in voice.
+- **So a conversation or voice suite should select only the conversation-level scorers** (Task
+  Resolution, Quality, Deflection, Abandonment) and leave Subagent and Action Evaluation off.
+- V3's Task Resolution "Fail" is correct behaviour scored as failure: an escalation is *meant* to end
+  in a handoff. Read escalation rows' resolution and deflection scores with that in mind.
+- 3 voice conversations = ~36 MB of recordings, over the org's 20 MB cap on their own. Purge
+  immediately after each voice run.
+
 ## Candidate agent fixes (not applied; they would need a new version before the Wed 18:00 freeze)
 
 - Finding 2: in `policy_faq`, state that questions about order stages, drafts or cancelling

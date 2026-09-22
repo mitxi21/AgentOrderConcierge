@@ -404,9 +404,13 @@ cd src; py -3.8 run_eval.py eval_cases.yaml
     can't — a **blank Expected Actions cell fails**, it doesn't skip) and
     `Keyburn_Conversation_upload.csv` (simulated multi-turn callers). In Studio: turn **off**
     Completeness and Conciseness, check the **Conditions** step for live vs simulated actions
-    (simulated returns null outputs, so the agent says "case number is None"), and don't expect
-    subagent/action assertions to work in the *conversation* suite — its actual values come back
-    empty.
+    (simulated returns null outputs, so the agent says "case number is None"), and select only the
+    conversation-level scorers for a **conversation or voice** suite — their actual subagent/action
+    values always come back empty (it follows the conversation runner, not voice or personas), while
+    a single-turn suite captures both. **Voice testing is the Studio wizard's Data step**
+    (*Select Conversation Output: Text and voice*); it stores a ~12 MB WAV per conversation against
+    this org's 20 MB file limit, so keep it to 3 cases and run
+    `scripts/purge_voice_recordings.apex` straight after.
   - Baseline and all of the above with evidence: `docfiles/testing_center_run01.md`.
   - Suite runs create Cases as the agent user. `scripts/purge_eval_cases.apex` deletes them
     (`Origin = 'Agentforce Agent'` + creator profile *Einstein Agent User*) and keeps the seeded
