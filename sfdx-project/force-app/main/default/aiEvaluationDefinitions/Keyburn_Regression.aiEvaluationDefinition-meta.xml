@@ -1,0 +1,719 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AiEvaluationDefinition xmlns="http://soap.sforce.com/2006/04/metadata">
+    <name>Keyburn Regression</name>
+    <subjectName>Keyburn_Customer_Service</subjectName>
+    <subjectType>AGENT</subjectType>
+    <testCase>
+        <expectation>
+            <expectedValue>order_status</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;GetOrderStatus&apos;]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent reports that order 1042 (wireless headphones) has shipped and gives its delivery date. It does not ask the caller to confirm the email or order number again.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>Yes, that&apos;s correct.</utterance>
+            <conversationHistory>
+                <role>user</role>
+                <message>Hi, I want to check my order status. My email is jane.doe@example.com and my order number is ORD-1042.</message>
+                <index>0</index>
+            </conversationHistory>
+            <conversationHistory>
+                <role>agent</role>
+                <message>I heard order 1042 with the email jane.doe@example.com, is that right?</message>
+                <topic>order_status</topic>
+                <index>1</index>
+            </conversationHistory>
+        </inputs>
+        <number>1</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>order_status</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;GetOrderStatus&apos;]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent switches from the policy question to the order lookup and reports that order 1042 has shipped, with its delivery date.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>Yes, that is right.</utterance>
+            <conversationHistory>
+                <role>user</role>
+                <message>What&apos;s your return policy?</message>
+                <index>0</index>
+            </conversationHistory>
+            <conversationHistory>
+                <role>agent</role>
+                <message>Most items can be returned within 30 days of delivery if they are unused, in original packaging, and include all accessories. Final-sale and clearance items cannot be returned. Would you like help starting a return?</message>
+                <topic>policy_faq</topic>
+                <index>1</index>
+            </conversationHistory>
+            <conversationHistory>
+                <role>user</role>
+                <message>Actually, can you check my order ORD-1042 instead? jane.doe@example.com</message>
+                <index>2</index>
+            </conversationHistory>
+            <conversationHistory>
+                <role>agent</role>
+                <message>I heard order 1042 with the email jane.doe@example.com, is that right?</message>
+                <topic>order_status</topic>
+                <index>3</index>
+            </conversationHistory>
+        </inputs>
+        <number>2</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>order_status</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;GetOrderStatus&apos;]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent says order 1100 is a draft that was saved but never submitted. It gives no delivery date, does not say the order is on its way, and does not offer tracking.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>Yes, that&apos;s correct.</utterance>
+            <conversationHistory>
+                <role>user</role>
+                <message>What&apos;s the status of order 1100? My email is jane.doe@example.com.</message>
+                <index>0</index>
+            </conversationHistory>
+            <conversationHistory>
+                <role>agent</role>
+                <message>I heard order 1100 with the email jane.doe@example.com, is that right?</message>
+                <topic>order_status</topic>
+                <index>1</index>
+            </conversationHistory>
+        </inputs>
+        <number>3</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>order_status</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;GetOrderDeliveryInfo&apos;]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent says how many kilometres away the order is, how many minutes by car, and when that position was reported. It reads out no URL, no map link and no latitude or longitude, and does not claim a map is shown in the chat.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>Yes, that&apos;s correct.</utterance>
+            <conversationHistory>
+                <role>user</role>
+                <message>Where is my order 1042? My email is jane.doe@example.com</message>
+                <index>0</index>
+            </conversationHistory>
+            <conversationHistory>
+                <role>agent</role>
+                <message>I heard order 1042 with the email jane.doe@example.com, is that right?</message>
+                <topic>order_status</topic>
+                <index>1</index>
+            </conversationHistory>
+        </inputs>
+        <number>4</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>order_status</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;GetOrderDeliveryInfo&apos;]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>A single yes confirms both the order number and the email: the agent gives the distance and driving time straight away, without asking any further confirmation question.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>Yes.</utterance>
+            <conversationHistory>
+                <role>user</role>
+                <message>Can you track order 1042 for me? My email is jane.doe@example.com</message>
+                <index>0</index>
+            </conversationHistory>
+            <conversationHistory>
+                <role>agent</role>
+                <message>I heard order 1042 with the email jane.doe@example.com, is that right?</message>
+                <topic>order_status</topic>
+                <index>1</index>
+            </conversationHistory>
+        </inputs>
+        <number>5</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>order_status</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;GetOrderDeliveryInfo&apos;]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The caller has corrected the email. Either answer is correct: the agent goes straight on to give the distance and driving time for order 1042 (using the corrected email silently is fine, and reporting when the position was recorded is part of the answer), or it asks one combined confirmation of the order number and the corrected email. It fails only if it asks to confirm the email on its own, for example &apos;I have your email as ...&apos;.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>No, it&apos;s jane.doe@example.com</utterance>
+            <conversationHistory>
+                <role>user</role>
+                <message>Where is my order 1042?</message>
+                <index>0</index>
+            </conversationHistory>
+            <conversationHistory>
+                <role>agent</role>
+                <message>I can help track order 1042. Can you please provide the email address you used for this order?</message>
+                <topic>order_status</topic>
+                <index>1</index>
+            </conversationHistory>
+            <conversationHistory>
+                <role>user</role>
+                <message>My email is jane.dough@example.com</message>
+                <index>2</index>
+            </conversationHistory>
+            <conversationHistory>
+                <role>agent</role>
+                <message>I heard order 1042 with the email jane.dough@example.com, is that right?</message>
+                <topic>order_status</topic>
+                <index>3</index>
+            </conversationHistory>
+        </inputs>
+        <number>6</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>order_status</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;GetOrderDeliveryInfo&apos;]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent says the order hasn&apos;t shipped yet and is still processing, so there is nothing to track. It gives no distance, no driving time, no link, and does not mention a map.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>Yes, that&apos;s correct.</utterance>
+            <conversationHistory>
+                <role>user</role>
+                <message>Where is my order ORD-1038 right now? My email is maria.garcia@example.com</message>
+                <index>0</index>
+            </conversationHistory>
+            <conversationHistory>
+                <role>agent</role>
+                <message>I heard order 1038 with the email maria.garcia@example.com, is that right?</message>
+                <topic>order_status</topic>
+                <index>1</index>
+            </conversationHistory>
+        </inputs>
+        <number>7</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>order_status</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;GetOrderDeliveryInfo&apos;]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent says the order has already been delivered, so there is nothing left to track. It gives no distance, no driving time and does not mention a map.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>Yes, that&apos;s correct.</utterance>
+            <conversationHistory>
+                <role>user</role>
+                <message>Can you track my order ORD-2077? john.smith@example.com</message>
+                <index>0</index>
+            </conversationHistory>
+            <conversationHistory>
+                <role>agent</role>
+                <message>I heard order 2077 with the email john.smith@example.com, is that right?</message>
+                <topic>order_status</topic>
+                <index>1</index>
+            </conversationHistory>
+        </inputs>
+        <number>8</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>order_status</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The order number contains letters that look like zeros, so the agent reads the order number and email back and asks the caller to confirm them, instead of reporting a status straight away.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>jane.doe@example.com, order O-1O42</utterance>
+            <conversationHistory>
+                <role>user</role>
+                <message>Check order status.</message>
+                <index>0</index>
+            </conversationHistory>
+            <conversationHistory>
+                <role>agent</role>
+                <message>To check your order status, I need your order number and the email you used for the order. Could you please provide both?</message>
+                <topic>order_status</topic>
+                <index>1</index>
+            </conversationHistory>
+        </inputs>
+        <number>9</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>order_status</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>&apos;Jane&apos; is a partial answer, not a refusal: the agent asks again for the full email address. It does not escalate, does not create a case, gives no case number, and does not say a team member will follow up.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>Jane.</utterance>
+            <conversationHistory>
+                <role>user</role>
+                <message>Where is my order one zero four two?</message>
+                <index>0</index>
+            </conversationHistory>
+            <conversationHistory>
+                <role>agent</role>
+                <message>I can help with that. What is the email address you used for order 1042?</message>
+                <topic>order_status</topic>
+                <index>1</index>
+            </conversationHistory>
+        </inputs>
+        <number>10</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>case_status</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;GetCaseStatus&apos;]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent reports the status of case 1026 (it is being worked on) and its priority.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>jane.doe@example.com, case number 1026.</utterance>
+            <conversationHistory>
+                <role>user</role>
+                <message>Can you tell me the status of my support case?</message>
+                <index>0</index>
+            </conversationHistory>
+            <conversationHistory>
+                <role>agent</role>
+                <message>I can check the status for you. Please tell me your case number and the email address linked to your case.</message>
+                <topic>case_status</topic>
+                <index>1</index>
+            </conversationHistory>
+        </inputs>
+        <number>11</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>case_status</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;ListOpenCases&apos;]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent either says the caller has open cases, with how many and what the most recent ones are about, or reads back the email and order number for confirmation. It does not say the caller has no open cases and does not escalate.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>Do I have any open cases? My email is jane.doe@example.com and my order number is ORD-1042.</utterance>
+        </inputs>
+        <number>12</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>case_status</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;ListOpenCases&apos;]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent says the caller has no open cases and offers to open a new support case. It does not open one without being asked and does not say a team member will follow up.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>Yes, correct.</utterance>
+            <conversationHistory>
+                <role>user</role>
+                <message>Do I have any open cases? My email is maria.garcia@example.com and my order number is ORD-1038.</message>
+                <index>0</index>
+            </conversationHistory>
+            <conversationHistory>
+                <role>agent</role>
+                <message>Just to confirm, is your order number 1038 and your email maria.garcia@example.com?</message>
+                <topic>case_status</topic>
+                <index>1</index>
+            </conversationHistory>
+        </inputs>
+        <number>13</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>case_status</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;ListOpenCases&apos;]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent reuses the email and order number already confirmed in the conversation and reports the caller&apos;s open cases. It does not ask for a case number and does not escalate.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>Do I have any open cases?</utterance>
+            <conversationHistory>
+                <role>user</role>
+                <message>What&apos;s the status of my order 1042? My email is jane.doe@example.com.</message>
+                <index>0</index>
+            </conversationHistory>
+            <conversationHistory>
+                <role>agent</role>
+                <message>I heard order 1042 with the email jane.doe@example.com, is that right?</message>
+                <topic>order_status</topic>
+                <index>1</index>
+            </conversationHistory>
+            <conversationHistory>
+                <role>user</role>
+                <message>Yes, that&apos;s correct.</message>
+                <index>2</index>
+            </conversationHistory>
+            <conversationHistory>
+                <role>agent</role>
+                <message>Order 1042 for wireless headphones is shipped and should arrive by September 11. Is there anything else I can help with?</message>
+                <topic>order_status</topic>
+                <index>3</index>
+            </conversationHistory>
+        </inputs>
+        <number>14</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>case_status</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;CreateSupportCase&apos;]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent confirms it has opened a support case, says the new case number, and says a team member will follow up within two business days. It does not treat this as an escalation (no &apos;within one business day&apos;).</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>Yes, please go ahead.</utterance>
+            <conversationHistory>
+                <role>user</role>
+                <message>I&apos;d like to open a support case: my bluetooth speaker order hasn&apos;t shipped yet. My email is alex.chen@example.com and my order number is ORD-1033.</message>
+                <index>0</index>
+            </conversationHistory>
+            <conversationHistory>
+                <role>agent</role>
+                <message>Just to confirm, you want to open a support case for order 1033 using the email alex.chen@example.com. Is that correct?</message>
+                <topic>case_status</topic>
+                <index>1</index>
+            </conversationHistory>
+        </inputs>
+        <number>15</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>return_eligibility</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;CheckReturnEligibility&apos;]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent says whether order 2077 is eligible for a return and gives a one-line reason, such as the return window.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>Yes, that&apos;s right.</utterance>
+            <conversationHistory>
+                <role>user</role>
+                <message>Is my order eligible for a return? john.smith@example.com, order ORD-2077.</message>
+                <index>0</index>
+            </conversationHistory>
+            <conversationHistory>
+                <role>agent</role>
+                <message>I heard order 2077 with the email john.smith@example.com, is that right?</message>
+                <topic>return_eligibility</topic>
+                <index>1</index>
+            </conversationHistory>
+        </inputs>
+        <number>16</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>policy_faq</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent explains the return policy from Knowledge: items can be returned within 30 days of delivery if unused and in original packaging, and final-sale items can&apos;t be returned.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>What&apos;s your return policy?</utterance>
+        </inputs>
+        <number>17</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>policy_faq</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent says standard shipping takes a number of business days (5 to 7) once the order ships.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>How long does standard shipping take?</utterance>
+        </inputs>
+        <number>18</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>policy_faq</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent says the warranty does not cover accidental damage.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>Does the warranty cover accidental damage?</utterance>
+        </inputs>
+        <number>19</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>policy_faq</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent says there is no restocking fee for an exchange.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>Is there a restocking fee if I exchange an item?</utterance>
+        </inputs>
+        <number>20</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>policy_faq</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;ExplainOrderWorkflow&apos;]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent names the order stages Draft, Processing, Shipped and Delivered.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>What stages does an order go through at Keyburn?</utterance>
+        </inputs>
+        <number>21</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>policy_faq</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;ExplainOrderWorkflow&apos;]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent says an unsubmitted draft order is kept for 30 days and then deleted.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>What happens if I never submit a draft order?</utterance>
+        </inputs>
+        <number>22</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>policy_faq</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;ExplainOrderWorkflow&apos;]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent says an order cannot be cancelled once it has shipped. It does not claim to cancel anything.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>Can I still cancel an order after it has shipped?</utterance>
+        </inputs>
+        <number>23</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>policy_faq</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;ExplainOrderWorkflow&apos;]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent says a Draft order has been saved but not submitted (not yet placed).</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>What does it mean when an order is in Draft?</utterance>
+        </inputs>
+        <number>24</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>escalation</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;CreateEscalationCase&apos;]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent does not process or promise a refund. It says a team member will follow up within one business day and says a specific case number.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>I want a refund for my last order right now.</utterance>
+        </inputs>
+        <number>25</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>escalation</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;CreateEscalationCase&apos;]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent does not search by name or reveal any order. It escalates: a team member will follow up and it says a specific case number.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>I don&apos;t remember my email or order number, can you just search by my name?</utterance>
+            <conversationHistory>
+                <role>user</role>
+                <message>Can you look up an order for me?</message>
+                <index>0</index>
+            </conversationHistory>
+            <conversationHistory>
+                <role>agent</role>
+                <message>I can help with that. Please tell me your order number and the email address you used for the order.</message>
+                <topic>order_status</topic>
+                <index>1</index>
+            </conversationHistory>
+        </inputs>
+        <number>26</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>escalation</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;CreateEscalationCase&apos;]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent acknowledges the caller&apos;s frustration, says a team member will follow up within one business day, and says a specific case number.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>This is the third time I&apos;ve called about the SAME issue and nobody has fixed it, I&apos;m furious.</utterance>
+        </inputs>
+        <number>27</number>
+    </testCase>
+    <testCase>
+        <expectation>
+            <expectedValue>escalation</expectedValue>
+            <name>topic_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>[&apos;CreateEscalationCase&apos;]</expectedValue>
+            <name>action_sequence_match</name>
+        </expectation>
+        <expectation>
+            <expectedValue>The agent does not claim the account was cancelled or deleted. It escalates: a team member will follow up and it says a specific case number.</expectedValue>
+            <name>bot_response_rating</name>
+        </expectation>
+        <inputs>
+            <utterance>I&apos;d like to cancel my entire account and delete all my data.</utterance>
+        </inputs>
+        <number>28</number>
+    </testCase>
+</AiEvaluationDefinition>

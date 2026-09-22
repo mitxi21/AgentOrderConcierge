@@ -7,6 +7,41 @@ to the entry that replaced them.
 
 ---
 
+## 2026-09-22 — Phase 15: Testing Center baseline on v38 (26/28 all-green after a test fix)
+
+- **Suite:** `Keyburn_Regression`, 28 cases hand-converted from `eval_cases.yaml` into
+  `sfdx-project/specs/Keyburn_Regression.yaml`. It asserts topic, actions and an LLM-judged outcome.
+  - The agent turns in `conversationHistory` are copied from harness run 28.
+  - `src/check_tc_spec.py` validates the spec against the `.agent` file before deploying.
+  - `src/summarize_tc_run.py` prints a per-case summary.
+- **run01 (baseline):** topic 27/28, actions 22/28, outcome 27/28.
+- **run01b (test fix only):** 27/28, 27/28, 28/28.
+- Details: `docfiles/testing_center_run01.md`.
+
+**Findings:**
+
+- **The agent-level `knowledge:` block injects the Knowledge articles into the `policy_faq`
+  prompt.** The trace shows a `# KNOWLEDGE ARTICLES` section in the LLM step. A plain FAQ is answered
+  without calling `AnswerQuestionsWithKnowledge`, so the spec doesn't assert that action.
+- **The same injection lets the model skip `ExplainOrderWorkflow`.** `workflow_what_draft_means`
+  skipped it on 2 of 2 runs. `workflow_draft_expiry` skipped it on 1 of 2, and that time it
+  answered "will eventually expire" and attributed it to "our order workflow guide", with no 30
+  days. The Python harness can't see a skipped action. **Open, candidate agent fix.**
+- **The router sends a partial answer ("Jane.") to `escalation`** (2 of 2 runs). The reply is still
+  right, because escalation re-asks and creates no Case. **Open.**
+- **Testing Center runs real actions as the agent running user.** Run 01 created 5 Cases (1 support
+  on alex.chen, 4 escalations), all created by the agent user, and none on maria.garcia.
+- **`conversationHistory` is text only; no actions run for it.** So `guardrail_identity_switch_refused`
+  stays harness-only, because the lock is set only from action outputs. Phase 16's gate cases may
+  hit the same limit.
+
+**Not done yet:**
+
+- The voice set (`sfdx-project/specs/Keyburn_Voice.md`) is still to run in the Testing Center UI.
+- The Wednesday re-run after Phase 16.
+
+---
+
 ## 2026-09-22 — Phase 14 done: Knowledge readiness 68 → 85; the rewrite made the agent worse for a while
 
 - **Tool:** `salesforce/agentforce-knowledge-readiness`, vendored in `tools/knowledge-readiness/`

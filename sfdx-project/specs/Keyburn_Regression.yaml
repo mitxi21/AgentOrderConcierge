@@ -1,0 +1,328 @@
+# Testing Center regression suite for Keyburn_Customer_Service (Phase 15).
+# Converted by hand from src/eval_cases.yaml: each case carries a `# eval: <id>` comment.
+#
+#   py -3.12 ..\src\check_tc_spec.py specs\Keyburn_Regression.yaml
+#   sf agent test create --spec specs/Keyburn_Regression.yaml --api-name Keyburn_Regression -o devorg
+#   sf agent test run --api-name Keyburn_Regression --wait 20 --result-format json -o devorg
+#
+# - Multi-turn cases: setup turns in conversationHistory, the final caller turn is the utterance.
+#   The agent replies in the history are copied from harness run 28 (agent v38), so the confirm-back
+#   wording is what the agent really says.
+# - expectedActions lists business actions only (superset match); go_to_* transitions are implied.
+# - Testing Center runs REAL actions: escalation and support cases are created in the org.
+#   maria.garcia must never get a case-creating turn; new support cases land on alex.chen.
+# - Harness-only, deliberately not here: guardrail_identity_switch_refused. The identity lock is
+#   @variables.verified_email, which only an action's output sets. conversationHistory is replayed
+#   as text without running actions, so the lock would never engage and the case would test
+#   something else.
+
+name: "Keyburn Regression"
+subjectType: AGENT
+subjectName: Keyburn_Customer_Service
+
+testCases:
+  # ---------- Order status ----------
+  # eval: happy_order_status
+  - utterance: "Yes, that's correct."
+    conversationHistory:
+      - role: user
+        message: "Hi, I want to check my order status. My email is jane.doe@example.com and my order number is ORD-1042."
+      - role: agent
+        topic: order_status
+        message: "I heard order 1042 with the email jane.doe@example.com, is that right?"
+    expectedTopic: order_status
+    expectedActions:
+      - GetOrderStatus
+    expectedOutcome: "The agent reports that order 1042 (wireless headphones) has shipped and gives its delivery date. It does not ask the caller to confirm the email or order number again."
+
+  # eval: edge_topic_switch_midcall
+  - utterance: "Yes, that is right."
+    conversationHistory:
+      - role: user
+        message: "What's your return policy?"
+      - role: agent
+        topic: policy_faq
+        message: "Most items can be returned within 30 days of delivery if they are unused, in original packaging, and include all accessories. Final-sale and clearance items cannot be returned. Would you like help starting a return?"
+      - role: user
+        message: "Actually, can you check my order ORD-1042 instead? jane.doe@example.com"
+      - role: agent
+        topic: order_status
+        message: "I heard order 1042 with the email jane.doe@example.com, is that right?"
+    expectedTopic: order_status
+    expectedActions:
+      - GetOrderStatus
+    expectedOutcome: "The agent switches from the policy question to the order lookup and reports that order 1042 has shipped, with its delivery date."
+
+  # eval: order_status_draft
+  - utterance: "Yes, that's correct."
+    conversationHistory:
+      - role: user
+        message: "What's the status of order 1100? My email is jane.doe@example.com."
+      - role: agent
+        topic: order_status
+        message: "I heard order 1100 with the email jane.doe@example.com, is that right?"
+    expectedTopic: order_status
+    expectedActions:
+      - GetOrderStatus
+    expectedOutcome: "The agent says order 1100 is a draft that was saved but never submitted. It gives no delivery date, does not say the order is on its way, and does not offer tracking."
+
+  # ---------- Tracking ----------
+  # eval: track_shipped_order_distance_and_eta
+  - utterance: "Yes, that's correct."
+    conversationHistory:
+      - role: user
+        message: "Where is my order 1042? My email is jane.doe@example.com"
+      - role: agent
+        topic: order_status
+        message: "I heard order 1042 with the email jane.doe@example.com, is that right?"
+    expectedTopic: order_status
+    expectedActions:
+      - GetOrderDeliveryInfo
+    expectedOutcome: "The agent says how many kilometres away the order is, how many minutes by car, and when that position was reported. It reads out no URL, no map link and no latitude or longitude, and does not claim a map is shown in the chat."
+
+  # eval: edge_single_yes_confirms_both
+  - utterance: "Yes."
+    conversationHistory:
+      - role: user
+        message: "Can you track order 1042 for me? My email is jane.doe@example.com"
+      - role: agent
+        topic: order_status
+        message: "I heard order 1042 with the email jane.doe@example.com, is that right?"
+    expectedTopic: order_status
+    expectedActions:
+      - GetOrderDeliveryInfo
+    expectedOutcome: "A single yes confirms both the order number and the email: the agent gives the distance and driving time straight away, without asking any further confirmation question."
+
+  # eval: edge_correction_then_single_yes
+  - utterance: "No, it's jane.doe@example.com"
+    conversationHistory:
+      - role: user
+        message: "Where is my order 1042?"
+      - role: agent
+        topic: order_status
+        message: "I can help track order 1042. Can you please provide the email address you used for this order?"
+      - role: user
+        message: "My email is jane.dough@example.com"
+      - role: agent
+        topic: order_status
+        message: "I heard order 1042 with the email jane.dough@example.com, is that right?"
+    expectedTopic: order_status
+    expectedActions:
+      - GetOrderDeliveryInfo
+    expectedOutcome: "The caller has corrected the email. Either answer is correct: the agent goes straight on to give the distance and driving time for order 1042 (using the corrected email silently is fine, and reporting when the position was recorded is part of the answer), or it asks one combined confirmation of the order number and the corrected email. It fails only if it asks to confirm the email on its own, for example 'I have your email as ...'."
+
+  # eval: track_order_not_shipped_yet
+  - utterance: "Yes, that's correct."
+    conversationHistory:
+      - role: user
+        message: "Where is my order ORD-1038 right now? My email is maria.garcia@example.com"
+      - role: agent
+        topic: order_status
+        message: "I heard order 1038 with the email maria.garcia@example.com, is that right?"
+    expectedTopic: order_status
+    expectedActions:
+      - GetOrderDeliveryInfo
+    expectedOutcome: "The agent says the order hasn't shipped yet and is still processing, so there is nothing to track. It gives no distance, no driving time, no link, and does not mention a map."
+
+  # eval: track_delivered_order
+  - utterance: "Yes, that's correct."
+    conversationHistory:
+      - role: user
+        message: "Can you track my order ORD-2077? john.smith@example.com"
+      - role: agent
+        topic: order_status
+        message: "I heard order 2077 with the email john.smith@example.com, is that right?"
+    expectedTopic: order_status
+    expectedActions:
+      - GetOrderDeliveryInfo
+    expectedOutcome: "The agent says the order has already been delivered, so there is nothing left to track. It gives no distance, no driving time and does not mention a map."
+
+  # ---------- Negative: must re-ask / confirm, never escalate ----------
+  # eval: edge_ambiguous_order_number
+  - utterance: "jane.doe@example.com, order O-1O42"
+    conversationHistory:
+      - role: user
+        message: "Check order status."
+      - role: agent
+        topic: order_status
+        message: "To check your order status, I need your order number and the email you used for the order. Could you please provide both?"
+    expectedTopic: order_status
+    expectedOutcome: "The order number contains letters that look like zeros, so the agent reads the order number and email back and asks the caller to confirm them, instead of reporting a status straight away."
+
+  # eval: edge_partial_answer_does_not_escalate
+  - utterance: "Jane."
+    conversationHistory:
+      - role: user
+        message: "Where is my order one zero four two?"
+      - role: agent
+        topic: order_status
+        message: "I can help with that. What is the email address you used for order 1042?"
+    expectedTopic: order_status
+    expectedOutcome: "'Jane' is a partial answer, not a refusal: the agent asks again for the full email address. It does not escalate, does not create a case, gives no case number, and does not say a team member will follow up."
+
+  # ---------- Case status ----------
+  # eval: happy_case_status
+  - utterance: "jane.doe@example.com, case number 1026."
+    conversationHistory:
+      - role: user
+        message: "Can you tell me the status of my support case?"
+      - role: agent
+        topic: case_status
+        message: "I can check the status for you. Please tell me your case number and the email address linked to your case."
+    expectedTopic: case_status
+    expectedActions:
+      - GetCaseStatus
+    expectedOutcome: "The agent reports the status of case 1026 (it is being worked on) and its priority."
+
+  # eval: case_list_open_some
+  - utterance: "Do I have any open cases? My email is jane.doe@example.com and my order number is ORD-1042."
+    expectedTopic: case_status
+    expectedActions:
+      - ListOpenCases
+    expectedOutcome: "The agent either says the caller has open cases, with how many and what the most recent ones are about, or reads back the email and order number for confirmation. It does not say the caller has no open cases and does not escalate."
+
+  # eval: case_list_open_none_offers_to_open  (maria.garcia: read-only, never create a case)
+  - utterance: "Yes, correct."
+    conversationHistory:
+      - role: user
+        message: "Do I have any open cases? My email is maria.garcia@example.com and my order number is ORD-1038."
+      - role: agent
+        topic: case_status
+        message: "Just to confirm, is your order number 1038 and your email maria.garcia@example.com?"
+    expectedTopic: case_status
+    expectedActions:
+      - ListOpenCases
+    expectedOutcome: "The agent says the caller has no open cases and offers to open a new support case. It does not open one without being asked and does not say a team member will follow up."
+
+  # eval: edge_open_cases_after_order_lookup
+  - utterance: "Do I have any open cases?"
+    conversationHistory:
+      - role: user
+        message: "What's the status of my order 1042? My email is jane.doe@example.com."
+      - role: agent
+        topic: order_status
+        message: "I heard order 1042 with the email jane.doe@example.com, is that right?"
+      - role: user
+        message: "Yes, that's correct."
+      - role: agent
+        topic: order_status
+        message: "Order 1042 for wireless headphones is shipped and should arrive by September 11. Is there anything else I can help with?"
+    expectedTopic: case_status
+    expectedActions:
+      - ListOpenCases
+    expectedOutcome: "The agent reuses the email and order number already confirmed in the conversation and reports the caller's open cases. It does not ask for a case number and does not escalate."
+
+  # eval: case_open_new_support_case  (creates a Medium case on alex.chen)
+  - utterance: "Yes, please go ahead."
+    conversationHistory:
+      - role: user
+        message: "I'd like to open a support case: my bluetooth speaker order hasn't shipped yet. My email is alex.chen@example.com and my order number is ORD-1033."
+      - role: agent
+        topic: case_status
+        message: "Just to confirm, you want to open a support case for order 1033 using the email alex.chen@example.com. Is that correct?"
+    expectedTopic: case_status
+    expectedActions:
+      - CreateSupportCase
+    expectedOutcome: "The agent confirms it has opened a support case, says the new case number, and says a team member will follow up within two business days. It does not treat this as an escalation (no 'within one business day')."
+
+  # ---------- Return eligibility ----------
+  # eval: happy_return_eligibility
+  - utterance: "Yes, that's right."
+    conversationHistory:
+      - role: user
+        message: "Is my order eligible for a return? john.smith@example.com, order ORD-2077."
+      - role: agent
+        topic: return_eligibility
+        message: "I heard order 2077 with the email john.smith@example.com, is that right?"
+    expectedTopic: return_eligibility
+    expectedActions:
+      - CheckReturnEligibility
+    expectedOutcome: "The agent says whether order 2077 is eligible for a return and gives a one-line reason, such as the return window."
+
+  # ---------- Policy / FAQ (Knowledge) ----------
+  # No expectedActions: the agent-level knowledge block injects the articles into the policy_faq
+  # prompt, so a plain FAQ is answered from grounded text without calling
+  # AnswerQuestionsWithKnowledge (Session Tracing, tc run01). The outcome asserts the fact.
+  # eval: happy_policy_faq
+  - utterance: "What's your return policy?"
+    expectedTopic: policy_faq
+    expectedOutcome: "The agent explains the return policy from Knowledge: items can be returned within 30 days of delivery if unused and in original packaging, and final-sale items can't be returned."
+
+  # eval: happy_policy_faq_shipping
+  - utterance: "How long does standard shipping take?"
+    expectedTopic: policy_faq
+    expectedOutcome: "The agent says standard shipping takes a number of business days (5 to 7) once the order ships."
+
+  # eval: knowledge_warranty_excludes_accidental_damage
+  - utterance: "Does the warranty cover accidental damage?"
+    expectedTopic: policy_faq
+    expectedOutcome: "The agent says the warranty does not cover accidental damage."
+
+  # eval: knowledge_exchange_no_restocking_fee
+  - utterance: "Is there a restocking fee if I exchange an item?"
+    expectedTopic: policy_faq
+    expectedOutcome: "The agent says there is no restocking fee for an exchange."
+
+  # ---------- Workflow diagram (image read at question time) ----------
+  # eval: workflow_stages
+  - utterance: "What stages does an order go through at Keyburn?"
+    expectedTopic: policy_faq
+    expectedActions:
+      - ExplainOrderWorkflow
+    expectedOutcome: "The agent names the order stages Draft, Processing, Shipped and Delivered."
+
+  # eval: workflow_draft_expiry  (fact exists only in the diagram image)
+  - utterance: "What happens if I never submit a draft order?"
+    expectedTopic: policy_faq
+    expectedActions:
+      - ExplainOrderWorkflow
+    expectedOutcome: "The agent says an unsubmitted draft order is kept for 30 days and then deleted."
+
+  # eval: workflow_no_cancel_after_shipping  (fact exists only in the diagram image)
+  - utterance: "Can I still cancel an order after it has shipped?"
+    expectedTopic: policy_faq
+    expectedActions:
+      - ExplainOrderWorkflow
+    expectedOutcome: "The agent says an order cannot be cancelled once it has shipped. It does not claim to cancel anything."
+
+  # eval: workflow_what_draft_means
+  - utterance: "What does it mean when an order is in Draft?"
+    expectedTopic: policy_faq
+    expectedActions:
+      - ExplainOrderWorkflow
+    expectedOutcome: "The agent says a Draft order has been saved but not submitted (not yet placed)."
+
+  # ---------- Escalation (each creates a High-priority case) ----------
+  # eval: escalation_refund_request
+  - utterance: "I want a refund for my last order right now."
+    expectedTopic: escalation
+    expectedActions:
+      - CreateEscalationCase
+    expectedOutcome: "The agent does not process or promise a refund. It says a team member will follow up within one business day and says a specific case number."
+
+  # eval: escalation_unverifiable_caller
+  - utterance: "I don't remember my email or order number, can you just search by my name?"
+    conversationHistory:
+      - role: user
+        message: "Can you look up an order for me?"
+      - role: agent
+        topic: order_status
+        message: "I can help with that. Please tell me your order number and the email address you used for the order."
+    expectedTopic: escalation
+    expectedActions:
+      - CreateEscalationCase
+    expectedOutcome: "The agent does not search by name or reveal any order. It escalates: a team member will follow up and it says a specific case number."
+
+  # eval: escalation_frustrated_customer
+  - utterance: "This is the third time I've called about the SAME issue and nobody has fixed it, I'm furious."
+    expectedTopic: escalation
+    expectedActions:
+      - CreateEscalationCase
+    expectedOutcome: "The agent acknowledges the caller's frustration, says a team member will follow up within one business day, and says a specific case number."
+
+  # eval: edge_out_of_scope_request
+  - utterance: "I'd like to cancel my entire account and delete all my data."
+    expectedTopic: escalation
+    expectedActions:
+      - CreateEscalationCase
+    expectedOutcome: "The agent does not claim the account was cancelled or deleted. It escalates: a team member will follow up and it says a specific case number."

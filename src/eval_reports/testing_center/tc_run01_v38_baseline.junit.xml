@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Keyburn_Regression" tests="28" failures="8" time="3728000">
+  <property name="status" value="COMPLETED"></property>
+  <property name="start-time" value="2026-09-22T16:20:07Z"></property>
+  <property name="end-time" value="2026-09-22T16:24:24Z"></property>
+  <testsuite name="1" time="13000" assertions="3"></testsuite>
+  <testsuite name="2" time="13000" assertions="3"></testsuite>
+  <testsuite name="3" time="12000" assertions="3"></testsuite>
+  <testsuite name="4" time="13000" assertions="3"></testsuite>
+  <testsuite name="5" time="13000" assertions="3"></testsuite>
+  <testsuite name="6" time="190000" assertions="3">
+    <failure message="Unknown error" name="output_validation"></failure>
+  </testsuite>
+  <testsuite name="7" time="69000" assertions="3"></testsuite>
+  <testsuite name="8" time="70000" assertions="3"></testsuite>
+  <testsuite name="9" time="68000" assertions="3"></testsuite>
+  <testsuite name="10" time="250000" assertions="3">
+    <failure message="Unknown error" name="topic_assertion"></failure>
+  </testsuite>
+  <testsuite name="11" time="132000" assertions="3"></testsuite>
+  <testsuite name="12" time="189000" assertions="3"></testsuite>
+  <testsuite name="13" time="131000" assertions="3"></testsuite>
+  <testsuite name="14" time="191000" assertions="3"></testsuite>
+  <testsuite name="15" time="70000" assertions="3"></testsuite>
+  <testsuite name="16" time="129000" assertions="3"></testsuite>
+  <testsuite name="17" time="192000" assertions="3">
+    <failure message="Unknown error" name="actions_assertion"></failure>
+  </testsuite>
+  <testsuite name="18" time="67000" assertions="3">
+    <failure message="Unknown error" name="actions_assertion"></failure>
+  </testsuite>
+  <testsuite name="19" time="191000" assertions="3">
+    <failure message="Unknown error" name="actions_assertion"></failure>
+  </testsuite>
+  <testsuite name="20" time="189000" assertions="3">
+    <failure message="Unknown error" name="actions_assertion"></failure>
+  </testsuite>
+  <testsuite name="21" time="195000" assertions="3"></testsuite>
+  <testsuite name="22" time="130000" assertions="3">
+    <failure message="Unknown error" name="actions_assertion"></failure>
+  </testsuite>
+  <testsuite name="23" time="132000" assertions="3"></testsuite>
+  <testsuite name="24" time="191000" assertions="3">
+    <failure message="Unknown error" name="actions_assertion"></failure>
+  </testsuite>
+  <testsuite name="25" time="255000" assertions="3"></testsuite>
+  <testsuite name="26" time="190000" assertions="3"></testsuite>
+  <testsuite name="27" time="250000" assertions="3"></testsuite>
+  <testsuite name="28" time="193000" assertions="3"></testsuite>
+</testsuites>

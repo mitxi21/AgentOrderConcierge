@@ -55,7 +55,7 @@ the tree — if one appears under `sfdx-project/`, delete it rather than maintai
 | `sf-skills-1.55.0/` | Vendored third-party Salesforce skills library — not project code; exclude from searches. Git-ignored (local only) |
 | `tools/setup_redaction.ps1`, `.gitattributes` | Git filter that keeps org identifiers out of the public repo (see top of this file) |
 | `s3-docs/` | Phase 13 (planned): policy documents uploaded to the S3 bucket that Data 360 indexes as an unstructured data lake object |
-| `sfdx-project/specs/` | Phase 15 (planned): Testing Center test specs (`AiEvaluationDefinition` YAML) |
+| `sfdx-project/specs/` | Phase 15: Testing Center spec `Keyburn_Regression.yaml` (deployed as `AiEvaluationDefinition`) + the UI-only voice set `Keyburn_Voice.md`. Results in `src/eval_reports/testing_center/` |
 | `tools/knowledge-readiness/` | Phase 14 (planned): vendored `salesforce/agentforce-knowledge-readiness`, its own sfdx project. Git-ignored (local only) |
 
 `sfdx-project/` stays a nested subfolder rather than being hoisted to the repo root: the only
@@ -373,6 +373,25 @@ cd src; py -3.8 run_eval.py eval_cases.yaml
   in one run, or the pass-rate climb overstates the agent's improvement.
 - Escalation cases create real High-priority Cases in the org (created by the agent user) on
   every run. That's expected; clean them up before the demo if the case list will be shown.
+- **Testing Center (Phase 15)** — the second suite, next to the harness. Spec:
+  `sfdx-project/specs/Keyburn_Regression.yaml`; each case has an `# eval: <id>` comment. It asserts
+  topic, actions and an LLM-judged outcome. Run from `sfdx-project/`, in PowerShell:
+
+  ```powershell
+  py -3.12 ..\src\check_tc_spec.py specs\Keyburn_Regression.yaml     # local check; the server names no failing case
+  sf agent test create --spec specs/Keyburn_Regression.yaml --api-name Keyburn_Regression --force-overwrite -o devorg
+  sf agent test run --api-name Keyburn_Regression --wait 30 --result-format json -o devorg --json > ..\src\eval_reports\testing_center\tc_runNN_<label>.json
+  py -3.12 ..\src\summarize_tc_run.py ..\src\eval_reports\testing_center\tc_runNN_<label>.json
+  ```
+
+  Things to know:
+  - It runs **real actions as the agent user**: each run creates about 5 Cases.
+  - `conversationHistory` is replayed as text and no actions run for it. Anything that depends on a
+    variable set by an action output stays harness-only (e.g. `guardrail_identity_switch_refused`).
+  - Don't assert `AnswerQuestionsWithKnowledge`. The agent-level `knowledge:` block injects the
+    articles into the `policy_faq` prompt, so FAQs are answered without that action.
+  - Voice cases are only in the UI: `specs/Keyburn_Voice.md`.
+  - Baseline: `docfiles/testing_center_run01.md`.
 - **Expect a bad first run.** 50–70% pass is normal and is *good material* — save that first
   report. A climbing pass rate across saved runs is the Reliability & Evaluation evidence; a
   suite that passes first time mostly signals the tests were too easy.

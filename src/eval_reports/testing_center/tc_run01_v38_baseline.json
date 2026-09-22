@@ -1,0 +1,1637 @@
+﻿{
+  "status": 0,
+  "result": {
+    "endTime": "2026-09-22T16:24:24Z",
+    "startTime": "2026-09-22T16:20:07Z",
+    "status": "COMPLETED",
+    "subjectName": "Keyburn_Regression",
+    "testCases": [
+      {
+        "endTime": "2026-09-22T16:20:20Z",
+        "generatedData": {
+          "actionsSequence": "[&#39;GetOrderStatus&#39;]",
+          "generatedResponse": "Your order for wireless headphones was shipped and is on its way. The estimated delivery date is September 11, 2026. Would you like to track where your order is right now?",
+          "invokedActions": "[[{\"function\":{\"name\":\"GetOrderStatus\"}}]]",
+          "outcome": "Your order for wireless headphones was shipped and is on its way. The estimated delivery date is September 11, 2026. Would you like to track where your order is right now?",
+          "sessionId": "01a0c9ea-e731-7ea1-b838-1f684e7b8f57",
+          "topic": "order_status"
+        },
+        "inputs": {
+          "utterance": "Yes, that's correct."
+        },
+        "startTime": "2026-09-22T16:20:07Z",
+        "status": "COMPLETED",
+        "testNumber": 1,
+        "testResults": [
+          {
+            "actualValue": "order_status",
+            "endTime": "2026-09-22T16:22:32Z",
+            "errorCode": 0,
+            "expectedValue": "order_status",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:20:09Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "['GetOrderStatus']",
+            "endTime": "2026-09-22T16:22:32Z",
+            "errorCode": 0,
+            "expectedValue": "['GetOrderStatus']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:20:09Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "Your order for wireless headphones was shipped and is on its way. The estimated delivery date is September 11, 2026. Would you like to track where your order is right now?",
+            "endTime": "2026-09-22T16:22:32Z",
+            "errorCode": 0,
+            "expectedValue": "The agent reports that order 1042 (wireless headphones) has shipped and gives its delivery date. It does not ask the caller to confirm the email or order number again.",
+            "metricExplainability": "The bot response provides the order status and delivery date, matching the expected response. It does not ask for confirmation of email or order number, which aligns with the expectation. The response is clear and complete, with no irrelevant information.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:20:09Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:20:20Z",
+        "generatedData": {
+          "actionsSequence": "[&#39;GetOrderStatus&#39;]",
+          "generatedResponse": "Order 1042 is shipped and contains wireless headphones. Estimated delivery is September 11, 2026. Is there anything else you would like to check?",
+          "invokedActions": "[[{\"function\":{\"name\":\"GetOrderStatus\"}}]]",
+          "outcome": "Order 1042 is shipped and contains wireless headphones. Estimated delivery is September 11, 2026. Is there anything else you would like to check?",
+          "sessionId": "01a0c9ea-e6ec-7285-b1d3-7dc778dc4d4d",
+          "topic": "order_status"
+        },
+        "inputs": {
+          "utterance": "Yes, that is right."
+        },
+        "startTime": "2026-09-22T16:20:07Z",
+        "status": "COMPLETED",
+        "testNumber": 2,
+        "testResults": [
+          {
+            "actualValue": "order_status",
+            "endTime": "2026-09-22T16:22:33Z",
+            "errorCode": 0,
+            "expectedValue": "order_status",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:20:09Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "['GetOrderStatus']",
+            "endTime": "2026-09-22T16:22:33Z",
+            "errorCode": 0,
+            "expectedValue": "['GetOrderStatus']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:20:09Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "Order 1042 is shipped and contains wireless headphones. Estimated delivery is September 11, 2026. Is there anything else you would like to check?",
+            "endTime": "2026-09-22T16:22:33Z",
+            "errorCode": 0,
+            "expectedValue": "The agent switches from the policy question to the order lookup and reports that order 1042 has shipped, with its delivery date.",
+            "metricExplainability": "The bot response provides the order status and delivery date as requested, matching the expected outcome. It also offers further assistance, which is appropriate. No irrelevant information is present, and the response is clear and complete.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:20:09Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:20:19Z",
+        "generatedData": {
+          "actionsSequence": "[&#39;GetOrderStatus&#39;]",
+          "generatedResponse": "Order 1100 is saved as a draft and hasn&#39;t been submitted yet, so we haven&#39;t started processing it. Once you place it, it moves to Processing. Would you like help with anything else?",
+          "invokedActions": "[[{\"function\":{\"name\":\"GetOrderStatus\"}}]]",
+          "outcome": "Order 1100 is saved as a draft and hasn&#39;t been submitted yet, so we haven&#39;t started processing it. Once you place it, it moves to Processing. Would you like help with anything else?",
+          "sessionId": "01a0c9ea-e705-7333-8dfd-cf504369a465",
+          "topic": "order_status"
+        },
+        "inputs": {
+          "utterance": "Yes, that's correct."
+        },
+        "startTime": "2026-09-22T16:20:07Z",
+        "status": "COMPLETED",
+        "testNumber": 3,
+        "testResults": [
+          {
+            "actualValue": "order_status",
+            "endTime": "2026-09-22T16:22:32Z",
+            "errorCode": 0,
+            "expectedValue": "order_status",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:20:09Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "['GetOrderStatus']",
+            "endTime": "2026-09-22T16:22:32Z",
+            "errorCode": 0,
+            "expectedValue": "['GetOrderStatus']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:20:09Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "Order 1100 is saved as a draft and hasn't been submitted yet, so we haven't started processing it. Once you place it, it moves to Processing. Would you like help with anything else?",
+            "endTime": "2026-09-22T16:22:32Z",
+            "errorCode": 0,
+            "expectedValue": "The agent says order 1100 is a draft that was saved but never submitted. It gives no delivery date, does not say the order is on its way, and does not offer tracking.",
+            "metricExplainability": "The bot response accurately conveys that order 1100 is a draft and not yet processed, matching the expected response. It also offers further assistance, which is appropriate. No irrelevant or incorrect information is present.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:20:09Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:20:20Z",
+        "generatedData": {
+          "actionsSequence": "[&#39;GetOrderDeliveryInfo&#39;]",
+          "generatedResponse": "Your order is about 2.5 kilometers away, about 17 minutes by car. That position was reported 77 hours ago. Is there anything else I can help you with?",
+          "invokedActions": "[[{\"function\":{\"name\":\"GetOrderDeliveryInfo\"}}]]",
+          "outcome": "Your order is about 2.5 kilometers away, about 17 minutes by car. That position was reported 77 hours ago. Is there anything else I can help you with?",
+          "sessionId": "01a0c9ea-e728-7dbe-b55c-ce761b841293",
+          "topic": "order_status"
+        },
+        "inputs": {
+          "utterance": "Yes, that's correct."
+        },
+        "startTime": "2026-09-22T16:20:07Z",
+        "status": "COMPLETED",
+        "testNumber": 4,
+        "testResults": [
+          {
+            "actualValue": "order_status",
+            "endTime": "2026-09-22T16:22:33Z",
+            "errorCode": 0,
+            "expectedValue": "order_status",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:20:09Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "['GetOrderDeliveryInfo']",
+            "endTime": "2026-09-22T16:22:33Z",
+            "errorCode": 0,
+            "expectedValue": "['GetOrderDeliveryInfo']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:20:09Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "Your order is about 2.5 kilometers away, about 17 minutes by car. That position was reported 77 hours ago. Is there anything else I can help you with?",
+            "endTime": "2026-09-22T16:22:33Z",
+            "errorCode": 0,
+            "expectedValue": "The agent says how many kilometres away the order is, how many minutes by car, and when that position was reported. It reads out no URL, no map link and no latitude or longitude, and does not claim a map is shown in the chat.",
+            "metricExplainability": "The bot response provides the distance in kilometers, travel time by car, and the time the position was reported, matching the expected response. No irrelevant information is included, and the response is clear and complete.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:20:09Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:20:20Z",
+        "generatedData": {
+          "actionsSequence": "[&#39;GetOrderDeliveryInfo&#39;]",
+          "generatedResponse": "Your order is about 2.5 kilometers away, about 17 minutes by car. That position was reported 77 hours ago. Would you like help with anything else?",
+          "invokedActions": "[[{\"function\":{\"name\":\"GetOrderDeliveryInfo\"}}]]",
+          "outcome": "Your order is about 2.5 kilometers away, about 17 minutes by car. That position was reported 77 hours ago. Would you like help with anything else?",
+          "sessionId": "01a0c9ea-e73e-7fd1-afb1-ddf9338b728d",
+          "topic": "order_status"
+        },
+        "inputs": {
+          "utterance": "Yes."
+        },
+        "startTime": "2026-09-22T16:20:07Z",
+        "status": "COMPLETED",
+        "testNumber": 5,
+        "testResults": [
+          {
+            "actualValue": "order_status",
+            "endTime": "2026-09-22T16:22:32Z",
+            "errorCode": 0,
+            "expectedValue": "order_status",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:20:09Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "['GetOrderDeliveryInfo']",
+            "endTime": "2026-09-22T16:22:32Z",
+            "errorCode": 0,
+            "expectedValue": "['GetOrderDeliveryInfo']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:20:09Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "Your order is about 2.5 kilometers away, about 17 minutes by car. That position was reported 77 hours ago. Would you like help with anything else?",
+            "endTime": "2026-09-22T16:22:32Z",
+            "errorCode": 0,
+            "expectedValue": "A single yes confirms both the order number and the email: the agent gives the distance and driving time straight away, without asking any further confirmation question.",
+            "metricExplainability": "The bot response provides the distance and driving time as expected, but it also includes additional information about the position being reported 77 hours ago, which is not required. The response does not ask for further confirmation, aligning with the expected outcome. The extra information is irrelevant but does not hinder the main goal.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 4,
+            "startTime": "2026-09-22T16:20:09Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:23:17Z",
+        "generatedData": {
+          "actionsSequence": "[&#39;GetOrderDeliveryInfo&#39;]",
+          "generatedResponse": "Your order is about 2.5 kilometers away, about 16 minutes by car. That position was reported 77 hours ago. Is there anything else I can help with?",
+          "invokedActions": "[[{\"function\":{\"name\":\"GetOrderDeliveryInfo\"}}]]",
+          "outcome": "Your order is about 2.5 kilometers away, about 16 minutes by car. That position was reported 77 hours ago. Is there anything else I can help with?",
+          "sessionId": "01a0c9ed-a88a-769c-8711-2686fd04b255",
+          "topic": "order_status"
+        },
+        "inputs": {
+          "utterance": "No, it's jane.doe@example.com"
+        },
+        "startTime": "2026-09-22T16:20:07Z",
+        "status": "COMPLETED",
+        "testNumber": 6,
+        "testResults": [
+          {
+            "actualValue": "order_status",
+            "endTime": "2026-09-22T16:23:19Z",
+            "errorCode": 0,
+            "expectedValue": "order_status",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:23:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "['GetOrderDeliveryInfo']",
+            "endTime": "2026-09-22T16:23:19Z",
+            "errorCode": 0,
+            "expectedValue": "['GetOrderDeliveryInfo']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:23:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "Your order is about 2.5 kilometers away, about 16 minutes by car. That position was reported 77 hours ago. Is there anything else I can help with?",
+            "endTime": "2026-09-22T16:23:19Z",
+            "errorCode": 0,
+            "expectedValue": "The agent accepts the corrected email and either gives the distance and driving time for order 1042, or asks one combined confirmation of the order number and corrected email. It must not ask to confirm the email on its own (for example 'I have your email as ...').",
+            "metricExplainability": "The bot response provides distance and driving time for an order, but does not address the user's correction of the email address. It also incorrectly references a position reported 77 hours ago, which is irrelevant to the user's query. The response fails to either confirm the corrected email or provide the requested order details, thus not aligning with the expected response.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "FAILURE",
+            "score": 1,
+            "startTime": "2026-09-22T16:23:10Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:21:16Z",
+        "generatedData": {
+          "actionsSequence": "[&#39;GetOrderDeliveryInfo&#39;]",
+          "generatedResponse": "That order hasn&#39;t shipped yet, so there&#39;s no delivery to track. It&#39;s still processing. Would you like to know anything else about this order?",
+          "invokedActions": "[[{\"function\":{\"name\":\"GetOrderDeliveryInfo\"}}]]",
+          "outcome": "That order hasn&#39;t shipped yet, so there&#39;s no delivery to track. It&#39;s still processing. Would you like to know anything else about this order?",
+          "sessionId": "01a0c9eb-d187-7c94-8f9f-f1e672e24d7b",
+          "topic": "order_status"
+        },
+        "inputs": {
+          "utterance": "Yes, that's correct."
+        },
+        "startTime": "2026-09-22T16:20:07Z",
+        "status": "COMPLETED",
+        "testNumber": 7,
+        "testResults": [
+          {
+            "actualValue": "order_status",
+            "endTime": "2026-09-22T16:22:34Z",
+            "errorCode": 0,
+            "expectedValue": "order_status",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:21:09Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "['GetOrderDeliveryInfo']",
+            "endTime": "2026-09-22T16:22:34Z",
+            "errorCode": 0,
+            "expectedValue": "['GetOrderDeliveryInfo']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:21:09Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "That order hasn't shipped yet, so there's no delivery to track. It's still processing. Would you like to know anything else about this order?",
+            "endTime": "2026-09-22T16:22:34Z",
+            "errorCode": 0,
+            "expectedValue": "The agent says the order hasn't shipped yet and is still processing, so there is nothing to track. It gives no distance, no driving time, no link, and does not mention a map.",
+            "metricExplainability": "The bot response accurately conveys that the order hasn't shipped and is still processing, aligning with the expected response. It also offers further assistance, which is appropriate. No irrelevant information is included, and the response is clear and complete.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:21:09Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:21:17Z",
+        "generatedData": {
+          "actionsSequence": "[&#39;GetOrderDeliveryInfo&#39;]",
+          "generatedResponse": "That order has already been delivered, so there&#39;s nothing left to track. Is there anything else I can help with today?",
+          "invokedActions": "[[{\"function\":{\"name\":\"GetOrderDeliveryInfo\"}}]]",
+          "outcome": "That order has already been delivered, so there&#39;s nothing left to track. Is there anything else I can help with today?",
+          "sessionId": "01a0c9eb-d249-7973-bc87-8058707f3abf",
+          "topic": "order_status"
+        },
+        "inputs": {
+          "utterance": "Yes, that's correct."
+        },
+        "startTime": "2026-09-22T16:20:07Z",
+        "status": "COMPLETED",
+        "testNumber": 8,
+        "testResults": [
+          {
+            "actualValue": "order_status",
+            "endTime": "2026-09-22T16:22:34Z",
+            "errorCode": 0,
+            "expectedValue": "order_status",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:21:09Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "['GetOrderDeliveryInfo']",
+            "endTime": "2026-09-22T16:22:34Z",
+            "errorCode": 0,
+            "expectedValue": "['GetOrderDeliveryInfo']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:21:09Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "That order has already been delivered, so there's nothing left to track. Is there anything else I can help with today?",
+            "endTime": "2026-09-22T16:22:34Z",
+            "errorCode": 0,
+            "expectedValue": "The agent says the order has already been delivered, so there is nothing left to track. It gives no distance, no driving time and does not mention a map.",
+            "metricExplainability": "The bot response matches the expected response by stating the order has been delivered and offering further assistance, aligning with the desired outcome.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:21:09Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:21:15Z",
+        "generatedData": {
+          "actionsSequence": "[]",
+          "generatedResponse": "I heard order O-1O42 with the email jane.doe@example.com, is that right?",
+          "invokedActions": "[]",
+          "outcome": "I heard order O-1O42 with the email jane.doe@example.com, is that right?",
+          "sessionId": "01a0c9eb-d15c-7eb6-a056-6090bdc69223",
+          "topic": "order_status"
+        },
+        "inputs": {
+          "utterance": "jane.doe@example.com, order O-1O42"
+        },
+        "startTime": "2026-09-22T16:20:07Z",
+        "status": "COMPLETED",
+        "testNumber": 9,
+        "testResults": [
+          {
+            "actualValue": "order_status",
+            "endTime": "2026-09-22T16:22:33Z",
+            "errorCode": 0,
+            "expectedValue": "order_status",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:21:09Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "[]",
+            "endTime": "2026-09-22T16:22:33Z",
+            "errorCode": 0,
+            "expectedValue": "[]",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:21:09Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "I heard order O-1O42 with the email jane.doe@example.com, is that right?",
+            "endTime": "2026-09-22T16:22:33Z",
+            "errorCode": 0,
+            "expectedValue": "The order number contains letters that look like zeros, so the agent reads the order number and email back and asks the caller to confirm them, instead of reporting a status straight away.",
+            "metricExplainability": "The bot's response correctly reads back the order number and email to confirm them, aligning with the expected response's goal of verifying the details due to potential confusion with similar-looking characters. The response is precise, relevant, and complete for this confirmation step.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:21:09Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:24:17Z",
+        "generatedData": {
+          "actionsSequence": "[]",
+          "generatedResponse": "I didn&#39;t catch the full email address for order 1042. Could you please provide the complete email you used with that order?",
+          "invokedActions": "[]",
+          "outcome": "I didn&#39;t catch the full email address for order 1042. Could you please provide the complete email you used with that order?",
+          "sessionId": "01a0c9ee-92ac-7089-ae23-dbedccfedcd4",
+          "topic": "escalation"
+        },
+        "inputs": {
+          "utterance": "Jane."
+        },
+        "startTime": "2026-09-22T16:20:07Z",
+        "status": "COMPLETED",
+        "testNumber": 10,
+        "testResults": [
+          {
+            "actualValue": "escalation",
+            "endTime": "2026-09-22T16:24:18Z",
+            "errorCode": 0,
+            "expectedValue": "order_status",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "FAILURE",
+            "score": 0,
+            "startTime": "2026-09-22T16:24:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "[]",
+            "endTime": "2026-09-22T16:24:18Z",
+            "errorCode": 0,
+            "expectedValue": "[]",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:24:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "I didn't catch the full email address for order 1042. Could you please provide the complete email you used with that order?",
+            "endTime": "2026-09-22T16:24:18Z",
+            "errorCode": 0,
+            "expectedValue": "'Jane' is a partial answer, not a refusal: the agent asks again for the full email address. It does not escalate, does not create a case, gives no case number, and does not say a team member will follow up.",
+            "metricExplainability": "The bot's response correctly asks for the full email address, which aligns with the expected response. It does not provide unnecessary information or deviate from the task.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:24:10Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:22:19Z",
+        "generatedData": {
+          "actionsSequence": "[&#39;GetCaseStatus&#39;]",
+          "generatedResponse": "Case 1026 is currently being worked on and marked as high priority. I also see other open cases about your issues—would you like a team member to follow up on those as well?",
+          "invokedActions": "[[{\"function\":{\"name\":\"GetCaseStatus\"}}]]",
+          "outcome": "Case 1026 is currently being worked on and marked as high priority. I also see other open cases about your issues—would you like a team member to follow up on those as well?",
+          "sessionId": "01a0c9ec-bdf4-7cce-abf1-61736dc41ae9",
+          "topic": "case_status"
+        },
+        "inputs": {
+          "utterance": "jane.doe@example.com, case number 1026."
+        },
+        "startTime": "2026-09-22T16:20:07Z",
+        "status": "COMPLETED",
+        "testNumber": 11,
+        "testResults": [
+          {
+            "actualValue": "case_status",
+            "endTime": "2026-09-22T16:22:35Z",
+            "errorCode": 0,
+            "expectedValue": "case_status",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:22:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "['GetCaseStatus']",
+            "endTime": "2026-09-22T16:22:35Z",
+            "errorCode": 0,
+            "expectedValue": "['GetCaseStatus']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:22:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "Case 1026 is currently being worked on and marked as high priority. I also see other open cases about your issues—would you like a team member to follow up on those as well?",
+            "endTime": "2026-09-22T16:22:35Z",
+            "errorCode": 0,
+            "expectedValue": "The agent reports the status of case 1026 (it is being worked on) and its priority.",
+            "metricExplainability": "The bot response correctly reports the status and priority of case 1026 as requested. It also offers additional assistance, which is permissible and does not detract from the primary goal. The response is clear, precise, and contains no irrelevant information.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:22:10Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:23:16Z",
+        "generatedData": {
+          "actionsSequence": "[&#39;ListOpenCases&#39;]",
+          "generatedResponse": "You have 10 open cases. The most recent are about unresolved issues and a refund request. Is there anything else you’d like help with on your cases?",
+          "invokedActions": "[[{\"function\":{\"name\":\"ListOpenCases\"}}]]",
+          "outcome": "You have 10 open cases. The most recent are about unresolved issues and a refund request. Is there anything else you’d like help with on your cases?",
+          "sessionId": "01a0c9ed-a89a-7662-be78-24b1affb76f0",
+          "topic": "case_status"
+        },
+        "inputs": {
+          "utterance": "Do I have any open cases? My email is jane.doe@example.com and my order number is ORD-1042."
+        },
+        "startTime": "2026-09-22T16:20:07Z",
+        "status": "COMPLETED",
+        "testNumber": 12,
+        "testResults": [
+          {
+            "actualValue": "case_status",
+            "endTime": "2026-09-22T16:23:18Z",
+            "errorCode": 0,
+            "expectedValue": "case_status",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:23:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "['ListOpenCases']",
+            "endTime": "2026-09-22T16:23:18Z",
+            "errorCode": 0,
+            "expectedValue": "['ListOpenCases']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:23:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "You have 10 open cases. The most recent are about unresolved issues and a refund request. Is there anything else you’d like help with on your cases?",
+            "endTime": "2026-09-22T16:23:18Z",
+            "errorCode": 0,
+            "expectedValue": "The agent either says the caller has open cases, with how many and what the most recent ones are about, or reads back the email and order number for confirmation. It does not say the caller has no open cases and does not escalate.",
+            "metricExplainability": "The bot response correctly states the number of open cases and the nature of the most recent ones, aligning with the expected response. It does not provide incorrect information or unnecessary details, and it does not ask for additional information that should be retrieved from the CRM. The response is clear and complete.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:23:10Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:22:18Z",
+        "generatedData": {
+          "actionsSequence": "[&#39;ListOpenCases&#39;]",
+          "generatedResponse": "You do not have any open cases. Would you like me to open a new support case for you?",
+          "invokedActions": "[[{\"function\":{\"name\":\"ListOpenCases\"}}]]",
+          "outcome": "You do not have any open cases. Would you like me to open a new support case for you?",
+          "sessionId": "01a0c9ec-be23-7bae-9492-21c5909f693b",
+          "topic": "case_status"
+        },
+        "inputs": {
+          "utterance": "Yes, correct."
+        },
+        "startTime": "2026-09-22T16:20:07Z",
+        "status": "COMPLETED",
+        "testNumber": 13,
+        "testResults": [
+          {
+            "actualValue": "case_status",
+            "endTime": "2026-09-22T16:22:34Z",
+            "errorCode": 0,
+            "expectedValue": "case_status",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:22:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "['ListOpenCases']",
+            "endTime": "2026-09-22T16:22:34Z",
+            "errorCode": 0,
+            "expectedValue": "['ListOpenCases']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:22:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "You do not have any open cases. Would you like me to open a new support case for you?",
+            "endTime": "2026-09-22T16:22:35Z",
+            "errorCode": 0,
+            "expectedValue": "The agent says the caller has no open cases and offers to open a new support case. It does not open one without being asked and does not say a team member will follow up.",
+            "metricExplainability": "The bot response correctly informs the user that there are no open cases and offers to open a new one, aligning with the expected response. It does not prematurely open a case or mention a team member follow-up, adhering to the guidelines.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:22:10Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:23:18Z",
+        "generatedData": {
+          "actionsSequence": "[&#39;ListOpenCases&#39;]",
+          "generatedResponse": "You have 10 open cases. The most recent are about unresolved issues and a refund request. Would you like help checking a specific case?",
+          "invokedActions": "[[{\"function\":{\"name\":\"ListOpenCases\"}}]]",
+          "outcome": "You have 10 open cases. The most recent are about unresolved issues and a refund request. Would you like help checking a specific case?",
+          "sessionId": "01a0c9ed-a8d8-7673-a1dc-a5e23cfb2f99",
+          "topic": "case_status"
+        },
+        "inputs": {
+          "utterance": "Do I have any open cases?"
+        },
+        "startTime": "2026-09-22T16:20:07Z",
+        "status": "COMPLETED",
+        "testNumber": 14,
+        "testResults": [
+          {
+            "actualValue": "case_status",
+            "endTime": "2026-09-22T16:23:20Z",
+            "errorCode": 0,
+            "expectedValue": "case_status",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:23:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "['ListOpenCases']",
+            "endTime": "2026-09-22T16:23:20Z",
+            "errorCode": 0,
+            "expectedValue": "['ListOpenCases']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:23:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "You have 10 open cases. The most recent are about unresolved issues and a refund request. Would you like help checking a specific case?",
+            "endTime": "2026-09-22T16:23:20Z",
+            "errorCode": 0,
+            "expectedValue": "The agent reuses the email and order number already confirmed in the conversation and reports the caller's open cases. It does not ask for a case number and does not escalate.",
+            "metricExplainability": "The bot response provides the number of open cases and a brief description, which aligns with the expected response of reporting open cases. However, it adds an extra step by asking if the user wants help checking a specific case, which is not present in the expected response. This additional prompt is unnecessary and deviates slightly from the expected outcome.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 4,
+            "startTime": "2026-09-22T16:23:10Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:21:17Z",
+        "generatedData": {
+          "actionsSequence": "[&#39;CreateSupportCase&#39;]",
+          "generatedResponse": "I&#39;ve opened support case 00001224 for your order. A team member will follow up within two business days. Is there anything else I can help you with?",
+          "invokedActions": "[[{\"function\":{\"name\":\"CreateSupportCase\"}}]]",
+          "outcome": "I&#39;ve opened support case 00001224 for your order. A team member will follow up within two business days. Is there anything else I can help you with?",
+          "sessionId": "01a0c9eb-d16c-7ef0-817d-dfcf31a5d45a",
+          "topic": "case_status"
+        },
+        "inputs": {
+          "utterance": "Yes, please go ahead."
+        },
+        "startTime": "2026-09-22T16:20:07Z",
+        "status": "COMPLETED",
+        "testNumber": 15,
+        "testResults": [
+          {
+            "actualValue": "case_status",
+            "endTime": "2026-09-22T16:22:34Z",
+            "errorCode": 0,
+            "expectedValue": "case_status",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:21:09Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "['CreateSupportCase']",
+            "endTime": "2026-09-22T16:22:34Z",
+            "errorCode": 0,
+            "expectedValue": "['CreateSupportCase']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:21:09Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "I've opened support case 00001224 for your order. A team member will follow up within two business days. Is there anything else I can help you with?",
+            "endTime": "2026-09-22T16:22:34Z",
+            "errorCode": 0,
+            "expectedValue": "The agent confirms it has opened a support case, says the new case number, and says a team member will follow up within two business days. It does not treat this as an escalation (no 'within one business day').",
+            "metricExplainability": "The bot response confirms opening a support case, provides a case number, and states a follow-up timeframe of two business days, matching the expected response. It does not include unnecessary information or omit key details.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:21:09Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:22:17Z",
+        "generatedData": {
+          "actionsSequence": "[&#39;CheckReturnEligibility&#39;]",
+          "generatedResponse": "Your order is eligible for a return and still within the standard return window. Would you like to know how to start a return or have any other questions?",
+          "invokedActions": "[[{\"function\":{\"name\":\"CheckReturnEligibility\"}}]]",
+          "outcome": "Your order is eligible for a return and still within the standard return window. Would you like to know how to start a return or have any other questions?",
+          "sessionId": "01a0c9ec-be2e-7ea6-9a95-319f3638a98f",
+          "topic": "return_eligibility"
+        },
+        "inputs": {
+          "utterance": "Yes, that's right."
+        },
+        "startTime": "2026-09-22T16:20:08Z",
+        "status": "COMPLETED",
+        "testNumber": 16,
+        "testResults": [
+          {
+            "actualValue": "return_eligibility",
+            "endTime": "2026-09-22T16:22:35Z",
+            "errorCode": 0,
+            "expectedValue": "return_eligibility",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:22:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "['CheckReturnEligibility']",
+            "endTime": "2026-09-22T16:22:35Z",
+            "errorCode": 0,
+            "expectedValue": "['CheckReturnEligibility']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:22:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "Your order is eligible for a return and still within the standard return window. Would you like to know how to start a return or have any other questions?",
+            "endTime": "2026-09-22T16:22:35Z",
+            "errorCode": 0,
+            "expectedValue": "The agent says whether order 2077 is eligible for a return and gives a one-line reason, such as the return window.",
+            "metricExplainability": "The bot response confirms the order is eligible for return and offers assistance, aligning with the expected response's goal of stating eligibility and providing a reason. It is clear, precise, and contains no irrelevant information.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:22:10Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:23:20Z",
+        "generatedData": {
+          "actionsSequence": "[]",
+          "generatedResponse": "Most items can be returned within 30 days of delivery if they are unused, in the original packaging, and include all accessories. Final-sale and clearance items cannot be returned. Would you like to know how to start a return?",
+          "invokedActions": "[]",
+          "outcome": "Most items can be returned within 30 days of delivery if they are unused, in the original packaging, and include all accessories. Final-sale and clearance items cannot be returned. Would you like to know how to start a return?",
+          "sessionId": "01a0c9ed-b524-730c-a4dd-62f0ab5528ca",
+          "topic": "policy_faq"
+        },
+        "inputs": {
+          "utterance": "What's your return policy?"
+        },
+        "startTime": "2026-09-22T16:20:08Z",
+        "status": "COMPLETED",
+        "testNumber": 17,
+        "testResults": [
+          {
+            "actualValue": "policy_faq",
+            "endTime": "2026-09-22T16:23:21Z",
+            "errorCode": 0,
+            "expectedValue": "policy_faq",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:23:13Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "[]",
+            "endTime": "2026-09-22T16:23:21Z",
+            "errorCode": 0,
+            "expectedValue": "['AnswerQuestionsWithKnowledge']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "FAILURE",
+            "score": 0,
+            "startTime": "2026-09-22T16:23:13Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "Most items can be returned within 30 days of delivery if they are unused, in the original packaging, and include all accessories. Final-sale and clearance items cannot be returned. Would you like to know how to start a return?",
+            "endTime": "2026-09-22T16:23:21Z",
+            "errorCode": 0,
+            "expectedValue": "The agent explains the return policy from Knowledge: items can be returned within 30 days of delivery if unused and in original packaging, and final-sale items can't be returned.",
+            "metricExplainability": "The bot response accurately conveys the return policy as specified in the expected response, including the 30-day return window, conditions for return, and the exception for final-sale items. It also offers further assistance, which is a proactive and helpful addition. No irrelevant information is present, and the response is clear and complete.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:23:13Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:21:15Z",
+        "generatedData": {
+          "actionsSequence": "[]",
+          "generatedResponse": "Standard shipping typically takes 5 to 7 business days from the ship date, and you will get a tracking number by email once your order ships. Is there anything else I can check for you?",
+          "invokedActions": "[]",
+          "outcome": "Standard shipping typically takes 5 to 7 business days from the ship date, and you will get a tracking number by email once your order ships. Is there anything else I can check for you?",
+          "sessionId": "01a0c9eb-d1a1-73ed-8653-3b3a4a47f408",
+          "topic": "policy_faq"
+        },
+        "inputs": {
+          "utterance": "How long does standard shipping take?"
+        },
+        "startTime": "2026-09-22T16:20:08Z",
+        "status": "COMPLETED",
+        "testNumber": 18,
+        "testResults": [
+          {
+            "actualValue": "policy_faq",
+            "endTime": "2026-09-22T16:22:33Z",
+            "errorCode": 0,
+            "expectedValue": "policy_faq",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:21:09Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "[]",
+            "endTime": "2026-09-22T16:22:33Z",
+            "errorCode": 0,
+            "expectedValue": "['AnswerQuestionsWithKnowledge']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "FAILURE",
+            "score": 0,
+            "startTime": "2026-09-22T16:21:09Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "Standard shipping typically takes 5 to 7 business days from the ship date, and you will get a tracking number by email once your order ships. Is there anything else I can check for you?",
+            "endTime": "2026-09-22T16:22:33Z",
+            "errorCode": 0,
+            "expectedValue": "The agent says standard shipping takes a number of business days (5 to 7) once the order ships.",
+            "metricExplainability": "The bot response accurately provides the standard shipping time (5 to 7 business days) and additional shipping details, matching the expected response. It is clear, precise, and contains no irrelevant information.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:21:09Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:23:19Z",
+        "generatedData": {
+          "actionsSequence": "[]",
+          "generatedResponse": "The warranty does not cover accidental damage. It only covers defects in materials or workmanship. Would you like help with filing a warranty claim or have another question about coverage?",
+          "invokedActions": "[]",
+          "outcome": "The warranty does not cover accidental damage. It only covers defects in materials or workmanship. Would you like help with filing a warranty claim or have another question about coverage?",
+          "sessionId": "01a0c9ed-b58b-72de-8890-f2befdbba207",
+          "topic": "policy_faq"
+        },
+        "inputs": {
+          "utterance": "Does the warranty cover accidental damage?"
+        },
+        "startTime": "2026-09-22T16:20:08Z",
+        "status": "COMPLETED",
+        "testNumber": 19,
+        "testResults": [
+          {
+            "actualValue": "policy_faq",
+            "endTime": "2026-09-22T16:23:21Z",
+            "errorCode": 0,
+            "expectedValue": "policy_faq",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:23:13Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "[]",
+            "endTime": "2026-09-22T16:23:21Z",
+            "errorCode": 0,
+            "expectedValue": "['AnswerQuestionsWithKnowledge']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "FAILURE",
+            "score": 0,
+            "startTime": "2026-09-22T16:23:13Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "The warranty does not cover accidental damage. It only covers defects in materials or workmanship. Would you like help with filing a warranty claim or have another question about coverage?",
+            "endTime": "2026-09-22T16:23:21Z",
+            "errorCode": 0,
+            "expectedValue": "The agent says the warranty does not cover accidental damage.",
+            "metricExplainability": "The bot response accurately states that the warranty does not cover accidental damage, matching the expected response. It also offers additional assistance, which is relevant and not extraneous. The response is clear, complete, and precise.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:23:13Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:23:17Z",
+        "generatedData": {
+          "actionsSequence": "[]",
+          "generatedResponse": "There is no restocking fee if you exchange an item, as long as it is unused, in its original packaging, and within 30 days. Is there anything else I can help you with today?",
+          "invokedActions": "[]",
+          "outcome": "There is no restocking fee if you exchange an item, as long as it is unused, in its original packaging, and within 30 days. Is there anything else I can help you with today?",
+          "sessionId": "01a0c9ed-a8a3-7f50-a312-91472cf42465",
+          "topic": "policy_faq"
+        },
+        "inputs": {
+          "utterance": "Is there a restocking fee if I exchange an item?"
+        },
+        "startTime": "2026-09-22T16:20:08Z",
+        "status": "COMPLETED",
+        "testNumber": 20,
+        "testResults": [
+          {
+            "actualValue": "policy_faq",
+            "endTime": "2026-09-22T16:23:18Z",
+            "errorCode": 0,
+            "expectedValue": "policy_faq",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:23:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "[]",
+            "endTime": "2026-09-22T16:23:18Z",
+            "errorCode": 0,
+            "expectedValue": "['AnswerQuestionsWithKnowledge']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "FAILURE",
+            "score": 0,
+            "startTime": "2026-09-22T16:23:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "There is no restocking fee if you exchange an item, as long as it is unused, in its original packaging, and within 30 days. Is there anything else I can help you with today?",
+            "endTime": "2026-09-22T16:23:18Z",
+            "errorCode": 0,
+            "expectedValue": "The agent says there is no restocking fee for an exchange.",
+            "metricExplainability": "The bot response directly answers the user's question about the restocking fee for an exchange, matching the expected response. It also provides additional relevant details (unused, original packaging, within 30 days) and offers further assistance, which is appropriate and non-ambiguous.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:23:10Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:23:23Z",
+        "generatedData": {
+          "actionsSequence": "[&#39;ExplainOrderWorkflow&#39;]",
+          "generatedResponse": "According to our order workflow guide, an order at Keyburn goes through Draft, Processing, Shipped, and Delivered stages. You can cancel before it ships, drafts are kept for 30 days, and returns are accepted within 30 days of delivery. Would you like to know more about any of these steps?",
+          "invokedActions": "[[{\"function\":{\"name\":\"ExplainOrderWorkflow\"}}]]",
+          "outcome": "According to our order workflow guide, an order at Keyburn goes through Draft, Processing, Shipped, and Delivered stages. You can cancel before it ships, drafts are kept for 30 days, and returns are accepted within 30 days of delivery. Would you like to know more about any of these steps?",
+          "sessionId": "01a0c9ed-b733-7b9c-99be-a36b29f6e97c",
+          "topic": "policy_faq"
+        },
+        "inputs": {
+          "utterance": "What stages does an order go through at Keyburn?"
+        },
+        "startTime": "2026-09-22T16:20:08Z",
+        "status": "COMPLETED",
+        "testNumber": 21,
+        "testResults": [
+          {
+            "actualValue": "policy_faq",
+            "endTime": "2026-09-22T16:23:23Z",
+            "errorCode": 0,
+            "expectedValue": "policy_faq",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:23:13Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "['ExplainOrderWorkflow']",
+            "endTime": "2026-09-22T16:23:23Z",
+            "errorCode": 0,
+            "expectedValue": "['ExplainOrderWorkflow']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:23:13Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "According to our order workflow guide, an order at Keyburn goes through Draft, Processing, Shipped, and Delivered stages. You can cancel before it ships, drafts are kept for 30 days, and returns are accepted within 30 days of delivery. Would you like to know more about any of these steps?",
+            "endTime": "2026-09-22T16:23:23Z",
+            "errorCode": 0,
+            "expectedValue": "The agent names the order stages Draft, Processing, Shipped and Delivered.",
+            "metricExplainability": "The bot response accurately lists the order stages as expected and provides additional relevant information about cancellation, drafts, and returns. It also offers further assistance, which is appropriate. No irrelevant or missing information is present.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:23:13Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:22:18Z",
+        "generatedData": {
+          "actionsSequence": "[]",
+          "generatedResponse": "According to our order workflow guide, if you never submit a draft order, it will eventually expire and not move forward for processing or shipping. Is there anything else you would like to know about how orders work?",
+          "invokedActions": "[]",
+          "outcome": "According to our order workflow guide, if you never submit a draft order, it will eventually expire and not move forward for processing or shipping. Is there anything else you would like to know about how orders work?",
+          "sessionId": "01a0c9ec-bdf4-7139-aadf-8c179eba6822",
+          "topic": "policy_faq"
+        },
+        "inputs": {
+          "utterance": "What happens if I never submit a draft order?"
+        },
+        "startTime": "2026-09-22T16:20:08Z",
+        "status": "COMPLETED",
+        "testNumber": 22,
+        "testResults": [
+          {
+            "actualValue": "policy_faq",
+            "endTime": "2026-09-22T16:22:35Z",
+            "errorCode": 0,
+            "expectedValue": "policy_faq",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:22:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "[]",
+            "endTime": "2026-09-22T16:22:35Z",
+            "errorCode": 0,
+            "expectedValue": "['ExplainOrderWorkflow']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "FAILURE",
+            "score": 0,
+            "startTime": "2026-09-22T16:22:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "According to our order workflow guide, if you never submit a draft order, it will eventually expire and not move forward for processing or shipping. Is there anything else you would like to know about how orders work?",
+            "endTime": "2026-09-22T16:22:35Z",
+            "errorCode": 0,
+            "expectedValue": "The agent says an unsubmitted draft order is kept for 30 days and then deleted.",
+            "metricExplainability": "The bot's response states that an unsubmitted draft order will eventually expire, but does not specify the 30-day period mentioned in the expected response. This omission makes the response partially aligned but not fully accurate.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 3,
+            "startTime": "2026-09-22T16:22:10Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:22:20Z",
+        "generatedData": {
+          "actionsSequence": "[&#39;ExplainOrderWorkflow&#39;]",
+          "generatedResponse": "According to our order workflow guide, orders cannot be canceled once they have shipped. You would need to wait for delivery and then look into a return if needed. Is there anything else I can check for you?",
+          "invokedActions": "[[{\"function\":{\"name\":\"ExplainOrderWorkflow\"}}]]",
+          "outcome": "According to our order workflow guide, orders cannot be canceled once they have shipped. You would need to wait for delivery and then look into a return if needed. Is there anything else I can check for you?",
+          "sessionId": "01a0c9ec-be30-7f7b-9184-d8365c9ad455",
+          "topic": "policy_faq"
+        },
+        "inputs": {
+          "utterance": "Can I still cancel an order after it has shipped?"
+        },
+        "startTime": "2026-09-22T16:20:08Z",
+        "status": "COMPLETED",
+        "testNumber": 23,
+        "testResults": [
+          {
+            "actualValue": "policy_faq",
+            "endTime": "2026-09-22T16:22:35Z",
+            "errorCode": 0,
+            "expectedValue": "policy_faq",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:22:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "['ExplainOrderWorkflow']",
+            "endTime": "2026-09-22T16:22:35Z",
+            "errorCode": 0,
+            "expectedValue": "['ExplainOrderWorkflow']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:22:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "According to our order workflow guide, orders cannot be canceled once they have shipped. You would need to wait for delivery and then look into a return if needed. Is there anything else I can check for you?",
+            "endTime": "2026-09-22T16:22:36Z",
+            "errorCode": 0,
+            "expectedValue": "The agent says an order cannot be cancelled once it has shipped. It does not claim to cancel anything.",
+            "metricExplainability": "The bot response accurately conveys that orders cannot be canceled once shipped, aligns with the expected response, and provides a clear next step (return process). No irrelevant information or omissions are present.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:22:10Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:23:19Z",
+        "generatedData": {
+          "actionsSequence": "[]",
+          "generatedResponse": "According to our order workflow guide, an order in Draft means it has been started but not yet submitted for processing. You can still make changes or cancel it at this stage. Would you like to know more about the next steps?",
+          "invokedActions": "[]",
+          "outcome": "According to our order workflow guide, an order in Draft means it has been started but not yet submitted for processing. You can still make changes or cancel it at this stage. Would you like to know more about the next steps?",
+          "sessionId": "01a0c9ed-b503-7543-8adf-51e84145262c",
+          "topic": "policy_faq"
+        },
+        "inputs": {
+          "utterance": "What does it mean when an order is in Draft?"
+        },
+        "startTime": "2026-09-22T16:20:08Z",
+        "status": "COMPLETED",
+        "testNumber": 24,
+        "testResults": [
+          {
+            "actualValue": "policy_faq",
+            "endTime": "2026-09-22T16:23:21Z",
+            "errorCode": 0,
+            "expectedValue": "policy_faq",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:23:13Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "[]",
+            "endTime": "2026-09-22T16:23:21Z",
+            "errorCode": 0,
+            "expectedValue": "['ExplainOrderWorkflow']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "FAILURE",
+            "score": 0,
+            "startTime": "2026-09-22T16:23:13Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "According to our order workflow guide, an order in Draft means it has been started but not yet submitted for processing. You can still make changes or cancel it at this stage. Would you like to know more about the next steps?",
+            "endTime": "2026-09-22T16:23:21Z",
+            "errorCode": 0,
+            "expectedValue": "The agent says a Draft order has been saved but not submitted (not yet placed).",
+            "metricExplainability": "The bot response accurately explains what a Draft order means, matching the expected response. It also offers further assistance, which is appropriate. No irrelevant information is present, and the response is clear and complete.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:23:13Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:24:23Z",
+        "generatedData": {
+          "actionsSequence": "[&#39;CreateEscalationCase&#39;]",
+          "generatedResponse": "I understand you want a refund. A team member will follow up with you within one business day, and your case number is 00001228. Is there anything else I can help you with today?",
+          "invokedActions": "[[{\"function\":{\"name\":\"CreateEscalationCase\"}}]]",
+          "outcome": "I understand you want a refund. A team member will follow up with you within one business day, and your case number is 00001228. Is there anything else I can help you with today?",
+          "sessionId": "01a0c9ee-a63e-7581-bd50-35888df98b2d",
+          "topic": "escalation"
+        },
+        "inputs": {
+          "utterance": "I want a refund for my last order right now."
+        },
+        "startTime": "2026-09-22T16:20:08Z",
+        "status": "COMPLETED",
+        "testNumber": 25,
+        "testResults": [
+          {
+            "actualValue": "escalation",
+            "endTime": "2026-09-22T16:24:24Z",
+            "errorCode": 0,
+            "expectedValue": "escalation",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:24:15Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "['CreateEscalationCase']",
+            "endTime": "2026-09-22T16:24:24Z",
+            "errorCode": 0,
+            "expectedValue": "['CreateEscalationCase']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:24:15Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "I understand you want a refund. A team member will follow up with you within one business day, and your case number is 00001228. Is there anything else I can help you with today?",
+            "endTime": "2026-09-22T16:24:24Z",
+            "errorCode": 0,
+            "expectedValue": "The agent does not process or promise a refund. It says a team member will follow up within one business day and says a specific case number.",
+            "metricExplainability": "The bot response matches the expected response by stating that a team member will follow up within one business day and providing a specific case number, without processing the refund directly. It aligns with the desired outcome and does not include irrelevant information.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:24:15Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:23:18Z",
+        "generatedData": {
+          "actionsSequence": "[&#39;CreateEscalationCase&#39;]",
+          "generatedResponse": "I understand this is frustrating. A team member will follow up with you within one business day, and your case number is 00001225. Is there anything else I can help with today?",
+          "invokedActions": "[[{\"function\":{\"name\":\"CreateEscalationCase\"}}]]",
+          "outcome": "I understand this is frustrating. A team member will follow up with you within one business day, and your case number is 00001225. Is there anything else I can help with today?",
+          "sessionId": "01a0c9ed-a8b5-75b2-931c-130799fa368a",
+          "topic": "escalation"
+        },
+        "inputs": {
+          "utterance": "I don't remember my email or order number, can you just search by my name?"
+        },
+        "startTime": "2026-09-22T16:20:08Z",
+        "status": "COMPLETED",
+        "testNumber": 26,
+        "testResults": [
+          {
+            "actualValue": "escalation",
+            "endTime": "2026-09-22T16:23:20Z",
+            "errorCode": 0,
+            "expectedValue": "escalation",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:23:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "['CreateEscalationCase']",
+            "endTime": "2026-09-22T16:23:20Z",
+            "errorCode": 0,
+            "expectedValue": "['CreateEscalationCase']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:23:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "I understand this is frustrating. A team member will follow up with you within one business day, and your case number is 00001225. Is there anything else I can help with today?",
+            "endTime": "2026-09-22T16:23:20Z",
+            "errorCode": 0,
+            "expectedValue": "The agent does not search by name or reveal any order. It escalates: a team member will follow up and it says a specific case number.",
+            "metricExplainability": "The bot response aligns with the expected response by escalating the issue and providing a case number without searching by name or revealing order details, which matches the desired outcome.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:23:10Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:24:18Z",
+        "generatedData": {
+          "actionsSequence": "[&#39;CreateEscalationCase&#39;]",
+          "generatedResponse": "I understand you’re frustrated, and I want to make sure this gets the attention it needs. A team member will follow up within one business day, and your case number is 00001227. Is there anything else I can check for you right now?",
+          "invokedActions": "[[{\"function\":{\"name\":\"CreateEscalationCase\"}}]]",
+          "outcome": "I understand you’re frustrated, and I want to make sure this gets the attention it needs. A team member will follow up within one business day, and your case number is 00001227. Is there anything else I can check for you right now?",
+          "sessionId": "01a0c9ee-92e2-7f61-905b-ae1e80b31875",
+          "topic": "escalation"
+        },
+        "inputs": {
+          "utterance": "This is the third time I've called about the SAME issue and nobody has fixed it, I'm furious."
+        },
+        "startTime": "2026-09-22T16:20:08Z",
+        "status": "COMPLETED",
+        "testNumber": 27,
+        "testResults": [
+          {
+            "actualValue": "escalation",
+            "endTime": "2026-09-22T16:24:19Z",
+            "errorCode": 0,
+            "expectedValue": "escalation",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:24:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "['CreateEscalationCase']",
+            "endTime": "2026-09-22T16:24:19Z",
+            "errorCode": 0,
+            "expectedValue": "['CreateEscalationCase']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:24:10Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "I understand you’re frustrated, and I want to make sure this gets the attention it needs. A team member will follow up within one business day, and your case number is 00001227. Is there anything else I can check for you right now?",
+            "endTime": "2026-09-22T16:24:19Z",
+            "errorCode": 0,
+            "expectedValue": "The agent acknowledges the caller's frustration, says a team member will follow up within one business day, and says a specific case number.",
+            "metricExplainability": "The bot response acknowledges the user's frustration, provides a follow-up timeline, and includes a case number, matching the expected response. It is clear, precise, and contains all relevant information without unnecessary details.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:24:10Z",
+            "status": "COMPLETED"
+          }
+        ]
+      },
+      {
+        "endTime": "2026-09-22T16:23:21Z",
+        "generatedData": {
+          "actionsSequence": "[&#39;CreateEscalationCase&#39;]",
+          "generatedResponse": "I understand this is important to you. A team member will follow up within one business day, and your case number is 00001226. Is there anything else I can help you with right now?",
+          "invokedActions": "[[{\"function\":{\"name\":\"CreateEscalationCase\"}}]]",
+          "outcome": "I understand this is important to you. A team member will follow up within one business day, and your case number is 00001226. Is there anything else I can help you with right now?",
+          "sessionId": "01a0c9ed-b58b-7b6a-a2dd-91904851a07b",
+          "topic": "escalation"
+        },
+        "inputs": {
+          "utterance": "I'd like to cancel my entire account and delete all my data."
+        },
+        "startTime": "2026-09-22T16:20:08Z",
+        "status": "COMPLETED",
+        "testNumber": 28,
+        "testResults": [
+          {
+            "actualValue": "escalation",
+            "endTime": "2026-09-22T16:23:23Z",
+            "errorCode": 0,
+            "expectedValue": "escalation",
+            "metricLabel": "topic_assertion",
+            "name": "topic_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:23:13Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "['CreateEscalationCase']",
+            "endTime": "2026-09-22T16:23:23Z",
+            "errorCode": 0,
+            "expectedValue": "['CreateEscalationCase']",
+            "metricLabel": "actions_assertion",
+            "name": "actions_assertion",
+            "result": "PASS",
+            "score": 1,
+            "startTime": "2026-09-22T16:23:13Z",
+            "status": "COMPLETED",
+            "metricExplainability": ""
+          },
+          {
+            "actualValue": "I understand this is important to you. A team member will follow up within one business day, and your case number is 00001226. Is there anything else I can help you with right now?",
+            "endTime": "2026-09-22T16:23:23Z",
+            "errorCode": 0,
+            "expectedValue": "The agent does not claim the account was cancelled or deleted. It escalates: a team member will follow up and it says a specific case number.",
+            "metricExplainability": "The bot response matches the expected response by escalating the issue and providing a case number, without claiming to cancel the account. It is clear, precise, and contains all relevant information.",
+            "metricLabel": "output_validation",
+            "name": "output_validation",
+            "result": "PASS",
+            "score": 5,
+            "startTime": "2026-09-22T16:23:13Z",
+            "status": "COMPLETED"
+          }
+        ]
+      }
+    ],
+    "runId": "4KBak0000003CvtGAE"
+  },
+  "warnings": []
+}
