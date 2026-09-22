@@ -528,6 +528,8 @@ Phase 16 (the OTP gate) is the only change to the agent's core flow; its cut-off
   `EinsteinAISettings.enableAIFeedbackWithDC=true` deployed the flag but left the page's Data Space blank,
   and Session Tracing then failed with "Data space not ready". Switching it off and on in the UI fixed it.
   `AgentforcePlatformTracingSettings` needs API 68 and isn't available in this org.
+  Agent Analytics (Service + Employee) is installed. The templates only appeared once the admin had
+  **Tableau Next Limited Consumer** and at least one session had been traced.
 - Phase 18 — demo + deck (was Phase 12 until 2026-09-22). **Always the last phase**; the agent
   version is frozen at Wed 23 18:00.
 

@@ -7,7 +7,7 @@ to the entry that replaced them.
 
 ---
 
-## 2026-09-22 — Phase 12: Session Tracing on; Agent Analytics blocked on templates
+## 2026-09-22 — Phase 12 done: Session Tracing on, Agent Analytics installed
 
 **Starting state:** Data Cloud on, Standard Data Model 1.132 (≥ 1.130 required), `default` data
 space ACTIVE. None of the Session Tracing or audit data objects existed, so nothing was ever traced
@@ -32,13 +32,17 @@ before today. Tracing doesn't backfill, so v1–v38 history isn't in it.
 **Not available here:**
 - `AgentforcePlatformTracingSettings` needs API 68. The org maximum is 67.0.
 
-**Agent Analytics: open.**
+**Agent Analytics: resolved the same day.** The blocker was:
 - Setup → Agent Analytics says "You don't have any templates yet. Enable Agentforce Session Tracing
   and complete your agent-specific requirements".
 - Tableau Next Limited Consumer (license + permission set) is now assigned to the admin.
 - *Tableau Next Platform Analyst*, listed by third-party guides as a prerequisite, doesn't exist in
   this org. If it is required, this Developer Edition can't install the templates.
-- Fallback for Phase 17: raw data from the trace objects + Agent Optimization + Health Monitoring.
+- The templates appeared once Tableau Next Limited Consumer was assigned **and** at least one session
+  had been traced. Platform Analyst turned out not to be needed.
+- **Service Agent Analytics** and **Employee Agent Analytics** are installed, and the dashboards open.
+- After eval run 28, the trace tables hold 28 sessions, 111 interactions and 480 steps.
+- The audit tables (`GenAIGatewayRequest__dlm`, `GenAIGeneration__dlm`) still don't exist. Not needed.
 
 **Tooling notes:**
 - The CLI access token gets 401 on `/services/data/vXX/ssot/query-sql` (no Data Cloud scope). Query
