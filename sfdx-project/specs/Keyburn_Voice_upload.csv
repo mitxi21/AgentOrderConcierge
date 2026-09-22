@@ -1,0 +1,4 @@
+Conversation,Expected Actions,Expected Subagents
+"User asks where order 1042 is right now, gives the email jane.doe@example.com when asked, and confirms when the agent reads both back",['GetOrderDeliveryInfo'],order_status
+"User asks for the status of order 1024 with the email jane.doe@example.com, corrects the order number to 1042 when the agent reads it back, and confirms",['GetOrderStatus'],order_status
+User demands a refund for their last order right now,['CreateEscalationCase'],escalation
