@@ -4,6 +4,11 @@
     <description>Least-privilege access for the Order &amp; Case Concierge agent's running user. Read-only on Order__c, Contact, and Knowledge; create/edit on Case for the escalation and add-note actions. No delete on anything, no view-all/modify-all.</description>
     <hasActivationRequired>false</hasActivationRequired>
 
+    <customMetadataTypeAccesses>
+        <enabled>true</enabled>
+        <name>Keyburn_Setting__mdt</name>
+    </customMetadataTypeAccesses>
+
     <classAccesses>
         <apexClass>OCC_GetOrderStatus</apexClass>
         <enabled>true</enabled>

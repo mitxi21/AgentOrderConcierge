@@ -167,6 +167,24 @@ test-case CSV.
   small deliberate set (the 3 cases in `specs/Keyburn_Voice.md`) and purge straight afterwards.
   A 20-row suite over two personas would be ~400 MB and cannot complete.
 
+## Runs on agent v39 (2026-09-22 evening)
+
+| Run | What changed | Topic | Actions | Outcome |
+|---|---|---|---|---|
+| 02 | agent v39 (two instruction edits) | 27/28 | 27/28 | 27/28 |
+| 03 | **custom metadata access fix** (permset, not agent) | 27/28 | 25/28 | **28/28** |
+
+- **Run 02 exposed a platform-level break, not an agent one.** After the metadata API bump to 67,
+  every tracking answer became "I'm having trouble tracking that order right now". From API 62
+  `WITH USER_MODE` enforces custom-metadata-type access, and the agent permset never granted
+  `Keyburn_Setting__mdt` (warehouse origin + Google key). Admin calls kept working, so a `TraceFlag`
+  on the agent user was what showed it. Fixed with `<customMetadataTypeAccesses>` in both permsets;
+  in run 03 all 8 tracking cases pass.
+- **v39's two instruction edits changed nothing** - the workflow skip and the "Jane." routing both
+  survive. More prose is not the lever.
+- **`case_list_open_some` is nondeterministic**: the agent sometimes answers at once and sometimes
+  confirms first. The spec now scripts the confirmation and asserts the action on the next turn.
+
 ## Candidate agent fixes (not applied; they would need a new version before the Wed 18:00 freeze)
 
 - Finding 2: in `policy_faq`, state that questions about order stages, drafts or cancelling

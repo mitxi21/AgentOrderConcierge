@@ -4,5 +4,5 @@
         <members>Case.Agentforce_Escalations</members>
         <name>ListView</name>
     </types>
-    <version>61.0</version>
+    <version>67.0</version>
 </Package>

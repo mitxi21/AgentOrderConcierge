@@ -4,6 +4,11 @@
     <description>Full CRUD + view/modify-all on Order__c, Case, Contact, Knowledge for the builder to manage sample data and articles. Broad on purpose - NOT for the agent user, use Order_Case_Concierge_Agent for that.</description>
     <hasActivationRequired>false</hasActivationRequired>
 
+    <customMetadataTypeAccesses>
+        <enabled>true</enabled>
+        <name>Keyburn_Setting__mdt</name>
+    </customMetadataTypeAccesses>
+
     <classAccesses>
         <apexClass>OCC_GetOrderStatus</apexClass>
         <enabled>true</enabled>

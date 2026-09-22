@@ -7,6 +7,59 @@ to the entry that replaced them.
 
 ---
 
+## 2026-09-22 — API 67 bump broke the map for the agent user: custom metadata access is enforced from 62
+
+All metadata was moved to **API 67.0** (29 Apex class metas, 2 LWC, 2 VF pages, the mdapi
+`package.xml`); `sfdx-project.json` was already there. Deploy 33/33, and the Apex suite passed
+(1301 tests, 100%, 90% org-wide coverage). The only failing test is the **vendored** Knowledge
+readiness package hitting a Developer Edition ceiling: `STORAGE_LIMIT_EXCEEDED - Article limit
+exceeded`. Not our code.
+
+**But every tracking answer became "I'm having trouble tracking that order right now"** - the catch
+block in `OCC_GetOrderDeliveryInfo` - in the Python harness (3 failures), Testing Center and
+`sf agent preview`, while calling the action directly **as admin worked**.
+
+Root cause, from a `TraceFlag` on the agent user (the definitive move when admin works and the agent
+doesn't):
+
+```
+System.QueryException: sObject type 'Keyburn_Setting__mdt' is not supported
+```
+
+- At API 61 a `WITH USER_MODE` query against a **custom metadata type** did not enforce type-level
+  access. At API 67 it does.
+- The least-privilege permset never granted `Keyburn_Setting__mdt`, which holds the warehouse origin
+  and the Google key. Admin has it implicitly - hence "works as admin, fails as the agent user".
+- **Fix:** `<customMetadataTypeAccesses>` for `Keyburn_Setting__mdt` in **both** permission sets.
+  Keep the version bump and least privilege; don't revert the API version. Verified: the agent now
+  answers "about 2.5 kilometers away, about 14 minutes by car".
+- **Rule:** constraint 4 in `CLAUDE.md` (every new Apex class needs `<classAccesses>` in both
+  permsets) now extends to **custom metadata types** - and an API version bump can turn a previously
+  silent access gap into a runtime failure. Re-run both suites after any bump.
+
+---
+
+## 2026-09-22 — Agent v39: the two instruction fixes did NOT work
+
+Published and activated **v39** with two edits: `policy_faq` told explicitly that the Knowledge
+articles do not contain the workflow facts and that `ExplainOrderWorkflow` must be called every time,
+and the router's `go_to_escalation` description told that a reply which is only a first name or a few
+digits is a partial answer.
+
+Neither changed behaviour:
+
+- `workflow_what_draft_means` still answers without calling `ExplainOrderWorkflow` (**4th**
+  reproduction).
+- "Jane." still routes to `escalation` (the reply is still correct, since escalation re-asks and logs
+  no Case).
+
+**Conclusion: more instruction text is not the lever for either.** If the workflow skip must be
+fixed, it needs a structural change of the kind escalation already uses (a variable the instructions
+branch on), not more prose. Both remain open and both are cosmetic: the answer is right, only the
+grounding path and the topic label are wrong.
+
+---
+
 ## 2026-09-22 — Phase 15: Testing Center baseline on v38 (26/28 all-green after a test fix)
 
 - **Suite:** `Keyburn_Regression`, 28 cases hand-converted from `eval_cases.yaml` into

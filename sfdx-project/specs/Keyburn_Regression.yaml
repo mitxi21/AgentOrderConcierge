@@ -175,7 +175,15 @@ testCases:
     expectedOutcome: "The agent reports the status of case 1026 (it is being worked on) and its priority."
 
   # eval: case_list_open_some
-  - utterance: "Do I have any open cases? My email is jane.doe@example.com and my order number is ORD-1042."
+  # The agent may answer at once or confirm the details first (it did both across runs), so the
+  # confirmation is scripted here and the action is asserted on the turn after it.
+  - utterance: "Yes, that's right."
+    conversationHistory:
+      - role: user
+        message: "Do I have any open cases? My email is jane.doe@example.com and my order number is ORD-1042."
+      - role: agent
+        topic: case_status
+        message: "Just to confirm, your order number is ORD-1042 and your email is jane.doe@example.com, is that correct?"
     expectedTopic: case_status
     expectedActions:
       - ListOpenCases

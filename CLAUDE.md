@@ -80,7 +80,9 @@ directory looking for `sfdx-project.json`, so every `sf` command must run from i
 - Agentforce Agent Builder, originally built via the Builder's assistant/wizard, with a dedicated
   running user. **Since 2026-09-17 the agent script is in source control and edited locally**:
   `sfdx-project/force-app/main/default/aiAuthoringBundles/Keyburn_Customer_Service/Keyburn_Customer_Service.agent`
-  is the working draft and the file to edit. **Active version: v38** = v33 (the Phase 9 demo
+  is the working draft and the file to edit. **Active version: v39** = v38 + two instruction edits
+  that measurably changed nothing (see `project-status.md` 2026-09-22): the workflow action is still
+  skipped on one question and a partial answer still routes to escalation. v38 = v33 (the Phase 9 demo
   candidate) + Phase 10 (Draft status, workflow diagram read by a multimodal prompt template). It
   keeps normal identifiers, the map card in the deployed chat (**first tracked order per conversation only**;
   see `project-status.md`), and an **identity lock enforced in Apex**. Fallback: v33. Every lookup action has a
@@ -220,6 +222,11 @@ live only in `secrets.env` — don't paste them back into this file.
 4. **Any new Apex class needs a `<classAccesses>` entry in both permission sets.** Agentforce
    invocation is blocked at the platform level before any try/catch runs without it. New
    fields/objects also need explicit permissions in the agent permset (least-privilege).
+   **This includes custom metadata types**: `<customMetadataTypeAccesses>` for `Keyburn_Setting__mdt`
+   is what makes the Google key and warehouse origin readable by the agent user. From **API 62
+   onwards `WITH USER_MODE` enforces custom-metadata-type access**, so the 61 → 67 bump turned a
+   silent gap into "I'm having trouble tracking that order right now" in every tracking answer,
+   while admin tests still passed (2026-09-22). After any API version bump, re-run both suites.
 5. **Do not add explicit `<fieldPermissions>` for platform-required fields**
    (`Knowledge__kav.Title`, `Case.CaseNumber`, `Case.Status`, `Order__c.Order_Number__c`) —
    deploys fail. The same applies to **every `Contact.Mailing*` component** (Street, City,
@@ -410,7 +417,8 @@ cd src; py -3.8 run_eval.py eval_cases.yaml
 
 ## Remaining work
 
-Phase 8 is **closed** (14/15 on agent v4, stable). The demo-safe fallback is now **v38** (then v33, v4).
+Phase 8 is **closed** (14/15 on agent v4, stable). Active is **v39**; the demo-safe fallback is
+**v38** (then v33, v4).
 Phases 9–18 are planned in detail, with spikes and cut-offs, in `docfiles/BUILD_RUNBOOK.md`.
 **Panel feedback on 2026-09-22 reopened the scope:** Phases 12–17 add observability (Session Tracing,
 Agent Analytics, Sessions & Intents), an S3 → Data 360 unstructured pipeline, a Knowledge readiness
