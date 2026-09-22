@@ -35,6 +35,17 @@ to the entry that replaced them.
   stays harness-only, because the lock is set only from action outputs. Phase 16's gate cases may
   hit the same limit.
 
+**Agentforce Studio -> Tests is a separate store** (not `AiEvaluationDefinition`; the CLI and a
+metadata listing don't see those suites). Two CSV suites were uploaded there and run:
+
+- **Conversation suite:** subagent/action assertions are unusable - every row reports
+  `Actual topics: []` while Session Tracing shows the routing and the action really happened. The
+  simulated-conversation runner seems to use the text-only Agent API path (`result: []`). Keep the
+  conversation-level scorers there and the assertions in the CLI suite.
+- **Single-turn suite:** the **Conciseness** scorer returns 0 with no reason (`evaluator.text_quality`)
+  and fails the shortest replies, while Response Evaluation passes 5/5 on the same rows. Known bug in
+  the vendored `agentforce-test` skill - deselect it, use coherence.
+
 **Not done yet:**
 
 - The voice set (`sfdx-project/specs/Keyburn_Voice.md`) is still to run in the Testing Center UI.

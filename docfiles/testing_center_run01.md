@@ -93,6 +93,35 @@ the simulated caller never gets past the confirm-back and no action fires.
   single-subagent rows.
 - The `escalation` rows create real High-priority Cases on every run, as in every other suite.
 
+## Agentforce Studio → Tests is a separate store, with different scorers (2026-09-22)
+
+The Studio suites built from the two CSVs are **not** `AiEvaluationDefinition` metadata: `sf agent
+test list` and a metadata listing show only the CLI's `Keyburn_Regression`, and `AiEvaluationTestSet`
+is empty. The two paths run independently and capture different things.
+
+**v2, conversation suite (20 simulated conversations): subagent and action assertions don't work.**
+
+- Every row failed with `Missing expected topics: [order_status]. Actual topics: []`, and the grid's
+  `Actual Subagent` cell is `{"content":[],...}` on all 20 rows.
+- Session Tracing shows the agent did route and act (`TOPIC_STEP agent_router` → `LLM_STEP
+  order_status` → `ACTION_STEP GetOrderStatus`), so this is capture, not behaviour.
+- Consistent with the documented fact that **the Agent API returns text only** (`result: []`): the
+  simulated-conversation runner appears to use that path, so no structured data reaches the scorers.
+  The CLI path does capture both (`generatedData.topic`, `actionsSequence`).
+- **So: assertions live in the CLI suite; the Studio conversation suite keeps the conversation-level
+  scorers** (Task Resolution, Quality, Deflection, Abandonment), which are judged from the transcript.
+  Still unconfirmed: whether "Text and voice" or the personas cause the drop — a Text-only,
+  Default-persona run of one row would settle it.
+
+**v1, single-turn suite (23 utterances): the Conciseness scorer is broken.**
+
+- Failing rows return `evaluator.text_quality`, `"Evaluation completed with score: 0.0"`, no reason.
+- `Response Evaluation` passes 5/5 on every row, including the failing ones, and Conciseness fails
+  the *shortest* replies (the one-line confirm-backs) while passing longer ones. It also splits
+  near-identical escalation rows.
+- Matches the known bug in `sf-skills.../agentforce-test`: conciseness returns 0; use coherence.
+- **So: deselect Conciseness.** With Response Evaluation only, v1 is green.
+
 ## Candidate agent fixes (not applied; they would need a new version before the Wed 18:00 freeze)
 
 - Finding 2: in `policy_faq`, state that questions about order stages, drafts or cancelling
