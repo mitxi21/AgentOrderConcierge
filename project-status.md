@@ -185,12 +185,21 @@ the Lambda (600 ms, no errors), its JWT auth, and Salesforce accepting the beaco
 independently from the laptop returned scopes `cdp_ingest_api api`, which is how the connected app
 was cleared of suspicion before looking further.
 
+**23:32 - the text pipeline is complete**: `Keyburn_Policy_Docs_v3` reads 3 / 3 / 3 across the
+directory, chunk and index tables, so the three policy documents are catalogued, chunked and
+embedded. Cataloguing to embedding took about 15 minutes unattended.
+
+**And the visual object answers the Intelligent Context question**: `Keyburn_Visual_Docs_v2__dll` = 1
+(the PDF is catalogued, so PDF ingestion works), while `Keyburn_Visual_Docs_IC_chunk` stays at 0.
+**A published Intelligent Context configuration is bound to the UDLO it was published onto and does
+not follow to a new one** - a new configuration is needed for `Keyburn_Visual_Docs_v2` (LLM-based
+parsing, no preprocessing, image processing off), and its chunks must be checked for the grade C
+instruction before publishing.
+
 **Still to do for Phase 13/13b:**
 
-- Chunk and index stages had not run yet (`_v3_chunk`, `_v3_index` = 0); they follow cataloguing.
-- **The visual PDF is not ingested**: `Keyburn_Visual_Docs` is also a pre-pipeline object. It needs a
-  new UDLO over the `visual` directory, created now, **without** the wizard's semantic search, with
-  Intelligent Context republished onto it.
+- A new Intelligent Context configuration on `Keyburn_Visual_Docs_v2` (the old one does not carry
+  over), then check its chunks hold the grade C instruction.
 - The retriever and the `OCC_Policy_Docs_Answer` prompt template must point at the **v3** index.
 - Tidy up: `Keyburn_Policy_Docs`, `_v2`, and the stray secrets `keyburn-probe-delete-me`,
   `keyburn-probe2-delete-me`, `keyburn-s3-consumer-key2`. `CloudWatchLogsReadOnlyAccess` was attached
