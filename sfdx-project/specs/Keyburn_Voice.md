@@ -21,8 +21,9 @@ left empty, and with each conversation's resolved ending described so Task Resol
 escalation fairly.
 
 Settings: Text and voice, **Default persona** (Accent persona is the interesting one for a second
-run, but it doubles the recordings), live actions, and the same scorers as the other suites —
-Response, Subagent, Action, Coherence, Latency; Completeness and Conciseness **off**.
+run, but it doubles the recordings), live actions, and **Task Resolution only** among the wizard's
+scorers, plus Quality / Deflection / Abandonment afterwards if wanted. Read an escalation's
+deflection and resolution scores knowing a handoff is the *correct* ending there.
 
 | # | Case | Conversation description | Pass when |
 |---|---|---|---|
