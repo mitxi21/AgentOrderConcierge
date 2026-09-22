@@ -7,6 +7,40 @@ to the entry that replaced them.
 
 ---
 
+## 2026-09-22 — Phase 13/13b blocked: the S3 documents are never catalogued
+
+**State:** the structure is all there and empty. Both unstructured data lake objects
+(`Keyburn_Policy_Docs`, `Keyburn_Visual_Docs`), the Intelligent Context config and its published
+objects (`Keyburn_Visual_Docs_IC_chunk/_index/_harmonized`), the search indexes and the retrievers
+exist. **Every table is empty, in both layers**: `__dll` (raw) as well as `__dlm` (mapped). So this is
+not a mapping/tagging problem - untagged fields would empty only the `__dlm` side.
+
+**What was eliminated, with evidence:**
+
+- **The files are in the bucket**: 3 HTML policy docs at the root and `visual/keyburn-packaging-damage-guide.pdf`,
+  listed straight from S3 with boto3.
+- **The credentials work**: the dedicated `AWS_S3_*` pair has ListBucket, GetObject and
+  GetBucketLocation on the bucket. (The main `AWS_*` pair from Phase 11 is denied on it - worth
+  knowing, but the connector is set up with the right one.)
+- **The object is healthy**: `Keyburn_Policy_Docs__dll` is Active, Directory Table, created
+  2026-09-22 13:31, Data Mapping 17/18 READY - and Total Records 0 with an **empty Refresh History**.
+- **No ingestion job exists**: the org's 28 data streams include no S3 stream, and the New Data
+  Stream wizard offers only CSV/Parquet for this connection, i.e. the structured path. There is no
+  Refresh action on the object and no unstructured endpoint in the API at 67.0.
+
+**Conclusion:** the cataloguing job never ran and cannot be started from the CLI. Possibly a
+Developer Edition limit on unstructured/file federation. **Fallback taken** (as the runbook's Phase
+13b cut-off allows): 13/13b go into the deck as *designed and built, not ingested*, with Phase 10
+standing as the working proof that the agent reads images. Nothing already built is wasted, and the
+honest version of this story - structure healthy, platform reporting success everywhere, zero rows -
+is itself good panel material.
+
+**If it is revisited:** check whether the S3 connection is the structured connector type rather than
+the file-storage one; the unstructured flow needs the latter before the stream wizard offers
+HTML/PDF.
+
+---
+
 ## 2026-09-22 — API 67 bump broke the map for the agent user: custom metadata access is enforced from 62
 
 All metadata was moved to **API 67.0** (29 Apex class metas, 2 LWC, 2 VF pages, the mdapi
