@@ -77,6 +77,22 @@ multi-turn ones stay in `Keyburn_Regression.yaml`, because the CSV has no conver
 - The 10 lookup rows assert the subagent and the confirm-back only: on the caller's first turn the
   agent reads the order number and email back, so no action has run yet.
 
+## CSV upload (conversation cases)
+
+`sfdx-project/specs/Keyburn_Conversation_upload.csv`, columns
+`Conversation,Expected Actions,Expected Subagents`, 20 rows. Here the Conversation column is a
+**description the platform simulates a caller from**, not scripted turns, so every row states what
+the caller supplies when asked (email, order or case number, and the confirmation). Without that,
+the simulated caller never gets past the confirm-back and no action fires.
+
+- Because a simulated conversation really runs the actions, this file can carry the case the YAML
+  spec can't: the **identity switch** (verify as maria.garcia, then ask for jane.doe's order). The
+  lock lives in `@variables.verified_email`, which only an action output sets.
+- Two rows expect two subagents (topic switch, and open cases after an order lookup). They use the
+  same list style as Expected Actions; if the upload rejects a list there, split them into
+  single-subagent rows.
+- The `escalation` rows create real High-priority Cases on every run, as in every other suite.
+
 ## Candidate agent fixes (not applied; they would need a new version before the Wed 18:00 freeze)
 
 - Finding 2: in `policy_faq`, state that questions about order stages, drafts or cancelling

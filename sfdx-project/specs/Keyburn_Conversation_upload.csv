@@ -1,0 +1,21 @@
+Conversation,Expected Actions,Expected Subagents
+"User asks for the status of order ORD-1042, gives the email jane.doe@example.com when asked, and confirms when the agent reads both back",['GetOrderStatus'],order_status
+"User asks where order 1042 is right now and how long until it arrives, gives the email jane.doe@example.com, and confirms when the agent reads both back",['GetOrderDeliveryInfo'],order_status
+"User asks to track order ORD-1038, gives the email maria.garcia@example.com, and confirms when the agent reads both back; that order has not shipped yet",['GetOrderDeliveryInfo'],order_status
+"User asks to track order ORD-2077, gives the email john.smith@example.com, and confirms when the agent reads both back; that order was already delivered",['GetOrderDeliveryInfo'],order_status
+"User asks for the status of order 1100, gives the email jane.doe@example.com, and confirms when the agent reads both back; that order is still a draft that was never submitted",['GetOrderStatus'],order_status
+"User asks whether order ORD-2077 can be returned, gives the email john.smith@example.com, and confirms when the agent reads both back",['CheckReturnEligibility'],return_eligibility
+"User asks for the status of support case 1026, gives the email jane.doe@example.com, and confirms when the agent reads both back",['GetCaseStatus'],case_status
+"User asks whether they have any open cases, gives the email jane.doe@example.com and order number ORD-1042, and confirms when the agent reads them back",['ListOpenCases'],case_status
+"User asks whether they have any open cases, gives the email maria.garcia@example.com and order number ORD-1038, and confirms when the agent reads them back; they have none, and the user declines the offer to open one",['ListOpenCases'],case_status
+"User asks to open a support case because their bluetooth speaker order has not shipped, gives the email alex.chen@example.com and order number ORD-1033, and confirms when the agent reads them back",['CreateSupportCase'],case_status
+"User first asks about the return policy, then changes subject and asks for the status of order ORD-1042 with the email jane.doe@example.com, confirming when the agent reads both back","['GetOrderStatus']","['policy_faq', 'order_status']"
+"User asks for the status of order 1042 with the email jane.doe@example.com, confirms when the agent reads both back, and then asks whether they have any open cases without repeating their details","['GetOrderStatus', 'ListOpenCases']","['order_status', 'case_status']"
+"User asks where order 1042 is, first gives the email as jane.dough@example.com, corrects it to jane.doe@example.com when the agent reads it back, and confirms",['GetOrderDeliveryInfo'],order_status
+"User asks for the status of order O-1O42 with the email jane.doe@example.com, then corrects the order number to 1042 when the agent reads it back, and confirms",['GetOrderStatus'],order_status
+"User asks where order 1042 is and answers with only their first name Jane when asked for their email address, then gives the full email jane.doe@example.com when the agent asks again",['GetOrderDeliveryInfo'],order_status
+"User gives the email maria.garcia@example.com to track order 1088 and confirms, then says their email is now jane.doe@example.com and asks about order 1097; the agent must refuse the second account and look up nothing for it",['GetOrderDeliveryInfo'],order_status
+User demands a refund for their last order right now,['CreateEscalationCase'],escalation
+"User wants an order looked up but does not remember their email or order number and asks to be searched by name instead",['CreateEscalationCase'],escalation
+"User is furious because this is the third time they have called about the same unresolved issue",['CreateEscalationCase'],escalation
+User asks to cancel their entire account and delete all their data,['CreateEscalationCase'],escalation
