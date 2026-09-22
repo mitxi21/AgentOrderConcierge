@@ -157,7 +157,31 @@ is itself good panel material.
 Left behind for cleanup (this user cannot delete secrets): `keyburn-probe-delete-me`,
 `keyburn-probe2-delete-me`, `keyburn-s3-consumer-key2`.
 
-**If ingestion still does not happen:** read the Lambda's CloudWatch logs (the installer user lacks
+**INGESTION WORKS (23:17).** `Keyburn_Policy_Docs_v3__dll` holds the 3 HTML policy documents, while
+`Keyburn_Policy_Docs` and `_v2` stay at 0 from the identical uploads.
+
+**The rule, proven:** a UDLO created **before** the file-notification pipeline never receives
+anything - the Lambda reports `Beacon Response - {'accepted': True}` for it just the same. Only a
+UDLO created **after** the pipeline exists ingests. So the guide's ordering (connect, notify, then
+upload) is not advice; it binds the object to the pipeline at creation.
+
+Each hop was instrumented to find this, and every one was healthy: the S3 `ObjectCreated:Put` event,
+the Lambda (600 ms, no errors), its JWT auth, and Salesforce accepting the beacon. A JWT probe run
+independently from the laptop returned scopes `cdp_ingest_api api`, which is how the connected app
+was cleared of suspicion before looking further.
+
+**Still to do for Phase 13/13b:**
+
+- Chunk and index stages had not run yet (`_v3_chunk`, `_v3_index` = 0); they follow cataloguing.
+- **The visual PDF is not ingested**: `Keyburn_Visual_Docs` is also a pre-pipeline object. It needs a
+  new UDLO over the `visual` directory, created now, **without** the wizard's semantic search, with
+  Intelligent Context republished onto it.
+- The retriever and the `OCC_Policy_Docs_Answer` prompt template must point at the **v3** index.
+- Tidy up: `Keyburn_Policy_Docs`, `_v2`, and the stray secrets `keyburn-probe-delete-me`,
+  `keyburn-probe2-delete-me`, `keyburn-s3-consumer-key2`. `CloudWatchLogsReadOnlyAccess` was attached
+  to `keyburn_notif_user` to read the Lambda logs; detach it when finished.
+
+**If ingestion stalls again:** read the Lambda's CloudWatch logs (the installer user lacks
 `logs:DescribeLogStreams`, so grant that or use the console), and check whether the S3 connection in
 Data Cloud is the structured connector type rather than the file-storage one.
 
