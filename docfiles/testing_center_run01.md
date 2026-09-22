@@ -151,6 +151,22 @@ topics. So the limitation is the conversation runner, not Studio as a whole.
 - Matches the known bug in `sf-skills.../agentforce-test`: conciseness returns 0; use coherence.
 - **So: deselect Conciseness.** With Response Evaluation only, v1 is green.
 
+## A voice run fills a Developer Edition org's file storage (2026-09-22)
+
+Running the conversation suite with **"Text and voice"** made Studio store a WAV per conversation:
+19 files, **199 MB**, against this org's **20 MB** file limit. Everything then failed with "Your
+organization is using all its file storage, so you can't add new files" - including uploading a new
+test-case CSV.
+
+- Fix: `sfdx-project/scripts/purge_voice_recordings.apex` deletes `voice_conversation_%` files and
+  empties the recycle bin (deleted files keep counting until it is). It leaves the two files the
+  agent needs: the Phase 10 workflow diagram PNG and the Phase 13b damage-guide PDF.
+- The storage figure is recalculated asynchronously, so `sf org list limits` can still show the old
+  number for a minute after the purge.
+- **Budget roughly 10 MB per voice conversation.** Use Text only for routine runs; keep voice for a
+  small deliberate set (the 3 cases in `specs/Keyburn_Voice.md`) and purge straight afterwards.
+  A 20-row suite over two personas would be ~400 MB and cannot complete.
+
 ## Candidate agent fixes (not applied; they would need a new version before the Wed 18:00 freeze)
 
 - Finding 2: in `policy_faq`, state that questions about order stages, drafts or cancelling

@@ -42,6 +42,12 @@ redacted identifier enters the repo. 31 seeded Cases remain (00001000-00001030).
 survive: jane.doe 3 open (incl. 00001026, which `happy_case_status` looks up), maria.garcia 0 open,
 alex.chen 0 open. Re-run it before the demo if the case list will be on screen.
 
+**A voice run filled the org's file storage.** The conversation suite ran with "Text and voice", so
+Studio stored 19 WAV recordings totalling 199 MB against this Developer Edition's 20 MB file limit;
+every upload afterwards was refused. `sfdx-project/scripts/purge_voice_recordings.apex` clears them
+(and empties the recycle bin, which otherwise keeps the space) while keeping the workflow diagram PNG
+and the damage-guide PDF. Budget ~10 MB per voice conversation: routine runs go Text only.
+
 **What the Studio v1 failures actually were** (from its exported CSV, agent v38):
 
 - **A blank `Expected Actions` cell fails rather than skipping the assertion.** The `case 1026` row
