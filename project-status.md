@@ -7,6 +7,44 @@ to the entry that replaced them.
 
 ---
 
+## 2026-09-22 — Phase 14: Knowledge readiness 68 → 85; the rewrite made the agent worse for a while
+
+- **Tool:** `salesforce/agentforce-knowledge-readiness`, vendored in `tools/knowledge-readiness/`
+  (git-ignored) and deployed from there.
+  - A dry run deployed 537/537 components with 0 errors.
+  - It overwrites nothing of ours. The only change to our objects is one extra text field,
+    `Knowledge__kav.Merged_Into__c`.
+  - The admin has `KB_Assessment_Setup_Admin`, `KB_Assessment_Admin` and `KB_Knowledge_Author`.
+  - Setup: content field `Article_Body__c`, data categories off, search index
+    `KA_Agent_Library_Data_Space` (ADL = yes).
+  - The Knowledge Article Record Page is activated as the org default.
+- **run01:** 67.8. Three articles (Warranty, Returns, Exchange) were blocked by a deterministic rule:
+  a two-word title. The workflow article scored Not Ready because its facts live in the diagram.
+- **Decisions (builder):**
+  - Fix the titles with the tool's own *Fix with AI*, reviewed by a person.
+  - **Leave the workflow article as it is.** Its low score is the Phase 10 trade-off (image-only
+    facts are invisible to text search) and goes into the deck as such.
+- **run02:** 84.9, with 5 Ready and 1 Needs Work. Details: `docfiles/knowledge_readiness_run02.md`.
+- **The AI invented a fact:** the Exchange draft added "style, or version". Review caught it; it was
+  corrected by a one-phrase edit published as v3.
+- **Rerun re-scores a run in place:** run01's record now shows 84.7. The baseline is preserved in
+  `docfiles/knowledge_readiness_run01.md`.
+- **Regression in the agent, caught by the two new `knowledge_*` evals:** after republishing, the
+  agent said it couldn't find warranty or exchange answers. From the trace and the Data Cloud tables:
+  1. Publishing a version archives the old one, and the search ignores archived versions.
+  2. The data stream picked up the new versions at 14:20 UTC.
+  3. The Data Library's search index still chunked only the six **old** version IDs, even after a
+     manual rebuild.
+
+  So the three rewritten articles were invisible to the agent until the index re-chunked. Checking
+  it takes two SQL queries: `SourceRecordId__c` in `KA_Agent_Library_Data_Space_chunk__dlm` vs
+  `ssot__Id__c` in `ssot__KnowledgeArticleVersion__dlm`.
+- **Rule:** no Knowledge edits after Wed 23. A content change needs a stream refresh **and** an index
+  rebuild before the agent sees it.
+- **Open at the time of writing:** index re-chunk; the Exchange v3 stream refresh; Policy/FAQ evals.
+
+---
+
 ## 2026-09-22 — Phase 12 done: Session Tracing on, Agent Analytics installed
 
 **Starting state:** Data Cloud on, Standard Data Model 1.132 (≥ 1.130 required), `default` data
