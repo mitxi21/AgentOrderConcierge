@@ -44,3 +44,9 @@ RehearsalScript.txt
 
 # Phase 14: vendored salesforce/agentforce-knowledge-readiness (its own sfdx project, local only)
 tools/knowledge-readiness/
+
+# Demo screenshots: useful for the deck, not needed in the repo, and they can show org URLs.
+# NOTE: docfiles/order_workflow_diagram.png IS tracked on purpose - Phase 10 reads that image.
+docfiles/Keyburn_Regression_test.png
+docfiles/Keyburn_Voice_Test.png
+docfiles/screenshots/
