@@ -391,7 +391,19 @@ cd src; py -3.8 run_eval.py eval_cases.yaml
   - Don't assert `AnswerQuestionsWithKnowledge`. The agent-level `knowledge:` block injects the
     articles into the `policy_faq` prompt, so FAQs are answered without that action.
   - Voice cases are only in the UI: `specs/Keyburn_Voice.md`.
-  - Baseline: `docfiles/testing_center_run01.md`.
+  - **Agentforce Studio → Tests is a different store** from this CLI suite (its suites are not
+    `AiEvaluationDefinition`, so `sf agent test list` never shows them). Upload CSVs:
+    `specs/Keyburn_Regression_upload.csv` (rows that fire an action), `_noaction.csv` (rows that
+    can't — a **blank Expected Actions cell fails**, it doesn't skip) and
+    `Keyburn_Conversation_upload.csv` (simulated multi-turn callers). In Studio: turn **off**
+    Completeness and Conciseness, check the **Conditions** step for live vs simulated actions
+    (simulated returns null outputs, so the agent says "case number is None"), and don't expect
+    subagent/action assertions to work in the *conversation* suite — its actual values come back
+    empty.
+  - Baseline and all of the above with evidence: `docfiles/testing_center_run01.md`.
+  - Suite runs create Cases as the agent user. `scripts/purge_eval_cases.apex` deletes them
+    (`Origin = 'Agentforce Agent'` + creator profile *Einstein Agent User*) and keeps the seeded
+    data, so jane.doe keeps open cases and maria.garcia keeps none.
 - **Expect a bad first run.** 50–70% pass is normal and is *good material* — save that first
   report. A climbing pass rate across saved runs is the Reliability & Evaluation evidence; a
   suite that passes first time mostly signals the tests were too easy.

@@ -67,15 +67,21 @@ Results: `src/eval_reports/testing_center/tc_run01*_v38_*.json` (and `.junit.xml
 ## CSV upload (single-turn cases)
 
 Testing Center also takes a CSV of test cases, with the columns
-`Utterance,Expected Subagent,Expected Actions,Expected Response`.
-`sfdx-project/specs/Keyburn_Regression_upload.csv` holds the **single-turn** cases, 23 rows; the
-multi-turn ones stay in `Keyburn_Regression.yaml`, because the CSV has no conversation history.
+`Utterance,Expected Subagent,Expected Actions,Expected Response`. Multi-turn cases stay in
+`Keyburn_Regression.yaml`, because the CSV has no conversation history. Two files, because a blank
+Expected Actions cell fails rather than skipping the assertion:
 
-- 9 rows assert an action: 4 workflow (`ExplainOrderWorkflow`), 4 escalation
-  (`CreateEscalationCase`), 1 open cases (`ListOpenCases`).
-- The 4 Knowledge rows leave Expected Actions blank, for the reason in finding 1.
-- The 10 lookup rows assert the subagent and the confirm-back only: on the caller's first turn the
-  agent reads the order number and email back, so no action has run yet.
+- `specs/Keyburn_Regression_upload.csv` — **10 rows that really fire an action** in one turn:
+  4 workflow (`ExplainOrderWorkflow`), 4 escalation (`CreateEscalationCase`), open cases
+  (`ListOpenCases`) and case status (`GetCaseStatus`). Upload with Action Evaluation **on**,
+  and with **live** actions.
+- `specs/Keyburn_Regression_noaction.csv` — **13 rows that can't**: the 4 Knowledge answers (the
+  articles are injected into the prompt) and 9 lookups, where the caller's first turn only earns a
+  confirm-back. Upload as a separate suite with Action Evaluation **off**; it asserts the subagent
+  and the reply.
+
+Scorers for both: Response (`bot_response_rating`), Subagent, Coherence, Latency. **Off**:
+Completeness (fails a correct confirm-back) and Conciseness (returns 0 regardless).
 
 ## CSV upload (conversation cases)
 
@@ -113,7 +119,30 @@ is empty. The two paths run independently and capture different things.
   Still unconfirmed: whether "Text and voice" or the personas cause the drop — a Text-only,
   Default-persona run of one row would settle it.
 
-**v1, single-turn suite (23 utterances): the Conciseness scorer is broken.**
+**Correction:** subagent assertions work fine in the **single-turn** suite — `planner_topic_assertion`
+passed on every row with `Actual Subagent` populated. Only the **conversation** suite returns empty
+topics. So the limitation is the conversation runner, not Studio as a whole.
+
+**v1, single-turn suite: three separate causes, only one of them the agent.**
+
+1. **A blank `Expected Actions` cell is not "don't assert".** Studio runs
+   `planner_actions_assertion` anyway and fails an empty expected list. Proof: the `case 1026` row
+   had `Actual Actions = [GetCaseStatus]`, the agent was right, and the row still failed because the
+   cell was empty. Hence the split into two CSVs: `Keyburn_Regression_upload.csv` (10 rows that
+   really fire an action) and `Keyburn_Regression_noaction.csv` (13 rows that can't, to upload as a
+   separate suite **with Action Evaluation off**).
+2. **Completeness is the wrong scorer for single-turn cases.** A confirm-back ("I heard order 1042
+   … is that right?") is correct *and* incomplete by definition, so it scores 1–2/5. Turn it off
+   here; Response Evaluation (`bot_response_rating`) is the one that passes on those rows.
+3. **Action mode: that run used simulated actions.** It created no Cases at all — the last Case in
+   the org was still 00001242 from the conversation run — yet `Actual Actions` listed
+   `CreateEscalationCase`. That is why the replies said "your case number is **None**" and "I wasn't
+   able to open a case right now": the action was selected but never executed, so its outputs were
+   null. An earlier v1 run *did* create Cases 00001234–00001237, so this is a per-suite setting (the
+   wizard's **Conditions** step). **Run the action suite live** — asserting that an escalation really
+   logs a Case is a core claim — and expect ~5 Cases per run.
+
+**The Conciseness scorer is broken (unchanged).**
 
 - Failing rows return `evaluator.text_quality`, `"Evaluation completed with score: 0.0"`, no reason.
 - `Response Evaluation` passes 5/5 on every row, including the failing ones, and Conciseness fails
@@ -126,5 +155,8 @@ is empty. The two paths run independently and capture different things.
 
 - Finding 2: in `policy_faq`, state that questions about order stages, drafts or cancelling
   **always** call `ExplainOrderWorkflow`, because the article text doesn't hold the diagram's facts.
+  **Reproduced a third time** in the Studio v1 run ("Can I still cancel an order after it has
+  shipped?" and "What does it mean when an order is in Draft?" both returned empty Actual Actions),
+  after CLI runs 01 and 01b. The two rows that did call it answered with the image-only facts.
 - Finding 3: tighten the router's `go_to_escalation` description, or accept it and keep the
   assertion as a known wobble. It is harmless today only because the escalation subagent re-asks.

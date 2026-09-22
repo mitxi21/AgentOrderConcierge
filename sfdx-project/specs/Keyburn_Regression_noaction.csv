@@ -1,0 +1,14 @@
+Utterance,Expected Subagent,Expected Actions,Expected Response
+What's your return policy?,policy_faq,,items can be returned within 30 days of delivery if unused and in original packaging
+How long does standard shipping take?,policy_faq,,standard shipping takes 5 to 7 business days from the ship date
+Does the warranty cover accidental damage?,policy_faq,,the warranty does not cover accidental damage
+Is there a restocking fee if I exchange an item?,policy_faq,,there is no restocking fee for an exchange
+Where is my order 1042? My email is jane.doe@example.com,order_status,,the order number and email are read back once for confirmation
+My email is jane.doe@example.com and my order number is ORD-1042 what is its status,order_status,,the order number and email are read back once for confirmation
+What's the status of order 1100? My email is jane.doe@example.com.,order_status,,the order number and email are read back once for confirmation
+Where is my order ORD-1038 right now? My email is maria.garcia@example.com,order_status,,the order number and email are read back once for confirmation
+Can you track my order ORD-2077? john.smith@example.com,order_status,,the order number and email are read back once for confirmation
+Check the status of order O-1O42 my email is jane.doe@example.com,order_status,,the order number is read back with its letters so a mishearing can be corrected
+Is my order eligible for a return? john.smith@example.com order ORD-2077.,return_eligibility,,the order number and email are read back once for confirmation
+Do I have any open cases? My email is maria.garcia@example.com and my order number is ORD-1038.,case_status,,the order number and email are read back once for confirmation
+I'd like to open a support case: my bluetooth speaker order hasn't shipped yet. My email is alex.chen@example.com and my order number is ORD-1033.,case_status,,the request is read back for confirmation before any case is opened

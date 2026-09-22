@@ -35,6 +35,30 @@ to the entry that replaced them.
   stays harness-only, because the lock is set only from action outputs. Phase 16's gate cases may
   hit the same limit.
 
+**Case purge (2026-09-22, after the runs):** 211 Cases created by the agent user across eval,
+Testing Center and Studio runs were deleted by `sfdx-project/scripts/purge_eval_cases.apex`, which
+selects on `Origin = 'Agentforce Agent'` **and the creator's profile** (`Einstein Agent User`), so no
+redacted identifier enters the repo. 31 seeded Cases remain (00001000-00001030). The eval invariants
+survive: jane.doe 3 open (incl. 00001026, which `happy_case_status` looks up), maria.garcia 0 open,
+alex.chen 0 open. Re-run it before the demo if the case list will be on screen.
+
+**What the Studio v1 failures actually were** (from its exported CSV, agent v38):
+
+- **A blank `Expected Actions` cell fails rather than skipping the assertion.** The `case 1026` row
+  had `Actual Actions = [GetCaseStatus]` and still failed on an empty expected list. The upload CSV
+  is now split: `Keyburn_Regression_upload.csv` (10 rows that fire an action) and
+  `Keyburn_Regression_noaction.csv` (13 that can't, Action Evaluation off).
+- **Completeness fails a correct confirm-back** by definition; Response Evaluation passes it. Keep
+  Completeness and Conciseness off for single-turn suites.
+- **That run used simulated actions**: no Cases were created, yet `Actual Actions` listed
+  `CreateEscalationCase`, so the replies said "your case number is None" and "I wasn't able to open a
+  case". An earlier v1 run did create Cases, so it's a per-suite setting (wizard **Conditions**).
+  Run the action suite live.
+- **Correction to the entry above:** subagent assertions work in the single-turn suite (every row
+  passed with `Actual Subagent` populated). Only the *conversation* suite returns empty topics.
+- **`ExplainOrderWorkflow` skipped a third time**, on the cancel-after-shipping and what-is-Draft
+  questions. Still open.
+
 **Agentforce Studio -> Tests is a separate store** (not `AiEvaluationDefinition`; the CLI and a
 metadata listing don't see those suites). Two CSV suites were uploaded there and run:
 
