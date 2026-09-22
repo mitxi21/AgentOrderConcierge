@@ -20,6 +20,7 @@ Results: `src/eval_reports/testing_center/tc_run01*_v38_*.json` (and `.junit.xml
 ## What run 01 found, root-caused from Session Tracing
 
 **1. Knowledge answers call no action (test defect, fixed in 01b).**
+
 - Symptom: the four Policy/FAQ cases answered correctly but reported no `AnswerQuestionsWithKnowledge`.
 - Evidence: the traced steps (`ssot__AiAgentInteractionStep__dlm`) have no `ACTION_STEP` at all.
 - Cause: the `policy_faq` LLM step's prompt already contains a `# KNOWLEDGE ARTICLES` section, which
@@ -28,6 +29,7 @@ Results: `src/eval_reports/testing_center/tc_run01*_v38_*.json` (and `.junit.xml
 - Fix: the spec no longer asserts the action on these cases; the outcome asserts the fact instead.
 
 **2. The workflow diagram is sometimes skipped (agent finding, open).**
+
 - Also cause 1: the injected text includes the workflow article's text, so the model sometimes
   answers from it instead of reading the image with `ExplainOrderWorkflow`.
 - `workflow_what_draft_means` skipped it on both runs. The answer was still acceptable.
@@ -37,12 +39,14 @@ Results: `src/eval_reports/testing_center/tc_run01*_v38_*.json` (and `.junit.xml
 - The Python harness passed this case in run 28, so only an action assertion can see this.
 
 **3. "Jane." is routed to escalation (agent finding, open).**
+
 - Case: `edge_partial_answer_does_not_escalate`, wrong on both runs.
 - The router sends the partial answer to `escalation`, despite its "NOT for a caller whose answer
   was partial" description. The escalation subagent then correctly re-asks for the email and
   creates no Case, so the reply is right while the routing is wrong. The text harness can't see this.
 
 **4. Judge wording (test defect, fixed in 01b).**
+
 - Case: `edge_correction_then_single_yes`.
 - The judge failed a correct reply, which went straight to distance and ETA after the correction,
   because the outcome sentence read as though the reply had to acknowledge the correction.
@@ -59,6 +63,19 @@ Results: `src/eval_reports/testing_center/tc_run01*_v38_*.json` (and `.junit.xml
 - Topic names are the `.agent` subagent names as they are (`order_status`, …); no hash suffixes.
   Action names are the reasoning-action names (identical to the definitions in this agent).
 - A 28-case run takes about 4 minutes.
+
+## CSV upload (single-turn cases)
+
+Testing Center also takes a CSV of test cases, with the columns
+`Utterance,Expected Subagent,Expected Actions,Expected Response`.
+`sfdx-project/specs/Keyburn_Regression_upload.csv` holds the **single-turn** cases, 23 rows; the
+multi-turn ones stay in `Keyburn_Regression.yaml`, because the CSV has no conversation history.
+
+- 9 rows assert an action: 4 workflow (`ExplainOrderWorkflow`), 4 escalation
+  (`CreateEscalationCase`), 1 open cases (`ListOpenCases`).
+- The 4 Knowledge rows leave Expected Actions blank, for the reason in finding 1.
+- The 10 lookup rows assert the subagent and the confirm-back only: on the caller's first turn the
+  agent reads the order number and email back, so no action has run yet.
 
 ## Candidate agent fixes (not applied; they would need a new version before the Wed 18:00 freeze)
 
