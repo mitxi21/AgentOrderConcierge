@@ -52,6 +52,22 @@
   expect:
     contains_any: ["business day", "shipping"]
 
+# Phase 14: the Knowledge readiness AI fix rewrote the Warranty and Exchange articles (new titles,
+# restructured bodies). These pin the facts the rewrite had to keep.
+- id: knowledge_warranty_excludes_accidental_damage
+  category: knowledge
+  turns:
+    - "Does the warranty cover accidental damage?"
+  expect:
+    contains_any: ["not cover", "doesn't cover", "does not cover", "isn't covered", "not covered", "excludes", "excluded"]
+
+- id: knowledge_exchange_no_restocking_fee
+  category: knowledge
+  turns:
+    - "Is there a restocking fee if I exchange an item?"
+  expect:
+    contains_any: ["no restocking", "no fee", "isn't a restocking", "there is no", "there's no", "free of charge", "no charge"]
+
 - id: escalation_refund_request
   category: escalation
   turns:
