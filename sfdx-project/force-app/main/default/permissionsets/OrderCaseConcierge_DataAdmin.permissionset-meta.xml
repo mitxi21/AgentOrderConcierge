@@ -9,6 +9,7 @@
         <name>Keyburn_Setting__mdt</name>
     </customMetadataTypeAccesses>
 
+
     <classAccesses>
         <apexClass>OCC_GetOrderStatus</apexClass>
         <enabled>true</enabled>
@@ -69,6 +70,14 @@
         <apexClass>OCC_OrderMapRest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
+    <classAccesses>
+        <apexClass>OCC_SendVerificationCode</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>OCC_VerifyCode</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
 
     <objectPermissions>
         <object>Order__c</object>
@@ -108,6 +117,15 @@
     </objectPermissions>
     <objectPermissions>
         <object>CaseComment</object>
+        <allowCreate>true</allowCreate>
+        <allowRead>true</allowRead>
+        <allowEdit>true</allowEdit>
+        <allowDelete>true</allowDelete>
+        <viewAllRecords>true</viewAllRecords>
+        <modifyAllRecords>true</modifyAllRecords>
+    </objectPermissions>
+    <objectPermissions>
+        <object>OCC_Verification__c</object>
         <allowCreate>true</allowCreate>
         <allowRead>true</allowRead>
         <allowEdit>true</allowEdit>
@@ -211,9 +229,53 @@
         <readable>true</readable>
         <editable>true</editable>
     </fieldPermissions>
+    <fieldPermissions>
+        <field>OCC_Verification__c.Contact__c</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <field>OCC_Verification__c.Code_Plain__c</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <field>OCC_Verification__c.Code_Hash__c</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <field>OCC_Verification__c.Expires_At__c</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <field>OCC_Verification__c.Attempts__c</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <field>OCC_Verification__c.Verified__c</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <field>OCC_Verification__c.Verified_Email__c</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <field>OCC_Verification__c.Sent_To__c</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
 
     <recordTypeVisibilities>
         <recordType>Knowledge__kav.Policy_FAQ</recordType>
         <visible>true</visible>
     </recordTypeVisibilities>
+    <tabSettings>
+        <tab>OCC_Verification__c</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
 </PermissionSet>

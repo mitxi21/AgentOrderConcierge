@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Test_Mode__c</fullName>
+    <label>Test Mode</label>
+    <description>When true, OCC_SendVerificationCode does not email the code and stores it in plain text on the verification row, so the harness - and the demo - can read it there. This is a Developer Edition trade-off, not a design choice: the org sends without domain authentication (Proton flags it as phishing) and allows only 15 single emails a day. In production this stays false and the code only ever exists in the caller's mailbox.</description>
+    <type>Checkbox</type>
+    <defaultValue>false</defaultValue>
+</CustomField>

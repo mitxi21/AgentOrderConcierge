@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Demo_Inbox__c</fullName>
+    <label>Demo Inbox</label>
+    <description>Mailbox that receives verification codes for demo contacts. An @example.com address is routed to a plus-alias of it, so one inbox receives every code and the eval data keeps its original addresses. Blank = send to the contact's own address.</description>
+    <type>Email</type>
+    <required>false</required>
+    <externalId>false</externalId>
+    <unique>false</unique>
+</CustomField>

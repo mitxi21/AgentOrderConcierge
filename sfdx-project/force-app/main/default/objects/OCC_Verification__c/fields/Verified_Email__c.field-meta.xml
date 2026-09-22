@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Verified_Email__c</fullName>
+    <label>Verified Email</label>
+    <description>The address the caller claimed, i.e. the Contact's own email - not the routed demo inbox.</description>
+    <type>Email</type>
+    <required>false</required>
+</CustomField>

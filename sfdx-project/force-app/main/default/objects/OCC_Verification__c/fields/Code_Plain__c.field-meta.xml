@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Code_Plain__c</fullName>
+    <label>Code (test mode only)</label>
+    <description>EVAL ONLY. Populated only while Keyburn_Setting__mdt.Test_Mode__c is true, so the harness can read the code it would otherwise only find in the mailbox. Empty in normal operation, including the demo.</description>
+    <type>Text</type>
+    <length>10</length>
+    <required>false</required>
+</CustomField>

@@ -1,7 +1,7 @@
 // TEMPLATE - do not put the real key here. Generate the runnable copy from secrets.env:
 //
 //   . .\load_secrets.ps1
-//   $t = (Get-Content sfdx-project\scripts\set_keyburn_settings.apex.example -Raw).Replace('PUT-THE-KEY-HERE', $env:GOOGLE_MAPS_API_KEY)
+//   $t = (Get-Content sfdx-project\scripts\set_keyburn_settings.apex.example -Raw).Replace('PUT-THE-KEY-HERE', $env:GOOGLE_MAPS_API_KEY).Replace('PUT-THE-DEMO-INBOX-HERE', $env:REDACT_DEMO_INBOX)
 //   [IO.File]::WriteAllText("$pwd\sfdx-project\scripts\set_keyburn_settings.apex", $t, (New-Object Text.UTF8Encoding($false)))
 //   cd sfdx-project; sf apex run --file scripts/set_keyburn_settings.apex --target-org devorg
 //
@@ -23,7 +23,15 @@ Map<String, Object> values = new Map<String, Object>{
     'Warehouse_Latitude__c' => 40.45,
     'Warehouse_Longitude__c' => -3.69,
     'Average_Speed_Kmh__c' => 35,
-    'Google_Maps_Api_Key__c' => 'PUT-THE-KEY-HERE'
+    'Google_Maps_Api_Key__c' => 'PUT-THE-KEY-HERE',
+    // Phase 16: verification codes for @example.com contacts go to a plus-alias of this mailbox,
+    // so one inbox receives every code and the eval data keeps its original addresses.
+    'Demo_Inbox__c' => 'PUT-THE-DEMO-INBOX-HERE',
+    // No email is sent and the code is stored in plain text so the harness - and the demo - can
+    // read it from the verification record. A Developer Edition trade-off: this org sends without
+    // domain authentication (Proton flags it as phishing) and caps single emails at 15 a day.
+    // In a customer org this is false and the code only ever exists in the mailbox.
+    'Test_Mode__c' => true
 };
 for (String field : values.keySet()) {
     Metadata.CustomMetadataValue v = new Metadata.CustomMetadataValue();

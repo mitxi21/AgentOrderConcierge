@@ -57,6 +57,12 @@ variables:
         description: "True once a lookup has verified the caller's email in this conversation."
     verified_email: mutable string = ""
         description: "The email verified by the first successful lookup in this conversation."
+    # Phase 16 - email ownership gate. Only OCC_VerifyCode's output can set this to True, so the
+    # instructions below branch on a fact about the org rather than on a prompt-level promise.
+    email_verified: mutable boolean = False
+        description: "True once the caller has read back the six-digit code emailed to their address."
+    code_email: mutable string = ""
+        description: "The address a verification code was last sent to in this conversation."
 
 knowledge:
     rag_feature_config_id: "ARFPC_1JDak00000MMea1GAD"
@@ -82,6 +88,8 @@ start_agent agent_router:
                 description: "Caller asks a general question about Keyburn policies (returns, exchanges, warranty, shipping times, damaged items) or about how orders work in general: the stages an order goes through, what a status such as Draft means, what happens to a draft that is never submitted, or whether and when an order can be cancelled. A question about how things work, not a lookup of the caller's own order."
             go_to_escalation: @utils.transition to @subagent.escalation
                 description: "Caller asks for a refund, payment, or money back; is angry, frustrated, or calling again about an unresolved issue; explicitly says they don't know, don't remember, or don't have their email, order number, or case number, or asks to be looked up by name instead; or asks for something outside order status, case status, return eligibility, and policy questions, such as cancelling or deleting their account. NOT for a caller who simply hasn't given a detail yet, or whose answer was partial, mis-heard, or cut off - they are still mid-conversation and belong in the topic they were already in. A reply that is only a first name, only part of an email address, or only a few digits is a partial answer to the question just asked, not a statement that they cannot provide it: keep it in the topic that asked."
+            go_to_customer_verification: @utils.transition to @subagent.customer_verification
+                description: "Caller is reading back a six-digit verification code, says the code hasn't arrived or has expired, or asks to be sent a new one. Also when they want their own order or case data and have not yet been verified in this conversation."
             go_to_off_topic: @utils.transition to @subagent.off_topic
             go_to_ambiguous_question: @utils.transition to @subagent.ambiguous_question
                 description: "Only when it is unclear what the caller wants. Not when the caller says they can't provide their email, order number, or case number — that goes to escalation."
@@ -92,6 +100,7 @@ subagent order_status:
     reasoning:
         instructions: ->
             |You help the caller check the status of their order.
+             Before ANY order lookup, tracking or delivery action, the caller must be verified in this conversation. If {!@variables.email_verified} is not True, don't call a lookup action and don't ask for an order number yet: use {!@actions.go_to_customer_verification} so they can prove they own their email address first.
              Before calling any action, you must have BOTH the caller's email address AND their order number. Ask for whichever is missing before proceeding.
              Once you have both, confirm them in ONE question covering the order number and the email together — for example: "I heard order 1042 with the email jane.doe@example.com, is that right?" Leave out a standard ORD prefix, but if the number contains any other letters, read them out so the caller can correct a mishearing. When the caller says yes, both are confirmed: straight away call the action that answers what they asked — {!@actions.GetOrderDeliveryInfo} if they asked where the order is, how far away it is, how long until it arrives or to track it; otherwise {!@actions.GetOrderStatus} — and never ask a second confirmation question.
              Never guess or assume an identifier. If the caller says they don't know, don't remember, or can't find their email or order number, do not ask again — use {!@actions.go_to_escalation} immediately.
@@ -107,6 +116,8 @@ subagent order_status:
                 | This conversation is already verified for {!@variables.verified_email}. Don't ask for the email again and don't read it back: for a new order, confirm only the order number ("I heard order 1097, is that right?"), then call the action with email {!@variables.verified_email}.
                   If the caller gives a different email address, or asks about someone else's order, don't call any action: say that for their security you can only help with the account verified in this conversation, and that they can start a new conversation to check another account.
         actions:
+            go_to_customer_verification: @utils.transition to @subagent.customer_verification
+                description: "Route to verification when the caller has not yet proven they own their email address in this conversation"
             go_to_escalation: @utils.transition to @subagent.escalation
                 description: "Route to escalation if the caller cannot provide required identifiers or the request is out of scope"
             # lockedEmail is bound, never slot-filled: Apex refuses any email other than the one
@@ -280,6 +291,7 @@ subagent case_status:
     reasoning:
         instructions: ->
             |You help the caller with their support cases: checking a specific case, finding out whether they have any open cases, or opening a new case.
+             Before ANY case lookup, case list or new support case, the caller must be verified in this conversation. If {!@variables.email_verified} is not True, don't call an action: use {!@actions.go_to_customer_verification} first.
              Identity: every action needs the caller's email address plus an order number or case number that belongs to them. If the caller already gave and confirmed these earlier in this call, reuse them without asking or confirming again. Otherwise ask for whatever is missing, then confirm the number and the email in ONE question. A yes to that confirms both — act on it immediately and never ask a second confirmation question.
              Never guess or assume an identifier. If the caller cannot give their email, or has no order number and no case number at all, do not ask again — use {!@actions.go_to_escalation} immediately.
              Never ask the caller to confirm the same detail twice; a yes to your single confirmation question is enough to act.
@@ -294,6 +306,8 @@ subagent case_status:
                 | This conversation is already verified for {!@variables.verified_email}. Don't ask for the email again and don't read it back; call the actions with email {!@variables.verified_email}. They still need a case number, or an order or case number the caller confirmed in this conversation.
                   If the caller gives a different email address, or asks about someone else's cases, don't call any action: say that for their security you can only help with the account verified in this conversation, and that they can start a new conversation to check another account.
         actions:
+            go_to_customer_verification: @utils.transition to @subagent.customer_verification
+                description: "Route to verification when the caller has not yet proven they own their email address in this conversation"
             go_to_escalation: @utils.transition to @subagent.escalation
                 description: "Route to escalation if the caller cannot provide required identifiers, is frustrated or repeating a complaint, or the request is out of scope"
             GetCaseStatus: @actions.GetCaseStatus
@@ -472,6 +486,7 @@ subagent return_eligibility:
     reasoning:
         instructions: ->
             |You help the caller check whether their order is eligible for a return. You can only check eligibility — you cannot process, authorize, or confirm a return or refund of any kind.
+             Before checking return eligibility, the caller must be verified in this conversation. If {!@variables.email_verified} is not True, don't call the action: use {!@actions.go_to_customer_verification} first.
              Before calling any action, you must have BOTH the caller's email address AND their order number. Ask for whichever is missing before proceeding.
              Once you have both, confirm them in ONE question covering the order number and the email together — for example: "I heard order 2217 with the email john.smith@example.com, is that right?" Leave out a standard ORD prefix, but if the number contains any other letters, read them out so the caller can correct a mishearing. When the caller says yes, both are confirmed: call {!@actions.CheckReturnEligibility} straight away and never ask a second confirmation question.
              Never guess or assume an identifier. If the caller says they don't know, don't remember, or can't find their email or order number, do not ask again — use {!@actions.go_to_escalation} immediately.
@@ -481,6 +496,8 @@ subagent return_eligibility:
                 | This conversation is already verified for {!@variables.verified_email}. Don't ask for the email again and don't read it back: confirm only the order number, then call the action with email {!@variables.verified_email}.
                   If the caller gives a different email address, or asks about someone else's order, don't call any action: say that for their security you can only help with the account verified in this conversation, and that they can start a new conversation to check another account.
         actions:
+            go_to_customer_verification: @utils.transition to @subagent.customer_verification
+                description: "Route to verification when the caller has not yet proven they own their email address in this conversation"
             go_to_escalation: @utils.transition to @subagent.escalation
                 description: "Route to escalation if the caller cannot provide required identifiers, or requests a refund or return processing"
             CheckReturnEligibility: @actions.CheckReturnEligibility
@@ -695,6 +712,87 @@ subagent escalation:
                     filter_from_agent: False
             target: "apex://OCC_CreateEscalationCase"
             label: "Create Escalation Case"
+
+subagent customer_verification:
+    label: "Customer Verification"
+    description: "Proves the caller owns the email address on their account by emailing a six-digit code and checking the code they read back. Everything that reads a customer's own order or case data waits for this."
+    reasoning:
+        instructions: ->
+            |You prove the caller owns the email address before any of their order or case data is read out.
+             Ask for the email address on their account if you don't have it yet. Then call {!@actions.SendVerificationCode} with it, and say its message.
+             When the caller reads back a six-digit code, call {!@actions.VerifyCode} with that code and the same email address, and say its message.
+             You never know the code yourself: it exists only in the caller's mailbox. Never guess it, never read one out, and never say a code is correct unless the action said so.
+             If the caller says the code hasn't arrived, or it has expired, or they got it wrong too many times, offer to send a new one and call {!@actions.SendVerificationCode} again.
+             If the caller cannot receive email at that address, or says the address is wrong and gives no other, use {!@actions.go_to_escalation} - a person can help them another way.
+             Keep it to one or two spoken sentences. Never read the address back letter by letter.
+            if @variables.email_verified == True:
+                | This caller is already verified for {!@variables.verified_email}. Don't send another code and don't ask for one: say they are already verified and ask what they would like to check.
+        actions:
+            go_to_escalation: @utils.transition to @subagent.escalation
+                description: "Route to escalation when the caller cannot receive the code at their address"
+            SendVerificationCode: @actions.SendVerificationCode
+                with email = ...
+                set @variables.code_email = @outputs.claimedEmail
+            VerifyCode: @actions.VerifyCode
+                with email = ...
+                with code = ...
+                set @variables.email_verified = @outputs.verified
+                set @variables.verified_email = @outputs.verifiedEmail
+    actions:
+        # Phase 16: the code is emailed and only its salted hash is stored, so the only way to know
+        # it is to open the mailbox. Only VerifyCode's output can set email_verified.
+        SendVerificationCode:
+            description: "Emails a six-digit verification code to the address the caller says is theirs, so they can prove they own it."
+            target: "apex://OCC_SendVerificationCode"
+            inputs:
+                email: string
+                    label: "Email"
+                    description: "The email address the caller says is on their account."
+                    is_required: True
+            outputs:
+                sent: boolean
+                    label: "Sent"
+                    description: "True when a code was emailed."
+                    is_displayable: False
+                    filter_from_agent: False
+                message: string
+                    label: "Message"
+                    description: "Safe to read to the caller as it is."
+                    is_displayable: True
+                    filter_from_agent: False
+                claimedEmail: string
+                    label: "Claimed Email"
+                    description: "The address the code was issued for."
+                    is_displayable: False
+                    filter_from_agent: False
+        VerifyCode:
+            description: "Checks the six-digit code the caller read back from their email. Only a correct, unexpired code verifies them."
+            target: "apex://OCC_VerifyCode"
+            inputs:
+                email: string
+                    label: "Email"
+                    description: "The address the code was sent to."
+                    is_required: True
+                code: string
+                    label: "Code"
+                    description: "The six-digit code the caller read back."
+                    is_required: True
+            outputs:
+                verified: boolean
+                    label: "Verified"
+                    description: "True only when the code was correct and unexpired."
+                    is_displayable: False
+                    filter_from_agent: False
+                message: string
+                    label: "Message"
+                    description: "Safe to read to the caller as it is."
+                    is_displayable: True
+                    filter_from_agent: False
+                verifiedEmail: string
+                    label: "Verified Email"
+                    description: "The address now verified for this conversation."
+                    is_displayable: False
+                    filter_from_agent: False
 
 subagent off_topic:
     label: "Off Topic"
