@@ -487,9 +487,11 @@ and Intelligent Context").
 4. **Intelligent Context** (Data Cloud app → Process Content):
    - New Configuration `Keyburn_Visual_Docs_IC`, with the PDF as the test file.
    - Smart defaults, then Modify: **LLM-based Parsing**, **No preprocessing**, Image Processing
-     **off**.
-   - Check the chunks contain the grade C instruction. **Publish** onto `Keyburn_Visual_Docs`.
-   - Done 2026-09-22.
+     **ON**. (This said *off* until 2026-09-23 and was wrong: with it off the parser returns the
+     document's text layer and skips its figures, so the grade instructions never appear. Both
+     configurations are kept as an A/B pair — see `project-status.md` 2026-09-23.)
+   - Check the chunks contain the grade C instruction. **Publish** onto `Keyburn_Visual_Docs_v2`.
+   - Done 2026-09-23 as `Keyburn_Visual_Docs_ICon`.
 5. **Retrievers** (new Agent Builder → Data → Retrievers): one individual retriever per index. Both
    return the chunk text and the source file name.
 6. **Agent (Wed 23, with Phase 13 step 5):**

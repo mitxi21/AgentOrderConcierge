@@ -10,9 +10,17 @@ explain each design decision. **The slide-by-slide talk track is in `RehearsalSc
 > `BUILD_RUNBOOK.md`). Version-critical lines were refreshed on 2026-09-23 for **v42**; the rest
 > of the operational detail still reads as written. The talk track now lives in `RehearsalScript.txt`.
 
-Presented version: **agent v42** — the Phase 16 verification gate enforced in Apex; **29/29 twice**
-(runs 32 and 32b). Fallbacks, in order: **v40** (the gate falls back to advisory, no Apex redeploy
-needed because nothing binds the input), then **v38**, then v33.
+Presented version: **agent v46** — v44 (the Phase 16 verification gate **built and switched off**,
+plus a working two-step call close) with the Phase 13b packaging damage guide added to Policy/FAQ.
+Fallbacks, in order: **v44** (drops the damage question, nothing else), **v42** (the gate back on, if
+a reviewer asks to see it live and a mailbox is reachable), then **v38**, then v33.
+
+**On the verification gate, say this and move on:** it is built — the code is emailed, only a salted
+hash is stored, and `OCC_CaseLookupUtil.notVerified` refuses in Apex before any SOQL — and it is
+switched off for this demo, because the caller on stage cannot open the mailbox the code goes to,
+so the gate would stall the call. The architecture point survives intact and is the one worth
+making: **only an Apex action can set that flag, and no instruction anywhere can.** Do not demo the
+code step live.
 
 ---
 
@@ -31,7 +39,7 @@ Chapter times follow the panel brief: **5 / 30 / 10 / 10**.
 | The agent | agent | 3:00 | Keep the ROI sentence, cut the per-tile detail |
 | **Live demo** | demo | 8:00 | Drop moment 2's identity-switch step |
 | AI tooling | architecture ×5, data, choices | 6:00 | `choices`: the two marked rows only |
-| Guardrails | guardrails, verification | 5:00 | Read the layer stack bottom-up; on `verification` keep step three and the honest half |
+| Guardrails | guardrails, verification | 5:00 | Read the layer stack bottom-up; on `verification` say built-and-switched-off, keep step three and the honest half, don't demo it |
 | Reliability | evals, observability | 4:00 | State the gate, skip the run-by-run detail; on `observability` show the trace box and move |
 | Issues & trade-offs | failures, tradeoffs | 4:00 | The two marked rows on each |
 | Why me | whyme | 10:00 | — |
@@ -53,17 +61,19 @@ when you leave the demo — target **16:00**. Past 17:00, start cutting in the o
 ### Wednesday 23 (freeze day)
 
 - [ ] Decide the version to present and confirm it is active (Setup → Agentforce Agents → Keyburn
-      Customer Service → versions). **v42** is the one the deck describes: the gate enforced in Apex,
-      `customer_verification` able to hand control back, and the confirm-back happening before the code.
-      **v40** is the same gate as an instruction only — the model skips it sometimes. **v38** is pre-gate.
-- [ ] **Check the gate end to end once**: ask for an order, read the code from the
-      Verification tab, then confirm the answer arrives. The gate refuses the lookup until then.
-- [ ] Confirm `Keyburn_Setting__mdt.Default.Test_Mode__c` is **true**, and know why you are saying so
-      (below). With it false, the code is emailed and this org's mail fails Proton's domain
-      authentication checks and is capped at 15 a day.
+      Customer Service → versions). **v46** is the one to present: v44 plus the Phase 13b packaging
+      damage guide on Policy/FAQ (S3 → Data 360 → Intelligent Context → retriever → data library).
+      **v44** is the clean fallback — it loses the damage question and nothing else. **v42** is the
+      same build with the gate on — only go there if a reviewer wants it live and you have a
+      reachable mailbox. **v38** is pre-gate.
+- [ ] **Walk the close once, out loud, on the Nova page**: ask for an order, confirm, let it answer
+      and offer further help, then say *"no thanks, that's all"*. It must say one goodbye and the page
+      must hang up by itself. This is the thing that failed on the 23rd; it is worth the 90 seconds.
+- [ ] **Do not plan a live code step.** The gate is off in v44. If asked, say it is built and
+      switched off because the caller cannot open the mailbox on stage, and point at the Apex guard.
 - [ ] Run the eval suite **twice** on the version you will present and save both runs in
-      `src/eval_reports/`. On v42 expect **29/29**; the harness answers the gate itself by reading
-      `OCC_Verification__c`, which only works while `Test_Mode__c` is true.
+      `src/eval_reports/`. On v44 the harness's auto-verification step never fires (the gate is off),
+      so `auto_verifications` should be 0 — that is expected, not a harness failure.
 - [ ] Record a **backup video** of each of the four demo moments (below), including the Nova
       call with sound. Keep them on the laptop desktop, not in the cloud only.
 - [ ] Rehearse the whole 45 minutes out loud **twice** against a timer, reading from the speaker
@@ -89,14 +99,17 @@ when you leave the demo — target **16:00**. Past 17:00, start cutting in the o
       turn took 13.8 s.
 - [ ] Warm-up chat on the public Keyburn site (one tracking question), so the website moment is
       warm too.
-- [ ] If anything was published since the freeze: **republish the Embedded Service deployment**
-      `Agentforce_Service_Agent`, or the map card is sent but not drawn.
+- [ ] **Republish the Embedded Service deployment** `Agentforce_Service_Agent`, or the map card is
+      sent but not drawn. **This is outstanding for v46** — the agent was republished twice on the evening
+      of the 23rd and this step is Setup-UI only, so it cannot be scripted: Setup → Embedded Service
+      Deployments → `Agentforce_Service_Agent` → Publish. Do it before the website warm-up chat, then
+      confirm the map card actually draws.
 - [ ] **Purge the noise**: `sf apex run --file scripts/purge_eval_cases.apex -o devorg` (agent-created
       Cases) and `sf apex run --file scripts/purge_voice_recordings.apex -o devorg` (a voice test run
       stores ~12 MB per conversation against this org's 20 MB file limit and then blocks every
       upload). Check `sf org list limits` shows FileStorageMB back at 20.
-- [ ] If presenting the gate: open the **Verification** tab in the Keyburn Service console as a tab,
-      so reading the code back is one click, and delete old verification rows so the newest is on top.
+- [ ] The **Verification** tab is not needed — the gate is off in v46, exactly as in v44. Only open it if you have
+      deliberately fallen back to v42, in which case delete old rows first so the newest is on top.
 
 ### T–10 min (14:35)
 
@@ -134,7 +147,11 @@ if that email and that order belong to the same customer."*
 | You type | Expect | Point at |
 | --- | --- | --- |
 | `Can I still cancel my order once it has shipped?` | No — cancelling is only possible from Draft or Processing | That fact exists **only in the workflow diagram image**; GPT-4o reads it through a prompt template at question time |
+| `My parcel arrived wet and torn open, what should I do?` | Refuse the delivery; the carrier returns it and a replacement ships automatically | The instruction exists **only as pixels** in a PDF in the S3 bucket. Intelligent Context read the image **once, at index time**; the agent retrieves the sentences it produced |
 | `Can you also check order 2077 for john.smith@example.com?` | *"For your security, I can only help with the account verified earlier…"* | The lock is enforced in Apex, not in the prompt |
+
+The damage question takes **about 10 seconds** — the retrieval hop is slower than a lookup. Talk
+over it; don't retry.
 
 Optional if ahead of time: `How long do you keep a draft order?` → 30 days (also image-only).
 
@@ -188,6 +205,7 @@ recovery scores better than a perfect run.
 | Nova hears the wrong words repeatedly | Room noise / mic | Type the turn in the page's text box (it goes through the same relay) |
 | Nova page won't connect | AWS keys not loaded, server down | Play video 3; mention the in-chat voice button as the Salesforce-native path (no map/transcript there) |
 | Refund doesn't produce a case number | Escalation skipped | Say it's the nondeterminism the evals measure; show the recorded case |
+| Damage question answers from Knowledge, or says it can't help | The model picked the wrong tool, or the retrieval hop timed out | Ask it once more in plainer words (*"the box arrived soaked and ripped open"*). If it misses twice, move on — the fallback line is *"that one goes to a document in S3; I'll show you the chunk it retrieves in the deck"* |
 | Agent answers wrongly across the board | Wrong version active | Setup → activate **v40** (then v38). Rollback is one click — worth saying out loud |
 
 ---

@@ -7,6 +7,240 @@ to the entry that replaced them.
 
 ---
 
+## 2026-09-24 — Demo order dates moved to the demo day
+
+The three orders the demo sheet uses were seeded in early September, so the spoken *"estimated
+delivery"* line was a date in the past — a shipped parcel that should already have arrived, on a
+tracking demo. `sfdx-project/scripts/set_demo_order_dates.apex` sets `Estimated_Delivery__c` to
+`DEMO_DATE` (2026-09-24, the demo day) for ORD-1042 and ORD-1097 (jane.doe) and ORD-1088 (maria.garcia, the
+identity-lock refusal), and shifts `Order_Date__c` back by each order's original lead time from
+`sample-data/orders_sample.csv`, so the ordered → delivered gap stays what the sample data had.
+
+ORD-1024 is deliberately **not** in the script: it is the misheard digit in the voice call, it
+belongs to john.smith and its status is Delivered, so the lookup refuses it and a future delivery
+date on a delivered order would only be wrong in the record list. It was briefly updated and
+restored to 2026-08-16 / 2026-08-23.
+
+The script is idempotent and edits only the two date fields — statuses, `Return_Eligible__c` and the
+parcel coordinates are untouched. Like `set_demo_geodata.apex`, it has to be re-run (with a new
+`DEMO_DATE`) after any Order reload.
+
+---
+
+## 2026-09-23 (evening) — Agent v44: OTP gate switched off, call closing fixed
+
+A rehearsal call on the Nova relay page (`bedrock-voice/call_logs/call_20260923_191144.json`) ran
+**ten turns and never ended**. Four reported symptoms, two root causes. This is a deliberate
+**post-freeze** change: the freeze was Wed 23 18:00, the demo is Thu 24 14:45, and a call that
+cannot be hung up is not demoable.
+
+**Symptom 1 — the OTP gate blocks the demo.** Turn 2 answered *"I have sent a six-digit code to
+jane.doe@example.com"*. A caller on stage cannot open that mailbox, so the call dead-ends.
+
+*Decision: keep the gate built, switch it off, present it as a deliberate trade-off.* It is off by
+one default — `email_verified: mutable boolean = True` — plus the three "if not verified, go to
+`customer_verification`" instruction sentences and the three subagent-level routes into that
+subagent, each replaced by a comment marking where to put it back. **The Apex guard is untouched**:
+`OCC_CaseLookupUtil.notVerified` still refuses on `false`. That is why the
+`with emailVerified = @variables.email_verified` bindings had to *stay* — deleting them would pass
+null, which is permissive for an unrelated reason (non-agent callers) and would have made the
+rollback murkier. `customer_verification`, both Apex actions, `OCC_Verification__c` and the
+permission sets are all still deployed. Re-enabling is a revert plus a republish; no Apex deploy in
+either direction.
+
+**Symptoms 2, 3 and 4 are one cause: there was no way to end a call.**
+
+- *"please cancel the call"* created escalation Case **00001296**. `go_to_escalation`'s router
+  description ended with "such as cancelling or deleting their account", and "cancel the call"
+  matched it.
+- Once `escalation_case_number` was set, the router — which re-classifies **every** turn — kept
+  landing on `escalation`, whose `else` branch instructs it to state the follow-up and the case
+  number. Four of the ten turns were that same sentence.
+- `server.py` arms the hang-up only when `relay.is_goodbye(reply)` matches, and that function
+  rejects any reply containing `?`. Every reply in the call was either the escalation repeat or a
+  question, so no closing line ever existed and the page had nothing to hang up on.
+
+*Decision: closing is two steps, split deliberately.* Step one — "is there anything else I can help
+you with?" — is now in the `system:` instructions and stays with whichever subagent just answered,
+because it is a question and the call must stay open for the answer. It was **never instructed
+before**; the one that appeared at turn 7 was emergent model behaviour, which is exactly why it
+fired late and at random. Step two is the new **`subagent call_closing`**, whose only job is one
+sentence with no question mark. `go_to_escalation`'s description now excludes call control, the
+escalation `else` branch says the case number once and then hands to `call_closing`, and
+`off_topic` / `ambiguous_question` can close too.
+
+**v43 → v44: the fix needed a second pass.** v43 closed the call on a bare *"okay"* that was
+answering the agent's own question — escalation logged a case and said goodbye in the same turn.
+v44 excludes bare acknowledgements ("okay", "sure", "yes", "thanks") and any answer to a question
+just asked, in the router description *and* inside `call_closing`, and forbids escalation from
+logging a case and closing in one turn. Verified against four preview conversations: happy-path
+close, escalation-then-close, **caller accepts the offer of further help** (must not close), and
+bare "okay" mid-lookup (must not close). The last two are the regression guard for v43's defect.
+
+**Relay safety net.** `relay.wants_hangup(utterance, reply)` also arms the hang-up on the caller's
+own call-control words, but only when the reply contains no `?` — so step one's offer never ends the
+call, and a caller who says "hang up" while the agent is still asking something gets answered
+instead of cut off. Emails are stripped before matching, or *"my email is bye@example.com"* would
+hang up. Both signals land on the same `tool_end`, so the net never fires a turn early.
+
+**Generalisable:** *an instruction is not a control surface* has a mirror image — **a behaviour
+nobody instructed is not a feature.** The "anything else?" offer looked like part of the agent for
+days; it was the model's habit, and it disappeared exactly when the conversation got difficult.
+
+---
+
+## 2026-09-23 — Phase 13b done: the agent answers from an image read at index time (agent v46)
+
+The S3 corpus is reachable from the agent. A caller asking *"my parcel arrived wet and torn open,
+what should I do?"* is told to **refuse the delivery, the carrier returns it and a replacement ships
+automatically** — an instruction that exists nowhere in text. It is pixels in a PDF in the S3 bucket.
+
+### The setting that decided it: Image Processing
+
+The runbook's Phase 13b step 4 prescribed **LLM-based parsing, no preprocessing, image processing
+OFF**. That configuration is a confirmed negative, and both halves are still in the org as evidence:
+
+| Intelligent Context config | Image processing | Chunk content |
+|---|---|---|
+| `Keyburn_Visual_Docs_IC_v2` | off | *"…each picture shows the grade and what to do."* — the PDF's text layer, nothing more |
+| `Keyburn_Visual_Docs_ICon` | **on** | the three grades, their damage descriptions and their actions, as prose |
+
+With image processing off the parser takes the document's text and skips its figures, which is
+exactly what the PDF was built to expose. **`BUILD_RUNBOOK.md` step 4 was wrong and has been
+corrected.** Keep both configurations until after the demo: same file, same UDLO, one setting apart,
+and the second one answers a question the first cannot.
+
+Timing: about 11 minutes from publishing a configuration to chunks appearing, then a few more to the
+index and harmonized tables. The `_chunk__dlm` table is the only honest progress indicator.
+
+### The wiring, which needed no prompt template and no Apex
+
+1. A **retriever** over `Keyburn_Visual_Docs_ICon_index__dlm` (UI only — retrievers have no CLI, no
+   sObject and no REST route; `information_schema`, `SHOW TABLES` and six tooling objects were all
+   dead ends. Get the id from the browser URL). Fields returned: `Chunk__c` and `SourceRecordId__c`.
+2. `sf agent adl create --source-type retriever --retriever-id <id>` → a RETRIEVER-type data
+   library, READY immediately. `rag_feature_config_id` = `ARFPC_` + libraryId.
+3. In the `.agent`, a **second invocation alias on the same standard action**:
+
+   ```agentscript
+   AnswerFromPackagingDamageGuide: @actions.AnswerQuestionsWithKnowledge
+       with ragFeatureConfigId = @variables.damage_guide_rag_id
+       with citationsEnabled = False
+   ```
+
+   The model chooses between two *tools* by description, which is the router's own mechanism, rather
+   than following a rule buried in one instruction. `ragFeatureConfigId` is **bound**, so the model
+   cannot point a knowledge search at the wrong corpus. An invocation alias may carry its own
+   `description:` — that is what makes one action serve as two tools.
+
+### Citations are off for this corpus on purpose
+
+The citation resolves to a **presigned S3 URL whose query string carries the access key id** of the
+read-only bucket user. Acceptable in a trace, not on a projector, so `citationsEnabled = False` on
+this alias only. The Knowledge tool keeps its citations, which point at articles. The image-derived
+chunks also come back with `Citations__c` = `{}`, so there was nothing to render anyway.
+
+### Verified from the trace, not the transcript
+
+`sf agent trace read --dimension actions` on v46 shows the call with
+`"ragFeatureConfigId":"ARFPC_…","citationsEnabled":false` and the retrieved
+`Keyburn_Visual_Docs_ICon_chunk__dlm.Chunk__c` holding the grade A/B/C text. A control session
+(*"what is your policy about returns?"*) ran **no action at all** — answered from the agent-level
+`knowledge:` injection, as the Flex Credits analysis predicted — so the new tool has not swallowed
+ordinary policy questions.
+
+Two evals added: `s3_visual_damage_grade_c` (asserts *refuse* + *replacement*, and that no markdown
+is spoken) and `s3_damage_guide_not_used_for_returns` (the control).
+
+Costs to know: the retrieval hop is **~10 s**, noticeably slower than a lookup, and the chunk comes
+back as **markdown**, so the instruction has to tell the model not to speak the asterisks.
+
+**Voice verified on v46** the same evening, by the builder on the Nova page: a full call, with both
+the packaging-damage question and the workflow next-status question answered correctly. Voice had
+last been verified on v2, so this closes that carried-over item. The ~10 s retrieval hop is
+noticeable in voice but did not break the turn. The open-cases flow was not in that run.
+
+**Runs 34 and 34b: 31/31 twice on v46** (`eval_report_run34_v46_s3_damage_guide.json`,
+`eval_report_run34b_v46_repeat.json`) — the suite grew from 29 to 31 with the two `s3_*` cases, and
+nothing regressed. The damage-guide case passed on both runs, which is the answer to the standing
+worry that a model-chosen tool gets skipped: two tools with distinct descriptions held up where a
+prose rule inside one instruction did not.
+
+Active version is now **v46**; **v44** is the clean fallback and loses only this question.
+
+---
+
+## 2026-09-23 — Flex Credits costing: ~57 credits per conversation, half of it the OTP gate
+
+Costed the build against the **Flex Credits Rate Card (updated 2026-08-31)** for a hypothetical
+production deployment. Full working: `docfiles/flex_credits_estimate.md`. No org change, no traffic
+generated — the model is derived from the Phase 17 trace data and the v42 action inventory.
+
+### The card meters actions, and nothing else per-conversation
+
+Agentforce Actions (standard **and** custom, both ×20 in production, ×16 pre-production) is the only
+per-conversation usage type. Turns, the router's per-turn re-classification, the 21
+`@utils.transition` hops and the Trust layer (697 guardrail + 619 InstructionAdherence steps in the
+traced window) have **no line on the rate card**. Consequence for design: prose, extra subagents and
+extra confirm-back turns are free; action calls are not. That inverts the usual instinct to reduce
+turns.
+
+### The numbers
+
+Bottom-up from v42, weighted by the traced subagent mix, plus the 15.1% escalation overlay:
+**2.8 actions per conversation ≈ 57 credits** (56.3 actions + 0.4 for the workflow-diagram prompt).
+At an **assumed** $0.005/credit (~$0.10/action — not on the card, confirm on the Order Form) that is
+**$0.28 per conversation**: ~567k credits/month at 10k conversations, linear to 100k because
+Agentforce Actions has no volume tiering.
+
+### The finding worth acting on: the verification gate is 51% of the cost
+
+`SendVerificationCode` + `VerifyCode` add 2 actions to the 73% of conversations that do a lookup =
+**29.2 credits, 51% of the total**, ~$1,460/month at 10k conversations. Without the gate: 27.5
+credits. The gate stays — v40 proved the advisory version gets skipped, and it is the only structural
+defence against a caller reading out someone else's address — but the optimisation is now documented:
+**verify once per authenticated session**, or cache a verification for N days, and skip the gate when
+the channel already carries an authenticated identity. Anonymous phone callers keep paying it, which
+is where the cost belongs.
+
+### Three more, from the trace rather than from the card
+
+- **Knowledge injection is the cheapest grounded answer in the build**: 137 `policy_faq` turns
+  produced **8** `AnswerQuestionsWithKnowledge` calls, because the agent-level `knowledge:` block
+  puts the articles in the prompt. Zero-action grounded answers.
+- **`ExplainOrderWorkflow` double-charges** — custom action (20) + GPT-4o Flex prompt (4) — and on
+  `answered=false` the fall-through to the knowledge action makes one workflow question cost 44+
+  credits against 0–20 for a plain FAQ.
+- **Phase 11's Nova relay is ~45% cheaper per voice call than native Agentforce Voice** (≈57 vs ≈103
+  credits): Agentforce only ever sees Agent API text turns, so actions stay at ×20 instead of ×30 and
+  no Speech Foundations credits are consumed. Built for scope reasons, but it is a defensible cost
+  argument — the speech bill moves to AWS.
+- **Data 360 is a rounding error here** (under 100 credits per indexing pass for the Knowledge and S3
+  corpora, ~8 credits/month of tracing ingestion at 10k conversations) and scales with corpus size,
+  not conversation volume. The sensitivity that matters: **1 GB of documents = 153,600 credits
+  through Unstructured Processing or 614,400 through Intelligent Processing**, per pass. Unification
+  (75,000 per 1M rows, the card's most expensive line) is never touched by this build.
+
+### Build-to-date, and a lesson about evals
+
+The only hard figure is **297 actions in the 7.5-hour traced window** (4,752 credits at ×16); the
+whole build is estimated at 2,000–4,000 actions, unmeasurable before Phase 12 because Session Tracing
+does not backfill. **Evaluation is a billed workload** — a 29-case harness run is ~70 actions, and the
+pass-rate climb that constitutes the reliability evidence was paid for in credits. Keep suites off
+production orgs: ×16 vs ×20 is a 20% saving on a workload designed to be repeated.
+
+### Open, recorded in the estimate rather than guessed
+
+Credit price; the prompt tier of `sfdc_ai__DefaultGPT4Omni` (Standard 4 assumed, Advanced 16 = 2%
+sensitivity); whether a Developer Edition org earns the ×16 pre-production multiplier (the card names
+only sandboxes and scratch orgs); whether Agentforce Optimization's quality/deflection scoring bills
+as prompts; whether messaging **voice mode** bills at ×30 or ×20; and Customer 360 Platform "Headless
+Platform Interaction", still **TBA** on the card, which is an unpriced line for anything built on
+`OCC_OrderMapRest` or the Agent API. The largest source of error is the conversation mix, not any of
+these — replace it with a real channel report when one exists.
+
+---
+
 ## 2026-09-23 — Phase 16 gate made structural (v41/v42); Phase 18 deck rebuilt
 
 ### The finding: the verification gate was skippable

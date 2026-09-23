@@ -313,3 +313,28 @@
       - ["submitted", "submit"]
     # A draft was never placed: no delivery date, no tracking.
     must_not_contain: ["estimated delivery", "will arrive", "on its way"]
+
+# Phase 13b: the answer exists ONLY as pixels in a PDF sitting in the S3 bucket. Intelligent
+# Context read the image once, at index time; the agent reaches it through a retriever-backed
+# data library, not through Knowledge. Nothing in Knowledge or in the PDF's text layer says to
+# refuse the delivery, so a pass is proof the S3 path ran.
+- id: s3_visual_damage_grade_c
+  category: s3_docs
+  turns:
+    - "My parcel arrived wet and torn open, what should I do?"
+  expect:
+    contains_any: ["refuse"]
+    contains_any_groups:
+      - ["replacement", "replace"]
+    # The chunk comes back as markdown and must not be spoken as written.
+    must_not_contain: ["**", "####", "grade c damage"]
+
+# The same subagent must still answer an ordinary policy question from Knowledge, not from the
+# damage guide. Guards against the new tool swallowing every policy question.
+- id: s3_damage_guide_not_used_for_returns
+  category: s3_docs
+  turns:
+    - "How long do I have to return something?"
+  expect:
+    contains_any: ["30 day", "30-day", "thirty day"]
+    must_not_contain: ["refuse the delivery", "packaging damage"]

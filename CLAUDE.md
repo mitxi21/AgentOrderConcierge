@@ -43,6 +43,7 @@ the tree — if one appears under `sfdx-project/`, delete it rather than maintai
 | `docfiles/agent_builder_topics.md` | Paste-ready instructions per topic/subagent + eval→topic mapping |
 | `docfiles/README_eval_harness.md` | Agent API / External Client App setup for the eval harness |
 | `docfiles/knowledge_articles.md` | Source text of the 5 Policy/FAQ Knowledge articles |
+| `docfiles/flex_credits_estimate.md` | Flex Credits consumption model for a production deployment (~57 credits/conversation; the OTP gate is 51% of it). Rate card 2026-08-31 |
 | `docfiles/Builders Panel .pdf` | Original panel invitation / brief from Salesforce |
 | `secrets.env` (git-ignored) / `secrets.env.example` / `load_secrets.ps1` | All API keys and secrets, the committed template, and the session loader |
 | `bedrock-voice/` | Phase 11 external call page: Nova 2 Sonic = speech only, every caller turn relayed to Agentforce over the Agent API (`server.py`, `nova_session.py`, `relay.py`, `static/index.html`; `ws_test.py` = headless preflight). **Python 3.12** (`py -3.12`), not 3.8 |
@@ -54,7 +55,7 @@ the tree — if one appears under `sfdx-project/`, delete it rather than maintai
 | `sfdx-project/` | Deployable metadata (Apex, objects, permission sets) + anonymous-Apex scripts |
 | `sf-skills-1.55.0/` | Vendored third-party Salesforce skills library — not project code; exclude from searches. Git-ignored (local only) |
 | `tools/setup_redaction.ps1`, `.gitattributes` | Git filter that keeps org identifiers out of the public repo (see top of this file) |
-| `s3-docs/` | Phase 13 (planned): policy documents uploaded to the S3 bucket that Data 360 indexes as an unstructured data lake object |
+| `s3-docs/` | Phase 13: policy documents in the S3 bucket that Data 360 indexes as unstructured data lake objects. `visual/` holds the packaging damage guide PDF, whose instructions exist only as pixels — live in the agent since v46 |
 | `sfdx-project/specs/` | Phase 15: Testing Center spec `Keyburn_Regression.yaml` (deployed as `AiEvaluationDefinition`) + the UI-only voice set `Keyburn_Voice.md`. Results in `src/eval_reports/testing_center/` |
 | `tools/knowledge-readiness/` | Phase 14 (planned): vendored `salesforce/agentforce-knowledge-readiness`, its own sfdx project. Git-ignored (local only) |
 
@@ -80,15 +81,25 @@ directory looking for `sfdx-project.json`, so every `sf` command must run from i
 - Agentforce Agent Builder, originally built via the Builder's assistant/wizard, with a dedicated
   running user. **Since 2026-09-17 the agent script is in source control and edited locally**:
   `sfdx-project/force-app/main/default/aiAuthoringBundles/Keyburn_Customer_Service/Keyburn_Customer_Service.agent`
-  is the working draft and the file to edit. **Active version: v42** = the Phase 16 email
-  verification gate made *structural* (see `project-status.md` 2026-09-23): `customer_verification`
-  can now transition back into the topic that sent it work, and every gated subagent reads the
-  identifiers back **before** handing off to the gate. v41 = the Apex guard on its own; v40 = the
-  gate as an instruction only, which the model demonstrably skipped; v38 = v33 (the Phase 9 demo
-  candidate) + Phase 10 (Draft status, workflow diagram read by a multimodal prompt template). It
-  keeps normal identifiers, the map card in the deployed chat (**first tracked order per conversation only**;
-  see `project-status.md`), and an **identity lock enforced in Apex**. Fallbacks: v40 (gate becomes
-  advisory again, no Apex redeploy needed), then v38, then v33.
+  is the working draft and the file to edit. **Active version: v46** = v44 plus the Phase 13b
+  packaging damage guide on Policy/FAQ (v45 was the same thing with citations still on; see
+  `project-status.md` 2026-09-23). v44 = the verification gate **disabled** plus a working two-step
+  call close. v43 was the same change with `call_closing` routing too eagerly — a bare "okay" ended
+  the call — and v44 is the fix. v42 = the Phase 16 gate made *structural*; v41 = the Apex guard on its own;
+  v40 = the gate as an instruction only, which the model demonstrably skipped; v38 = v33 (the Phase 9
+  demo candidate) + Phase 10 (Draft status, workflow diagram read by a multimodal prompt template).
+  It keeps normal identifiers, the map card in the deployed chat (**first tracked order per conversation only**;
+  see `project-status.md`), and an **identity lock enforced in Apex**. Fallbacks: v44 (drops the
+  damage-guide question, nothing else), v42 (gate back on), then v38, then v33.
+  **The OTP gate is built and switched off** (2026-09-23, for the demo): a caller on stage cannot
+  open the mailbox the code goes to, so the gate stalls the call. It is off by one variable default —
+  `email_verified: mutable boolean = True` — plus the three "if not verified, go to
+  `customer_verification`" sentences and the three subagent-level routes into it, all removed with a
+  comment marking the spot. **The Apex guard is unchanged and still refuses on `false`**, so the
+  `with emailVerified = @variables.email_verified` bindings must stay bound to that variable;
+  deleting them would pass null, which is permissive for a different reason. `customer_verification`,
+  both Apex actions, `OCC_Verification__c` and the permission sets are untouched. Re-enabling is a
+  revert of those edits and a republish — no Apex deploy either way.
   **Two bound inputs carry the guardrails, and both are enforced in Apex, never in the prompt:**
   `lockedEmail = @variables.verified_email` (`OCC_CaseLookupUtil.violatesLock` refuses any other
   email) and `emailVerified = @variables.email_verified` (`OCC_CaseLookupUtil.notVerified` refuses
@@ -116,6 +127,22 @@ directory looking for `sfdx-project.json`, so every `sf` command must run from i
   - The router re-classifies **every turn** from scratch, not only the first. A follow-up line
     like "I don't remember my order number" is routed on its own, so escalation cues must live in
     router descriptions, not only in a subagent's instructions.
+  - **Ending the call is two steps, and the split is load-bearing** (v44). Step one, "is there
+    anything else I can help you with?", is in the `system:` instructions and stays with whichever
+    subagent just answered — it is a *question*, so the call must stay open for the answer. Step two
+    is `subagent call_closing`, whose one job is a single sentence with **no question mark**: the
+    Phase 11 page hangs up on `relay.is_goodbye`, and that rejects any reply containing `?`. A
+    closing line ending "…anything else?" leaves the caller on a line nobody ever ends.
+    Two traps, both hit on 2026-09-23:
+    - **"End the call" is not an escalation.** `go_to_escalation`'s router description said "such as
+      cancelling or deleting their account", and "please cancel the call" matched it — a junk
+      High-priority Case, then the escalation subagent repeating the same handoff sentence on every
+      later turn because the router kept landing there. Both router descriptions now name the
+      distinction explicitly.
+    - **A bare acknowledgement is not a goodbye.** v43 routed "okay" to `call_closing` and hung up
+      mid-lookup. v44 excludes "okay"/"sure"/"yes"/"thanks" on their own and any answer to a
+      question just asked, in the router description *and* in `call_closing` itself, and forbids
+      escalation from logging a case and closing in the same turn.
   - `aiAuthoringBundles/Keyburn_Customer_Service_1/` = the v1 snapshot (its meta has
     `<target>Keyburn_Customer_Service.v1</target>`); `genAiPlannerBundles/*_vN/` are compiled
     output from publish — don't hand-edit either.
@@ -132,7 +159,8 @@ directory looking for `sfdx-project.json`, so every `sf` command must run from i
   - `docfiles/agent_builder_topics.md` is the original design text and is **not** in sync. The
     `.agent` file wins.
 - 5 subagents behind `agent_router`: Order Status, Case Status, Return Eligibility, Policy/FAQ,
-  Escalation — plus `off_topic` and `ambiguous_question` handlers.
+  Escalation — plus `call_closing` (ends the call), `customer_verification` (built, currently
+  unreachable — the gate is off) and the `off_topic` / `ambiguous_question` handlers.
   Agent Script: `start_agent agent_router:` → `subagent <name>:` blocks with
   `reasoning:` / `actions:`; routing via `@utils.transition to @subagent.X`; action invocation
   `ActionName: @actions.ActionName with param = ...`; targets are `apex://ClassName` or
@@ -152,6 +180,26 @@ directory looking for `sfdx-project.json`, so every `sf` command must run from i
   body field `Article_Body__c`). Policy/FAQ uses the **native "Answer Question with Knowledge"
   standard action** (`standardInvocableAction://streamKnowledgeSearch`) grounded on the Data
   Library. `OCC_PolicyFAQLookup` (custom Apex/SOSL) exists as a deployed-but-unused fallback.
+- **Phase 13b — the S3 packaging damage guide (agent v46).** A second grounding corpus next to
+  Knowledge: S3 → unstructured data lake object `Keyburn_Visual_Docs_v2` → **Intelligent Context**
+  configuration `Keyburn_Visual_Docs_ICon` → retriever → RETRIEVER-type data library → the same
+  `streamKnowledgeSearch` action, invoked under a second alias. Things that cost time to learn:
+  - **Image Processing must be ON.** With it off (as the runbook originally said) the parser returns
+    the PDF's text layer and skips its figures. `Keyburn_Visual_Docs_IC_v2` is that negative, kept
+    next to `ICon` as an A/B pair on the identical file. Check the `_chunk__dlm` table, never the
+    transcript; chunks appear ~11 minutes after a configuration is published.
+  - **One action can serve as two tools.** An invocation alias may carry its own `description:`, so
+    `AnswerFromPackagingDamageGuide: @actions.AnswerQuestionsWithKnowledge` with
+    `ragFeatureConfigId = @variables.damage_guide_rag_id` gives the model a tool choice rather than a
+    prose rule, and the corpus is bound rather than slot-filled. Copy this for any further corpus.
+  - **Citations are off on that alias.** The citation resolves to a presigned S3 URL carrying the
+    bucket user's access key id — fine in a trace, not on a shared screen. The Knowledge alias keeps
+    its citations. The image-derived chunks carry `Citations__c` = `{}` regardless.
+  - **Retrievers are UI-only**: no CLI, no sObject, no REST route, and `information_schema` /
+    `SHOW TABLES` are rejected by the Data Cloud SQL endpoint. Take the id from the browser URL.
+    Everything downstream is scriptable (`sf agent adl create --source-type retriever`).
+  - The retrieval hop costs **~10 s**, and chunks come back as **markdown**, so the instruction has
+    to forbid speaking the asterisks.
 - Voice: native in-Builder voice preview (Enhanced Chat v2) works. Production telephony would
   need a paid Voice add-on — out of scope. The fix that made voice work was found by following
   an external guide and was never fully root-caused, so a voice regression means starting
@@ -386,8 +434,15 @@ cd src; py -3.8 run_eval.py eval_cases.yaml
   3 `tracking` cases 18/18 → 08 stricter map-claim tests 16/18 → 09 agent v6 18/18 → 09b
   repeat 18/18. … → 27 v38 26/27 → 28 v38 26/27 (first traced run) → 29 / 29b v38 + rewritten
   Knowledge 29/29 (2 `knowledge_*` cases added) → 30 v39 26/29 (the API-67 custom-metadata break,
-  since fixed) → 31 v40 24/29 (first run with the verification gate) → 32 v42 (gate enforced in Apex).
-- **The harness answers the verification gate itself.** When a reply asks for the six-digit code,
+  since fixed) → 31 v40 24/29 (first run with the verification gate) → 32 / 32b v42 29/29 twice
+  (gate enforced in Apex) → **33 / 33b v44 29/29 twice** (gate switched off + two-step call close;
+  `auto_verifications` 0 and no reply asks for a code, both as expected —
+  `eval_report_run33_v44_gate_off_call_closing.json`, `eval_report_run33b_v44_repeat.json`) →
+  **34 / 34b v46 31/31 twice** (Phase 13b; the suite grew by the two `s3_*` cases,
+  `eval_report_run34_v46_s3_damage_guide.json`, `eval_report_run34b_v46_repeat.json`).
+- **The harness answers the verification gate itself** — dormant on v44, since nothing asks for a
+  code any more, so `auto_verifications` is 0. It wakes up unchanged if you roll back to v42.
+  When a reply asks for the six-digit code,
   `run_eval.py` reads the newest `OCC_Verification__c` row for that address and sends it as an extra
   turn, marked `auto: "verification_code"` in the transcript and counted in `auto_verifications`.
   It needs `Keyburn_Setting__mdt.Test_Mode__c = true` (that is what writes `Code_Plain__c`), and it
@@ -441,6 +496,9 @@ cd src; py -3.8 run_eval.py eval_cases.yaml
   - It runs **real actions as the agent user**: each run creates about 5 Cases.
   - `conversationHistory` is replayed as text and no actions run for it. Anything that depends on a
     variable set by an action output stays harness-only (e.g. `guardrail_identity_switch_refused`).
+  - **v44 removes this problem**: the gate is off, so replayed-history cases reach their lookups
+    again and `UNVERIFIED_REFUSAL` no longer fires. The paragraph below applies only if you roll
+    back to v42.
   - **Since v42 this costs the suite every gated case.** `email_verified` is False in a replayed
     history, so every lookup case now hits `UNVERIFIED_REFUSAL`. That coverage belongs in the Studio
     **conversation / voice** suites, which execute turns for real; the CLI suite keeps the cases that
@@ -471,9 +529,12 @@ cd src; py -3.8 run_eval.py eval_cases.yaml
 
 ## Remaining work
 
-Phase 8 is **closed** (14/15 on agent v4, stable). Active is **v42** (Phase 16 gate enforced in
-Apex); the demo-safe fallbacks are **v40** (gate becomes advisory, no Apex redeploy), then **v38**,
-then v33.
+Phase 8 is **closed** (14/15 on agent v4, stable). Active is **v46** (v44 plus the Phase 13b
+packaging damage guide on Policy/FAQ); the demo-safe fallbacks are **v44** (OTP gate built but
+switched off, two-step call close working — drops only the damage question), then **v42** (gate back
+on), then **v38**, then v33. **The agent was published twice on the evening of Wed 23, so the
+Embedded Service deployment `Agentforce_Service_Agent` must be republished before the demo** or the
+map card is sent but not drawn.
 Phases 9–18 are planned in detail, with spikes and cut-offs, in `docfiles/BUILD_RUNBOOK.md`.
 **Panel feedback on 2026-09-22 reopened the scope:** Phases 12–17 add observability (Session Tracing,
 Agent Analytics, Sessions & Intents), an S3 → Data 360 unstructured pipeline, a Knowledge readiness
@@ -658,7 +719,10 @@ Carried over:
 
 - Test-only fix: `case_open_new_support_case` requires "opened", but "Your support case number is
   …" is correct.
-- **Re-test voice on v4**, including the open-cases flow. Voice was last verified on v2.
+- **Voice verified on v46** (2026-09-23 evening, builder's own run): the call worked end to end,
+  including the Phase 13b packaging-damage question and the workflow "what is the next status"
+  question, both answered correctly. That closes the long-standing "voice last verified on v2" item.
+  The open-cases flow was not part of that run, so it remains unverified in voice.
 - **Rehearse the misheard-number moment in voice.** Voice works on v2, but the platform's
   injected voice prompt converts spoken "O" to 0 in identifiers, so "O-1O42" may silently match
   ORD-1042 and skip the confirm-back story. A digit mishearing is a more reliable demo. The text

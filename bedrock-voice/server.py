@@ -24,7 +24,7 @@ import time
 from aiohttp import WSMsgType, web
 
 from nova_session import CALL_CONNECTED, NovaSession
-from relay import KeyburnRelay, is_goodbye
+from relay import KeyburnRelay, is_goodbye, wants_hangup
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST, PORT = "127.0.0.1", int(os.environ.get("VOICE_PAGE_PORT", "8765"))
@@ -58,7 +58,8 @@ async def call(request):
             await send_json({"type": "error", "message": data})
         else:
             await send_json({"type": kind, **(data or {})})
-            if kind == "tool_end" and is_goodbye(data.get("reply")):
+            if kind == "tool_end" and (is_goodbye(data.get("reply"))
+                                       or wants_hangup(data.get("utterance"), data.get("reply"))):
                 # The page hangs up once Nova has finished speaking this reply.
                 await send_json({"type": "goodbye"})
 

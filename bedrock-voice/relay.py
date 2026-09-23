@@ -58,6 +58,29 @@ def is_goodbye(reply):
     return bool(reply) and "?" not in reply and bool(GOODBYE.search(reply))
 
 
+# The caller's own call-control words, as a net for a closing line that drifts. Agentforce's reply
+# stays the primary signal; on 2026-09-23 a call ran ten turns without one, because every reply was
+# either a question or the escalation subagent repeating the same handoff sentence, so is_goodbye
+# never matched and the call never ended. Deliberately narrow: phrases that mean "end this call",
+# never a bare "no".
+CALLER_HANGUP = re.compile(r"\b(?:hang\s*up|end (?:the|this) call|cancel the call|good-?bye|bye"
+                           r"|that'?s all|that is all|nothing else|we'?re done)\b", re.I)
+
+
+def wants_hangup(utterance, reply):
+    """The caller asked to end the call AND the agent did not come back with a question.
+
+    A reply containing "?" is still owed an answer - including step one of the close, "is there
+    anything else I can help you with?" - so the line stays open, exactly as is_goodbye treats it.
+    Both signals land on the same turn: the utterance is the caller's "no thanks, that's all" and
+    the reply is the goodbye it triggered.
+    """
+    if not utterance or "?" in (reply or ""):
+        return False
+    # An address is not a farewell: "my email is bye@example.com" must not end the call.
+    return bool(CALLER_HANGUP.search(WRITTEN_EMAIL.sub(" ", utterance)))
+
+
 def emails_in(text):
     """Emails in a caller utterance, in the order spoken."""
     found = [m.group(0).rstrip(".").lower() for m in WRITTEN_EMAIL.finditer(text or "")]
