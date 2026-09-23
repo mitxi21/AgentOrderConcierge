@@ -23,6 +23,8 @@ public with sharing class OCC_SendVerificationCode {
     public class Request {
         @InvocableVariable(required=true label='Email' description='The email address the caller says is theirs')
         public String email;
+        @InvocableVariable(label='Locked Email' description='Email already verified in this conversation, bound by the agent. When set, a code is never issued for a different address.')
+        public String lockedEmail;
     }
 
     public class Response {
@@ -54,6 +56,15 @@ public with sharing class OCC_SendVerificationCode {
             resp.claimedEmail = email;
             if (String.isBlank(email) || !email.contains('@')) {
                 resp.message = 'I need the email address on your order before I can send a code.';
+                return resp;
+            }
+
+            // Once the conversation is pinned to a customer, a second address gets no code at all.
+            // Without this the agent announces "I have sent a code to <other address>" and only
+            // refuses on the following turn - and anyone could use the gate to post codes at an
+            // address they do not own.
+            if (OCC_CaseLookupUtil.violatesLock(req.lockedEmail, email)) {
+                resp.message = OCC_CaseLookupUtil.LOCK_REFUSAL;
                 return resp;
             }
 

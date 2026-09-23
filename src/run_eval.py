@@ -12,12 +12,69 @@ This is meant to be driven by Claude Code: point it at this script and your
 Salesforce dev org, and have it run the suite, read the report, and suggest
 prompt/topic-instruction fixes for anything that fails.
 """
+import re
 import sys
 import json
+import time
 import yaml
 from datetime import datetime, timezone
 
 from agent_client import client_from_env
+
+# ---- Phase 16: the email verification gate ----------------------------------
+# Agent v40 refuses every order/case lookup until the caller has read back a six-digit code.
+# A scripted case can't carry the code, because it's generated per send. So the harness plays
+# the part of a caller who can open their own inbox: when the agent asks for the code, it reads
+# the newest OCC_Verification__c row for that address and answers with it.
+#
+# This only works while Keyburn_Setting__mdt.Test_Mode__c is true, which is what writes
+# Code_Plain__c. With it false the code is only in a real mailbox and the suite cannot run.
+#
+# Injected turns are marked `auto: "verification_code"` in the transcript so a report can never
+# be mistaken for one where the caller supplied it unaided.
+
+#         ...[\w.-]+ would swallow the full stop that ends the sentence, and the lookup then
+#         searches for "jane.doe@example.com." and finds nothing. Anchor on a word character.
+EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]*\w")
+CODE_PROMPT_RE = re.compile(
+    r"six-digit code|verification code|read it back to me|code (?:that|when) it arrives",
+    re.IGNORECASE,
+)
+MAX_AUTO_VERIFICATIONS = 1  # one mailbox per caller; never unlock a second identity
+
+
+def emails_in(texts):
+    """Every address the scripted caller has said so far, oldest first."""
+    found = []
+    for t in texts:
+        for m in EMAIL_RE.findall(t or ""):
+            if m not in found:
+                found.append(m)
+    return found
+
+
+def fetch_code(client, email, attempts=4, delay=1.0):
+    """The newest code for that address, but only if a real Contact owns it.
+
+    Contact__c != null is what keeps the simulation faithful. OCC_SendVerificationCode issues a
+    code for an unknown address too, on purpose - whether an address exists in Keyburn's data is
+    not something an unverified caller may learn. A real caller still cannot read a code sent to
+    an address that isn't theirs. Without this filter the harness "verifies" a typo like
+    jane.dough@example.com, the conversation locks to it, and the correction the case is actually
+    testing can never land.
+    """
+    soql = (
+        "SELECT Code_Plain__c, CreatedDate FROM OCC_Verification__c "
+        f"WHERE Verified_Email__c = '{email}' AND Code_Plain__c != null AND Contact__c != null "
+        "ORDER BY CreatedDate DESC LIMIT 1"
+    )
+    for i in range(attempts):
+        rows = client.query(soql)
+        if rows and rows[0].get("Code_Plain__c"):
+            return rows[0]["Code_Plain__c"]
+        if i < attempts - 1:
+            time.sleep(delay)
+    return None
 
 
 def extract_text(messages):
@@ -76,14 +133,48 @@ def run_case(client, case):
     reply_text = ""
     transcript = []
     final_types = []
+    said_so_far = []
+    auto_verifications = 0
     try:
         for turn in case["turns"]:
+            said_so_far.append(turn)
             messages = client.send_message(turn)
             # Score only the last turn's reply. Falling back to an earlier turn's text would let
             # a silent final turn (e.g. a bare Escalate) pass on stale text.
             reply_text = extract_text(messages)
             final_types = non_text_types(messages)
             transcript.append({"user": turn, "agent": reply_text, "non_text_messages": final_types})
+
+            # The gate can interrupt any turn, including the last one. Answer it and let the
+            # agent's continuation become the reply that gets scored.
+            while (
+                case.get("auto_verify", True)
+                and auto_verifications < MAX_AUTO_VERIFICATIONS
+                and CODE_PROMPT_RE.search(reply_text or "")
+            ):
+                candidates = emails_in(said_so_far)
+                if not candidates:
+                    break  # caller never gave an address - let the case fail honestly
+                code = fetch_code(client, candidates[-1])
+                if not code:
+                    transcript.append({
+                        "user": None,
+                        "agent": None,
+                        "auto": "verification_code",
+                        "note": f"no code row found for {candidates[-1]}",
+                    })
+                    break
+                auto_verifications += 1
+                messages = client.send_message(code)
+                reply_text = extract_text(messages)
+                final_types = non_text_types(messages)
+                transcript.append({
+                    "user": code,
+                    "agent": reply_text,
+                    "non_text_messages": final_types,
+                    "auto": "verification_code",
+                })
+
         conversation_text = "\n".join(t["agent"] for t in transcript if t["agent"])
         failures = check_expectation(reply_text, case.get("expect", {}), conversation_text)
         if failures and final_types:
@@ -95,6 +186,7 @@ def run_case(client, case):
             "final_reply": reply_text,
             "final_non_text_messages": final_types,
             "transcript": transcript,
+            "auto_verifications": auto_verifications,
             "passed": len(failures) == 0,
             "failures": failures,
         }
@@ -121,6 +213,7 @@ def main():
                 "final_reply": None,
                 "final_non_text_messages": [],
                 "transcript": [],
+                "auto_verifications": 0,
                 "passed": False,
                 "failures": [f"exception: {exc}"],
             }

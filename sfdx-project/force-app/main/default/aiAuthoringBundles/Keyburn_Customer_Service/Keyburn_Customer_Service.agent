@@ -100,7 +100,7 @@ subagent order_status:
     reasoning:
         instructions: ->
             |You help the caller check the status of their order.
-             Before ANY order lookup, tracking or delivery action, the caller must be verified in this conversation. If {!@variables.email_verified} is not True, don't call a lookup action and don't ask for an order number yet: use {!@actions.go_to_customer_verification} so they can prove they own their email address first.
+             Before ANY order lookup, tracking or delivery action, the caller must be verified in this conversation. Collect the order number and the email first and read them back in ONE confirmation question, exactly as described below - a mis-heard order number has to be caught before anything else happens, and there is no point emailing a code for an order that was heard wrong. Only once they have confirmed, if {!@variables.email_verified} is not True, use {!@actions.go_to_customer_verification} so they can prove they own that address. The lookup happens after that, and you do not confirm anything a second time.
              Before calling any action, you must have BOTH the caller's email address AND their order number. Ask for whichever is missing before proceeding.
              Once you have both, confirm them in ONE question covering the order number and the email together — for example: "I heard order 1042 with the email jane.doe@example.com, is that right?" Leave out a standard ORD prefix, but if the number contains any other letters, read them out so the caller can correct a mishearing. When the caller says yes, both are confirmed: straight away call the action that answers what they asked — {!@actions.GetOrderDeliveryInfo} if they asked where the order is, how far away it is, how long until it arrives or to track it; otherwise {!@actions.GetOrderStatus} — and never ask a second confirmation question.
              Never guess or assume an identifier. If the caller says they don't know, don't remember, or can't find their email or order number, do not ask again — use {!@actions.go_to_escalation} immediately.
@@ -126,12 +126,14 @@ subagent order_status:
                 with email = ...
                 with orderNumber = ...
                 with lockedEmail = @variables.verified_email
+                with emailVerified = @variables.email_verified
                 set @variables.identity_locked = @outputs.identityLocked
                 set @variables.verified_email = @outputs.verifiedEmail
             GetOrderDeliveryInfo: @actions.GetOrderDeliveryInfo
                 with email = ...
                 with orderNumber = ...
                 with lockedEmail = @variables.verified_email
+                with emailVerified = @variables.email_verified
                 set @variables.identity_locked = @outputs.identityLocked
                 set @variables.verified_email = @outputs.verifiedEmail
     actions:
@@ -145,6 +147,10 @@ subagent order_status:
                 lockedEmail: string
                     label: "Locked Email"
                     description: "Bound to the email verified earlier in this conversation. Never ask the caller for it."
+                    is_required: False
+                emailVerified: boolean
+                    label: "Email Verified"
+                    description: "Bound to whether the caller has already proved they own their email in this conversation. Never ask the caller for it."
                     is_required: False
                 orderNumber: string
                     label: "Order Number"
@@ -203,6 +209,10 @@ subagent order_status:
                 lockedEmail: string
                     label: "Locked Email"
                     description: "Bound to the email verified earlier in this conversation. Never ask the caller for it."
+                    is_required: False
+                emailVerified: boolean
+                    label: "Email Verified"
+                    description: "Bound to whether the caller has already proved they own their email in this conversation. Never ask the caller for it."
                     is_required: False
                 orderNumber: string
                     label: "Order Number"
@@ -291,7 +301,7 @@ subagent case_status:
     reasoning:
         instructions: ->
             |You help the caller with their support cases: checking a specific case, finding out whether they have any open cases, or opening a new case.
-             Before ANY case lookup, case list or new support case, the caller must be verified in this conversation. If {!@variables.email_verified} is not True, don't call an action: use {!@actions.go_to_customer_verification} first.
+             Before ANY case lookup, case list or new support case, the caller must be verified in this conversation. Collect and read back the identifiers first, as described below, so a mis-heard number is caught before anything else happens. Only once they have confirmed, if {!@variables.email_verified} is not True, use {!@actions.go_to_customer_verification}. The lookup happens after that, and you do not confirm anything a second time.
              Identity: every action needs the caller's email address plus an order number or case number that belongs to them. If the caller already gave and confirmed these earlier in this call, reuse them without asking or confirming again. Otherwise ask for whatever is missing, then confirm the number and the email in ONE question. A yes to that confirms both — act on it immediately and never ask a second confirmation question.
              Never guess or assume an identifier. If the caller cannot give their email, or has no order number and no case number at all, do not ask again — use {!@actions.go_to_escalation} immediately.
              Never ask the caller to confirm the same detail twice; a yes to your single confirmation question is enough to act.
@@ -314,12 +324,14 @@ subagent case_status:
                 with caseNumber = ...
                 with email = ...
                 with lockedEmail = @variables.verified_email
+                with emailVerified = @variables.email_verified
                 set @variables.identity_locked = @outputs.identityLocked
                 set @variables.verified_email = @outputs.verifiedEmail
             ListOpenCases: @actions.ListOpenCases
                 with email = ...
                 with verifyingIdentifier = ...
                 with lockedEmail = @variables.verified_email
+                with emailVerified = @variables.email_verified
                 set @variables.identity_locked = @outputs.identityLocked
                 set @variables.verified_email = @outputs.verifiedEmail
             CreateSupportCase: @actions.CreateSupportCase
@@ -327,6 +339,7 @@ subagent case_status:
                 with verifyingIdentifier = ...
                 with issueSummary = ...
                 with lockedEmail = @variables.verified_email
+                with emailVerified = @variables.email_verified
                 set @variables.support_case_number = @outputs.caseNumber
                 set @variables.identity_locked = @outputs.identityLocked
                 set @variables.verified_email = @outputs.verifiedEmail
@@ -341,6 +354,10 @@ subagent case_status:
                 lockedEmail: string
                     label: "Locked Email"
                     description: "Bound to the email verified earlier in this conversation. Never ask the caller for it."
+                    is_required: False
+                emailVerified: boolean
+                    label: "Email Verified"
+                    description: "Bound to whether the caller has already proved they own their email in this conversation. Never ask the caller for it."
                     is_required: False
                 verifyingIdentifier: string
                     label: "Verifying Identifier"
@@ -384,6 +401,10 @@ subagent case_status:
                 lockedEmail: string
                     label: "Locked Email"
                     description: "Bound to the email verified earlier in this conversation. Never ask the caller for it."
+                    is_required: False
+                emailVerified: boolean
+                    label: "Email Verified"
+                    description: "Bound to whether the caller has already proved they own their email in this conversation. Never ask the caller for it."
                     is_required: False
                 verifyingIdentifier: string
                     label: "Verifying Identifier"
@@ -436,6 +457,10 @@ subagent case_status:
                     label: "Locked Email"
                     description: "Bound to the email verified earlier in this conversation. Never ask the caller for it."
                     is_required: False
+                emailVerified: boolean
+                    label: "Email Verified"
+                    description: "Bound to whether the caller has already proved they own their email in this conversation. Never ask the caller for it."
+                    is_required: False
             outputs:
                 found: boolean
                     label: "Found"
@@ -486,7 +511,7 @@ subagent return_eligibility:
     reasoning:
         instructions: ->
             |You help the caller check whether their order is eligible for a return. You can only check eligibility — you cannot process, authorize, or confirm a return or refund of any kind.
-             Before checking return eligibility, the caller must be verified in this conversation. If {!@variables.email_verified} is not True, don't call the action: use {!@actions.go_to_customer_verification} first.
+             Before checking return eligibility, the caller must be verified in this conversation. Collect and read back the order number and email first, as described below. Only once they have confirmed, if {!@variables.email_verified} is not True, use {!@actions.go_to_customer_verification}. The check happens after that, and you do not confirm anything a second time.
              Before calling any action, you must have BOTH the caller's email address AND their order number. Ask for whichever is missing before proceeding.
              Once you have both, confirm them in ONE question covering the order number and the email together — for example: "I heard order 2217 with the email john.smith@example.com, is that right?" Leave out a standard ORD prefix, but if the number contains any other letters, read them out so the caller can correct a mishearing. When the caller says yes, both are confirmed: call {!@actions.CheckReturnEligibility} straight away and never ask a second confirmation question.
              Never guess or assume an identifier. If the caller says they don't know, don't remember, or can't find their email or order number, do not ask again — use {!@actions.go_to_escalation} immediately.
@@ -504,6 +529,7 @@ subagent return_eligibility:
                 with email = ...
                 with orderNumber = ...
                 with lockedEmail = @variables.verified_email
+                with emailVerified = @variables.email_verified
                 set @variables.identity_locked = @outputs.identityLocked
                 set @variables.verified_email = @outputs.verifiedEmail
     actions:
@@ -517,6 +543,10 @@ subagent return_eligibility:
                 lockedEmail: string
                     label: "Locked Email"
                     description: "Bound to the email verified earlier in this conversation. Never ask the caller for it."
+                    is_required: False
+                emailVerified: boolean
+                    label: "Email Verified"
+                    description: "Bound to whether the caller has already proved they own their email in this conversation. Never ask the caller for it."
                     is_required: False
                 orderNumber: string
                     label: "Order Number"
@@ -726,12 +756,26 @@ subagent customer_verification:
              If the caller cannot receive email at that address, or says the address is wrong and gives no other, use {!@actions.go_to_escalation} - a person can help them another way.
              Keep it to one or two spoken sentences. Never read the address back letter by letter.
             if @variables.email_verified == True:
-                | This caller is already verified for {!@variables.verified_email}. Don't send another code and don't ask for one: say they are already verified and ask what they would like to check.
+                | This caller is verified for {!@variables.verified_email}. Never send another code and never ask for one.
+                  They asked for something before they were sent here, so do NOT ask them what they would like to check - that makes them repeat themselves. Go straight back to it and let that subagent answer: {!@actions.go_to_order_status} for an order, where it is, how far away it is or tracking; {!@actions.go_to_case_status} for a case, their open cases, or opening a new one; {!@actions.go_to_return_eligibility} for whether something can be returned; {!@actions.go_to_policy_faq} for a policy or how-orders-work question. Only ask what they need if they genuinely never said.
+                  If they give a different email address, don't send a code to it: say that for their security you can only help with the account verified in this conversation, and that they can start a new conversation to check another account. Apex refuses it either way, so saying it first just saves the caller a turn.
         actions:
             go_to_escalation: @utils.transition to @subagent.escalation
                 description: "Route to escalation when the caller cannot receive the code at their address"
+            # Without these this subagent is a dead end: once the code checks out it has nowhere to
+            # hand back to, so it asks the caller to repeat what they already said. That cost four
+            # eval cases on the v40 baseline (2026-09-23).
+            go_to_order_status: @utils.transition to @subagent.order_status
+                description: "The caller is now verified and what they originally asked about was an order: its status, where it is, how far away it is, or tracking it."
+            go_to_case_status: @utils.transition to @subagent.case_status
+                description: "The caller is now verified and what they originally asked about was a support case, their open cases, or opening a new one."
+            go_to_return_eligibility: @utils.transition to @subagent.return_eligibility
+                description: "The caller is now verified and what they originally asked was whether an order can be returned."
+            go_to_policy_faq: @utils.transition to @subagent.policy_faq
+                description: "The caller is now verified and what they originally asked was a general policy or how-orders-work question."
             SendVerificationCode: @actions.SendVerificationCode
                 with email = ...
+                with lockedEmail = @variables.verified_email
                 set @variables.code_email = @outputs.claimedEmail
             VerifyCode: @actions.VerifyCode
                 with email = ...
@@ -749,6 +793,10 @@ subagent customer_verification:
                     label: "Email"
                     description: "The email address the caller says is on their account."
                     is_required: True
+                lockedEmail: string
+                    label: "Locked Email"
+                    description: "Bound to the email already verified in this conversation. No code is issued for a different address."
+                    is_required: False
             outputs:
                 sent: boolean
                     label: "Sent"

@@ -1,0 +1,35 @@
+{
+  "required" : [ "caseNumber", "email" ],
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "caseNumber" : {
+      "title" : "Case Number",
+      "description" : "The case number the caller provided, spoken digits only - leading zeros are handled automatically.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "email" : {
+      "title" : "Customer Email",
+      "description" : "Email address the caller provided for verification.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "emailVerified" : {
+      "title" : "Email Verified",
+      "description" : "Bound to whether the caller has already proved they own their email in this conversation. Never ask the caller for it.",
+      "lightning:type" : "lightning__booleanType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "lockedEmail" : {
+      "title" : "Locked Email",
+      "description" : "Bound to the email verified earlier in this conversation. Never ask the caller for it.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    }
+  },
+  "lightning:type" : "lightning__objectType"
+}

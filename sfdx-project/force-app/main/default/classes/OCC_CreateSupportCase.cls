@@ -11,6 +11,8 @@ public with sharing class OCC_CreateSupportCase {
         public String issueSummary;
         @InvocableVariable(label='Locked Email' description='Email verified earlier in this conversation, bound by the agent - never asked from the caller. When set, any other email is refused.')
         public String lockedEmail;
+        @InvocableVariable(label='Email Verified' description='True once the caller has read back the six-digit code sent to their address. Bound by the agent to a variable only OCC_VerifyCode can set - never asked from the caller.')
+        public Boolean emailVerified;
     }
 
     public class Response {
@@ -48,6 +50,11 @@ public with sharing class OCC_CreateSupportCase {
         Response resp = new Response();
         try {
             resp.verifiedEmail = OCC_CaseLookupUtil.lockOf(req.lockedEmail);
+            if (OCC_CaseLookupUtil.notVerified(req.emailVerified)) {
+                resp.success = false;
+                resp.message = OCC_CaseLookupUtil.UNVERIFIED_REFUSAL;
+                return resp;
+            }
             if (OCC_CaseLookupUtil.violatesLock(req.lockedEmail, req.email)) {
                 resp.success = false;
                 resp.message = OCC_CaseLookupUtil.LOCK_REFUSAL;

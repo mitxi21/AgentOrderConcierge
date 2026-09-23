@@ -1,0 +1,21 @@
+{
+  "required" : [ "email", "code" ],
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "code" : {
+      "title" : "Code",
+      "description" : "The six-digit code the caller read back.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "email" : {
+      "title" : "Email",
+      "description" : "The address the code was sent to.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    }
+  },
+  "lightning:type" : "lightning__objectType"
+}

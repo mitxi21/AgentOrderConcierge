@@ -71,8 +71,24 @@ private class OCC_SendVerificationCodeTest {
 
     @IsTest
     static void routesDemoAddressesToThePlusAlias() {
-        // With no Demo_Inbox__c configured in a test context, the address is left alone.
-        Assert.areEqual('jane.doe@example.com',
-            OCC_SendVerificationCode.routeAddress('jane.doe@example.com'));
+        // Custom metadata IS visible inside tests, so this depends on the org's Keyburn_Setting
+        // record. The original version assumed the opposite and only passed while Demo_Inbox__c
+        // was empty; it started failing the moment Phase 16 populated it. Assert the shape rather
+        // than the address, so the demo inbox never has to be written down here.
+        String routed = OCC_SendVerificationCode.routeAddress('jane.doe@example.com');
+        String inbox = [
+            SELECT Demo_Inbox__c FROM Keyburn_Setting__mdt WHERE DeveloperName = 'Default' LIMIT 1
+        ].Demo_Inbox__c;
+
+        if (String.isBlank(inbox)) {
+            Assert.areEqual('jane.doe@example.com', routed, 'No demo inbox: leave the address alone');
+        } else {
+            Assert.isTrue(routed.contains('+jane.doe@'), 'Expected a plus alias, got: ' + routed);
+            Assert.areNotEqual('jane.doe@example.com', routed);
+        }
+
+        // A real address is never rerouted, whatever the setting says.
+        Assert.areEqual('someone@keyburn.test',
+            OCC_SendVerificationCode.routeAddress('someone@keyburn.test'));
     }
 }

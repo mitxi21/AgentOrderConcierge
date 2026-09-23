@@ -84,6 +84,23 @@ class AgentforceClient:
         resp.raise_for_status()
         return resp.json().get("messages", [])
 
+    # ---- Salesforce REST, on the same token ----
+    def query(self, soql, api_version="v67.0"):
+        """Runs SOQL against the org as the ECA's Run As user.
+
+        Phase 16: the harness has to behave like a caller who can open their own inbox. With
+        Keyburn_Setting__mdt.Test_Mode__c = true the code is written to OCC_Verification__c
+        instead of being emailed, so reading it back is a query rather than an IMAP poll.
+        """
+        resp = requests.get(
+            f"{self.my_domain_url}/services/data/{api_version}/query",
+            params={"q": soql},
+            headers={"Authorization": f"Bearer {self._get_token()}"},
+            timeout=30,
+        )
+        resp.raise_for_status()
+        return resp.json().get("records", [])
+
     def end_session(self, reason="UserRequest"):
         if not self.session_id:
             return

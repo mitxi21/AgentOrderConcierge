@@ -62,4 +62,25 @@ public with sharing class OCC_CaseLookupUtil {
         String lock = lockOf(lockedEmail);
         return lock != null && !lock.equalsIgnoreCase(email == null ? '' : email.trim());
     }
+
+    // Phase 16 email ownership gate, enforced here for the same reason as the lock above: the
+    // instruction version ("if email_verified is not True, don't call a lookup action") was
+    // measurably skippable - on 2026-09-23 a plain "check my order status" reached GetOrderStatus
+    // with no code sent at all. The agent binds emailVerified to @variables.email_verified, which
+    // only OCC_VerifyCode's output can set, so the model never chooses this value.
+    public static final String UNVERIFIED_REFUSAL = 'Before I can look that up I need to check '
+        + 'the email on your account. I will send a six-digit code to it - please read it back to me.';
+
+    /**
+     * True when the caller has NOT proven ownership of their email in this conversation.
+     *
+     * Null is deliberately permissive: it means the action was invoked by something other than the
+     * agent - the Apex tests, scripts/test_actions.apex, the Order record page, or OCC_OrderMapRest,
+     * which each carry their own access control. Inside the agent the input is always bound, and the
+     * variable defaults to False, so the value is never null there. Tighten this to `!= true` if the
+     * action is ever exposed somewhere that does not verify the caller by other means.
+     */
+    public static Boolean notVerified(Boolean emailVerified) {
+        return emailVerified == false;
+    }
 }
