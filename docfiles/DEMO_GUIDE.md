@@ -1,47 +1,50 @@
 # Demo guide — Builders Panel, Thursday 2026-09-24, 14:45, Salesforce Madrid office
 
-Companion to the deck ("Order & Case Concierge — Builders Panel", 13 slides plus two appendix slides,
-speaker notes on each slide). This file is the operational side: what to check before, what to say and type
-during the demo, what to do when something breaks, and how to explain each design decision.
+Companion to the deck ("Order & Case Concierge — Builders Panel"). This file is the operational side:
+what to check before, what to say and type during the demo, what to do when something breaks, and how to
+explain each design decision. **The slide-by-slide talk track is in `RehearsalScript.txt`.**
 
 > **Being reworked (2026-09-22).** Panel feedback added Phases 12–17 (observability, S3 pipeline,
 > Knowledge readiness, Testing Center, email verification). Wednesday 23 is now a build day, and
 > the agent version freezes at Wed 23 18:00. This guide is rewritten in Phase 18 (see
-> `BUILD_RUNBOOK.md`). Until then, the v38 content below is the fallback demo.
+> `BUILD_RUNBOOK.md`). Version-critical lines were refreshed on 2026-09-23 for **v42**; the rest
+> of the operational detail still reads as written. The talk track now lives in `RehearsalScript.txt`.
 
-Presented version: **agent v38** (fallback **v33**, then **v4**). No agent edits after Tuesday
-evening; Wednesday 23 is freeze, recordings and rehearsal only.
+Presented version: **agent v42** — the Phase 16 verification gate enforced in Apex; **29/29 twice**
+(runs 32 and 32b). Fallbacks, in order: **v40** (the gate falls back to advisory, no Apex redeploy
+needed because nothing binds the input), then **v38**, then v33.
 
 ---
 
 ## 1. Timing (45 min)
 
-13 slides plus two appendix slides. Several of them carry two or three minutes of talking, so
-the speaker notes matter more than the slide count — rehearse against the notes, not the
-bullets. The architecture slide is **four slides that build one diagram** (channels → Agentforce
-→ actions → data); they share the footer number, so the deck is still 13 numbered slides. Built
-that way on purpose: exports (PPTX, Google Slides, PDF) carry no animation.
+13 numbered slides, plus a five-slide architecture build that shares one footer number, plus three
+appendix slides. Several carry two or three minutes of talking, so rehearse against the speaker
+notes, not the bullets. The architecture build is deliberately separate slides rather than one
+animated slide: exports (PPTX, Google Slides, PDF) carry no animation.
+
+Chapter times follow the panel brief: **5 / 30 / 10 / 10**.
 
 | Block | Slides | Time | If running late |
 | --- | --- | --- | --- |
 | Introduction | cover, about | 5:00 | Agenda is spoken, never shown |
-| The agent | agent (job to be done, metrics, what containment is worth) | 3:00 | Keep the ROI sentence, cut the per-tile detail |
+| The agent | agent | 3:00 | Keep the ROI sentence, cut the per-tile detail |
 | **Live demo** | demo | 8:00 | Drop moment 2's identity-switch step |
-| AI tooling | architecture ×4, data, choices | 6:00 | `choices`: the two marked rows only |
-| Guardrails | guardrails | 4:00 | Read the layer stack bottom-up, skip the scope column |
-| Reliability | evals | 3:00 | State the gate, skip the run-by-run detail |
-| Issues & trade-offs | failures, tradeoffs | 5:00 | The two marked rows on each |
+| AI tooling | architecture ×5, data, choices | 6:00 | `choices`: the two marked rows only |
+| Guardrails | guardrails, verification | 5:00 | Read the layer stack bottom-up; on `verification` keep step three and the honest half |
+| Reliability | evals, observability | 4:00 | State the gate, skip the run-by-run detail; on `observability` show the trace box and move |
+| Issues & trade-offs | failures, tradeoffs | 4:00 | The two marked rows on each |
 | Why me | whyme | 10:00 | — |
-| Q&A | questions (+ 2 appendix slides) | 10:00 | — |
+| Q&A | questions (+ 3 appendix slides) | 10:00 | — |
 
-**Two slides carry the most weight and are the easiest to rush: `agent` (what was measured and
-what wasn't) and `failures` (how the root causes were found). Both are marked SLOW DOWN in the
-notes.** On `choices` and `tradeoffs`, narrate only the two tinted rows and leave the rest for
-the panel to read.
+**Three slides carry the most weight and are the easiest to rush: `agent` (what was measured and
+what wasn't), `verification` (the guardrail a reviewer asked for) and `failures` (how the root
+causes were found).** On `choices` and `tradeoffs`, narrate only the two tinted rows and leave the
+rest for the panel to read.
 
-Asset block (agent → tradeoffs) must land at **30 min**. It's the part that overruns: at
-rehearsal, check the clock when leaving the demo (target 16:30 into the talk). If you're past
-19:00, skip the slides in the last column.
+The asset block runs **5:00 → 35:00**. It's the part that overruns: at rehearsal, check the clock
+when you leave the demo — target **16:00**. Past 17:00, start cutting in the order listed in
+`RehearsalScript.txt` section 1.
 
 ---
 
@@ -50,16 +53,17 @@ rehearsal, check the clock when leaving the demo (target 16:30 into the talk). I
 ### Wednesday 23 (freeze day)
 
 - [ ] Decide the version to present and confirm it is active (Setup → Agentforce Agents → Keyburn
-      Customer Service → versions). **v40** carries the Phase 16 verification gate; **v39** is the
-      same agent without it; **v38** is the pre-gate fallback that every earlier eval run used.
-- [ ] **If presenting v40, check the gate end to end once**: ask for an order, read the code from the
+      Customer Service → versions). **v42** is the one the deck describes: the gate enforced in Apex,
+      `customer_verification` able to hand control back, and the confirm-back happening before the code.
+      **v40** is the same gate as an instruction only — the model skips it sometimes. **v38** is pre-gate.
+- [ ] **Check the gate end to end once**: ask for an order, read the code from the
       Verification tab, then confirm the answer arrives. The gate refuses the lookup until then.
 - [ ] Confirm `Keyburn_Setting__mdt.Default.Test_Mode__c` is **true**, and know why you are saying so
       (below). With it false, the code is emailed and this org's mail fails Proton's domain
       authentication checks and is capped at 15 a day.
 - [ ] Run the eval suite **twice** on the version you will present and save both runs in
-      `src/eval_reports/`. On v38/v39 expect 26–29 of 29; **on v40 every lookup case needs the extra
-      verification turn**, so use the runs from the version you actually present.
+      `src/eval_reports/`. On v42 expect **29/29**; the harness answers the gate itself by reading
+      `OCC_Verification__c`, which only works while `Test_Mode__c` is true.
 - [ ] Record a **backup video** of each of the four demo moments (below), including the Nova
       call with sound. Keep them on the laptop desktop, not in the cloud only.
 - [ ] Rehearse the whole 45 minutes out loud **twice** against a timer, reading from the speaker
@@ -184,7 +188,7 @@ recovery scores better than a perfect run.
 | Nova hears the wrong words repeatedly | Room noise / mic | Type the turn in the page's text box (it goes through the same relay) |
 | Nova page won't connect | AWS keys not loaded, server down | Play video 3; mention the in-chat voice button as the Salesforce-native path (no map/transcript there) |
 | Refund doesn't produce a case number | Escalation skipped | Say it's the nondeterminism the evals measure; show the recorded case |
-| Agent answers wrongly across the board | Wrong version active | Setup → activate **v38** (fallback v33). Rollback is one click — worth saying out loud |
+| Agent answers wrongly across the board | Wrong version active | Setup → activate **v40** (then v38). Rollback is one click — worth saying out loud |
 
 ---
 
@@ -225,7 +229,10 @@ on the Nova map call, email+order identity vs real authentication.
 
 ## 6. The one failing eval case — you will be asked
 
-`edge_topic_switch_midcall` is the single red case on agent v38 (run 27, 26/27).
+**On v42 the suite is green (29/29, twice).** The paragraphs below describe the last red case, which
+was on agent v38 (run 27, 26/27) — keep them for the "has it ever failed?" question.
+
+`edge_topic_switch_midcall` was the single red case on agent v38 (run 27, 26/27).
 
 - The turns: "What's your return policy?" → "Actually, can you check my order ORD-1042
   instead? jane.doe@example.com" → "Yes, that's correct."

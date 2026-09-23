@@ -7,6 +7,174 @@ to the entry that replaced them.
 
 ---
 
+## 2026-09-23 — Phase 16 gate made structural (v41/v42); Phase 18 deck rebuilt
+
+### The finding: the verification gate was skippable
+
+v40 shipped the Phase 16 email gate as an **instruction only** — every gated subagent said "if
+`{!@variables.email_verified}` is not True, don't call a lookup action, use
+`go_to_customer_verification`". A smoke test on 2026-09-23 showed the model ignoring it: *"Hi, I want
+to check my order status"* + email + order returned a full status answer with **no code ever sent**.
+
+That is the third time on this project that an instruction has failed as a control surface
+(`ExplainOrderWorkflow` skipped, the router's partial-answer rule, now the gate). **An instruction is
+not a lever for anything that must not be skipped.**
+
+### The fix, following the identity-lock pattern
+
+- `OCC_CaseLookupUtil.notVerified(Boolean)` + `UNVERIFIED_REFUSAL`, mirroring `violatesLock` /
+  `LOCK_REFUSAL`.
+- An `emailVerified` `@InvocableVariable` on the six gated actions — `OCC_GetOrderStatus`,
+  `OCC_GetOrderDeliveryInfo`, `OCC_CheckReturnEligibility`, `OCC_GetCaseStatus`, `OCC_ListOpenCases`,
+  `OCC_CreateSupportCase` — guarded **before any SOQL**.
+- In the `.agent`, `with emailVerified = @variables.email_verified` on all six, declared as a
+  `boolean` input on each action. Bound, never slot-filled, so the model never chooses the value.
+- **Null is deliberately permissive.** It means the action was invoked by something other than the
+  agent (Apex tests, `test_actions.apex`, the record page, `OCC_OrderMapRest`), each of which has its
+  own access control. Two consequences worth keeping: the whole Apex suite stayed green without
+  edits, and **rolling back to v40 disables the gate cleanly with no Apex redeploy**, because nothing
+  binds the input any more. Tighten to `!= true` if a gated action is ever exposed elsewhere.
+- `OCC_SendVerificationCode` also takes `lockedEmail` now and refuses through `violatesLock`. Without
+  it the agent announced *"I have sent a six-digit code to &lt;the other customer&gt;"* and only refused on
+  the following turn — which both leaks a turn of confusion into the demo's refusal moment and lets
+  anyone use the gate to post codes at an address they do not own.
+
+### The second defect: `customer_verification` was a dead end
+
+Its only exit was `go_to_escalation`. Once a code checked out it had **nowhere to hand back to**, so
+it asked the caller to repeat what they had already said: *"You are verified. Would you like to check
+the status of order 1042 now?"*. That caused **four of the five failures** on the v40 baseline.
+
+Fixed by giving it `go_to_order_status`, `go_to_case_status`, `go_to_return_eligibility` and
+`go_to_policy_faq`, and an instruction to resume rather than ask. **Rule: a subagent that interrupts
+a flow needs a transition back into every flow that can send it work.**
+
+### The third defect: the gate displaced the confirm-back
+
+The `order_status` instruction literally said *"don't ask for an order number yet"*, so the agent
+jumped to the code before reading the identifiers back. That breaks the **voice demo's whole
+misheard-digit moment**, and it emails a code for an order number that was heard wrong. v42 reorders
+all three gated subagents: **collect and read back first, then verify, then look up, and never
+confirm twice.**
+
+### Eval harness: it now answers the gate
+
+`run_eval.py` plays a caller who can open their own inbox. When a reply asks for the code it reads
+the newest `OCC_Verification__c` row for that address and sends it back as an extra turn, marked
+`auto: "verification_code"` in the transcript and counted in `auto_verifications`, so a report can
+never be mistaken for one where the caller supplied it unaided. `agent_client.query()` uses the ECA
+token against the REST API. **This only works while `Keyburn_Setting__mdt.Test_Mode__c` is true**,
+which is what writes `Code_Plain__c`.
+
+Two harness bugs found on the first run, both worth keeping:
+
+1. The email regex `[\w.+-]+@[\w-]+\.[\w.-]+` **swallowed the full stop ending the sentence**, so the
+   lookup searched for `jane.doe@example.com.` and found nothing. Anchor the last class on `\w`.
+2. The code lookup now requires `Contact__c != null`. `OCC_SendVerificationCode` issues a code for an
+   unknown address on purpose (whether an address exists in Keyburn's data is not something an
+   unverified caller may learn), but a real caller cannot read a code sent to a typo. Without the
+   filter the harness "verified" `jane.dough@example.com`, the conversation locked to it, and
+   `edge_correction_then_single_yes` could never pass. **A test double that is more capable than the
+   real user tests the wrong thing.**
+
+### Runs
+
+| Run | Version | Result | Note |
+|---|---|---|---|
+| 31 | v40 | **24/29** | Gate instruction-only. 13 of 29 cases reached the gate. Four failures were the dead-end hand-back; one was the regex bug |
+| 32 | v42 | **29/29** | Structural gate, transitions back, confirm-back restored |
+| 32b | v42 | **29/29** | Repeat. First 100% the project has had *with* a verification gate in the flow |
+
+On the v42 smoke set, `happy_order_status`, `track_order_not_shipped_yet`,
+`edge_correction_then_single_yes` and `guardrail_identity_switch_refused` all pass, and the identity
+switch now refuses in **one turn** instead of two.
+
+**Eval data drift:** `case_list_open_none_offers_to_open` failed because maria.garcia had picked up an
+open case from earlier Testing Center runs. `scripts/purge_eval_cases.apex` restored the invariants
+(jane.doe 3 open, maria.garcia 0, alex.chen 0). Check this before reading any suite result.
+
+### The gate holds — verified from the traces, not from the replies
+
+Three queries against `ssot__AiAgentInteractionStep__dlm` after run 32:
+
+| Query | Result |
+|---|---|
+| Gated actions called with `"emailVerified":false` | **none** |
+| Gated actions called with no `emailVerified` key at all | **none** |
+| Gated actions called with `"emailVerified":true` | all of them, each preceded by `SendVerificationCode` → `VerifyCode` |
+
+So the binding is always delivered — the platform does **not** drop a false boolean, which was the
+worry — and since v41 no lookup has run for an unverified caller. `lockedEmail` arrives as `""`
+before the first lookup and as the pinned address afterwards, exactly as intended.
+
+**Check a guardrail from the trace, not from the transcript.** A reply that looks right proves
+nothing about which inputs the action received.
+
+### But run 32 also passed a case the agent never looked up
+
+`case_list_open_none_offers_to_open` passed with *"You do not have any open cases at the moment.
+Would you like me to open a new support case for you?"* — and **`ListOpenCases` was never called**.
+
+Reproduced in run 32b, so it is a real behaviour rather than a one-off.
+
+Two independent proofs:
+
+- The transcript has `auto_verifications = 0`, i.e. no code turn. Under v42 a lookup is impossible
+  without one, so the action cannot have run.
+- No `ListOpenCases` step for maria.garcia exists in the trace for that session's window.
+
+The answer happened to be true (maria.garcia has no open cases, by design), so the keyword assertion
+passed. Had she had one, the agent would have stated a false fact with total confidence.
+
+This is the `ExplainOrderWorkflow` failure again in a new place: **the model answers from the
+conversation instead of calling the action, and a text-scoring suite cannot tell the difference.**
+It is also the sharpest available argument for the second suite — Testing Center asserts the action
+list, and would have failed this case.
+
+**Not fixed before the freeze.** The structural fix is the escalation pattern (an action output sets a
+variable, the instruction branches on it), which is agent surgery on the night of a freeze for a
+defect whose blast radius is a benign wrong answer on one case in twenty-nine. Decide in the morning;
+until then it is honest demo material rather than a hidden flaw. Do **not** claim in the room that
+every data answer is grounded in a lookup — say that the guardrail that matters (no data disclosed
+without verification) is enforced in code, and that grounding every *claim* is the next piece.
+
+### Known consequence: Testing Center loses the gated cases
+
+`conversationHistory` is replayed as text and runs no actions, so `email_verified` is False for every
+CLI test case, and roughly half of `Keyburn_Regression` now hits the refusal. Same limitation that
+already made `guardrail_identity_switch_refused` harness-only. That coverage belongs in the Studio
+**conversation/voice** suites, which execute turns for real.
+
+### Unrelated test defect found and fixed
+
+`OCC_SendVerificationCodeTest.routesDemoAddressesToThePlusAlias` asserted the *opposite* of its own
+name and only passed while `Demo_Inbox__c` was empty; Phase 16 populated it and the test began
+failing. Custom metadata **is** visible inside Apex tests. Rewritten to assert the shape of the alias,
+so the demo inbox is never written into the repo.
+
+### Phase 18 — deck and scripts rebuilt
+
+Presentation material only. Reviewer feedback: the deck read as machine-written.
+
+- **Restructured to the panel's own chapters**: intro / the agent / AI tooling / boundaries and
+  guardrails / issues and trade-offs / why me / Q&A, on a 5–30–10–10 clock with the asset block
+  landing at exactly 30 minutes.
+- **Rewritten to sound like a person.** The tells were uniform: every title was a counted compound
+  ("Four reasons…", "Five failures…", "Six decisions…"), every card was the same length, and the
+  speaker notes were instructional essays rather than words anyone would say out loud. Titles are now
+  uneven and plain; notes are first-person with stage directions in brackets.
+- **Three new slides** for Phases 12–17: `verification` (the gate and the lock, with the real Apex on
+  screen), `observability` (403 sessions, the trace drill-down, the Sessions & Intents screenshot),
+  and a third appendix slide carrying the Testing Center and voice-test screenshots.
+- The architecture build is five slides now: observability is a band **under** the four columns,
+  because it is cross-cutting rather than a pipeline stage.
+- The eval chart is regenerated from all **39** saved runs, and the evals slide carries both suites.
+- `RehearsalScript.txt` rewritten to the new order, with an explicit map of the nine evaluation
+  criteria to the sentence that pays for each. `HumanScript.txt` carries the code-reading step in
+  blocks marked so they can be skipped if the gate is not presented.
+
+---
+
 ## 2026-09-22 — Phase 17 built (pre-freeze): STDM readout, Sessions & Intents, one health alert
 
 **Scope decision:** the runbook puts Phase 17 on Wed 23 evening, after the freeze. Built the whole

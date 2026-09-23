@@ -80,15 +80,22 @@ directory looking for `sfdx-project.json`, so every `sf` command must run from i
 - Agentforce Agent Builder, originally built via the Builder's assistant/wizard, with a dedicated
   running user. **Since 2026-09-17 the agent script is in source control and edited locally**:
   `sfdx-project/force-app/main/default/aiAuthoringBundles/Keyburn_Customer_Service/Keyburn_Customer_Service.agent`
-  is the working draft and the file to edit. **Active version: v39** = v38 + two instruction edits
-  that measurably changed nothing (see `project-status.md` 2026-09-22): the workflow action is still
-  skipped on one question and a partial answer still routes to escalation. v38 = v33 (the Phase 9 demo
+  is the working draft and the file to edit. **Active version: v42** = the Phase 16 email
+  verification gate made *structural* (see `project-status.md` 2026-09-23): `customer_verification`
+  can now transition back into the topic that sent it work, and every gated subagent reads the
+  identifiers back **before** handing off to the gate. v41 = the Apex guard on its own; v40 = the
+  gate as an instruction only, which the model demonstrably skipped; v38 = v33 (the Phase 9 demo
   candidate) + Phase 10 (Draft status, workflow diagram read by a multimodal prompt template). It
   keeps normal identifiers, the map card in the deployed chat (**first tracked order per conversation only**;
-  see `project-status.md`), and an **identity lock enforced in Apex**. Fallback: v33. Every lookup action has a
-  `lockedEmail` input bound to `@variables.verified_email`, and `OCC_CaseLookupUtil.violatesLock`
-  refuses any other email. Each also returns `verifiedEmail` + `identityLocked`, which the script
-  stores. New lookup actions must follow the same pattern.
+  see `project-status.md`), and an **identity lock enforced in Apex**. Fallbacks: v40 (gate becomes
+  advisory again, no Apex redeploy needed), then v38, then v33.
+  **Two bound inputs carry the guardrails, and both are enforced in Apex, never in the prompt:**
+  `lockedEmail = @variables.verified_email` (`OCC_CaseLookupUtil.violatesLock` refuses any other
+  email) and `emailVerified = @variables.email_verified` (`OCC_CaseLookupUtil.notVerified` refuses
+  before any SOQL when the caller has not read back the code). Each lookup also returns
+  `verifiedEmail` + `identityLocked`, which the script stores. **New lookup actions must follow both
+  patterns.** `notVerified` treats *null* as permissive on purpose — null means a non-agent caller
+  (Apex tests, the record page, `OCC_OrderMapRest`), and it is what makes a rollback to v40 clean.
   **After every agent publish, republish the Embedded Service deployment** `Agentforce_Service_Agent`,
   or cards are sent but not drawn.
   **One map card per conversation is a platform limit — accepted, don't re-investigate.** Only an
@@ -168,7 +175,9 @@ directory looking for `sfdx-project.json`, so every `sf` command must run from i
 | `OCC_CreateSupportCase` | Case Status | email + order-or-case # + issue → Medium-priority Case (Subject/Priority/ContactId only) |
 | `OCC_ExplainOrderWorkflow` | Policy/FAQ | question → finds the PNG File on Knowledge article `how-an-order-moves-through-keyburn` → Flex prompt template `OCC_Order_Workflow_Diagram` (GPT-4o reads the image) → `answered` + spoken answer; `NOT_IN_DIAGRAM` → `answered=false` |
 | `OCC_PolicyFAQLookup` | (unused fallback) | stopword-stripped SOSL over published `Knowledge__kav` |
-| `OCC_CaseLookupUtil` | shared | `normalize()` for spoken order/case numbers; `verifiedContactId()` = email + an identifier that belongs to that Contact |
+| `OCC_SendVerificationCode` | Customer Verification | email → six-digit code on an `OCC_Verification__c` row (salted hash only; `Code_Plain__c` **only** while `Keyburn_Setting__mdt.Test_Mode__c` is true) and, outside test mode, an email. Takes `lockedEmail`: no code is ever issued for a second address. An unknown address gets the same answer as a known one — existence is not disclosed |
+| `OCC_VerifyCode` | Customer Verification | email + code → `verified`. **The only thing that can set `@variables.email_verified`** |
+| `OCC_CaseLookupUtil` | shared | `normalize()` for spoken order/case numbers; `verifiedContactId()` = email + an identifier that belongs to that Contact; `violatesLock()` = the identity lock; `notVerified()` = the Phase 16 gate |
 
 Every action has a matching `*Test` class except `OCC_CaseLookupUtil` (covered indirectly).
 
@@ -240,6 +249,32 @@ live only in `secrets.env` — don't paste them back into this file.
    Keep this path when adding lookups.
 
 ## Debugging notes worth not rediscovering
+
+**An instruction is not a control surface.** Three times now a rule written into the prompt has been
+silently ignored — `ExplainOrderWorkflow` skipped (4 reproductions), the router's partial-answer rule
+(v39 changed nothing), and the Phase 16 verification gate (v40 answered a lookup with no code sent).
+More prose never fixed any of them. Anything that **must not be skipped** needs a fact the model
+cannot set: a bound input checked in Apex (`violatesLock`, `notVerified`) or a variable the
+instructions branch on that only an action output can write. Prose is for tone and for choosing
+between correct options.
+
+**Verify a guardrail from the trace, not from the transcript.** A reply that reads correctly proves
+nothing about what the action was actually given. `ssot__AiAgentInteractionStep__dlm`'s
+`ssot__InputValueText__c` holds the real action input JSON, so
+`... WHERE ssot__InputValueText__c LIKE '%"emailVerified":false%'` answers "has this guard ever been
+bypassed" in one query. That is how the Phase 16 gate was confirmed (it never has) and how the
+"platform might drop a false boolean" worry was disproved.
+
+**A green eval case can still be an ungrounded answer.** Run 32's
+`case_list_open_none_offers_to_open` passed on *"You do not have any open cases"* while
+`ListOpenCases` was never called — the answer was true only because the test data makes it true.
+Keyword scoring cannot see this; an action assertion can. It is the same failure as the
+`ExplainOrderWorkflow` skip, and it is the reason both suites exist. Open.
+
+**A subagent that interrupts a flow needs a way back into it.** `customer_verification` shipped with
+`go_to_escalation` as its only exit, so after a successful check it had nowhere to hand control and
+asked the caller to repeat what they had already said. Four eval failures, one missing transition.
+When adding a subagent, list every subagent that can route *into* it and give it a route back out.
 
 **`WITH USER_MODE` fails in two different ways, and only one of them is visible.** An FLS/CRUD
 violation **throws** (`System.QueryException`). A **sharing** restriction **does not throw** — it
@@ -350,7 +385,14 @@ cd src; py -3.8 run_eval.py eval_cases.yaml
   → 06 agent v4 14/15 → 06b repeat 14/15 (same single failure: test wording) → 07 agent v5 with
   3 `tracking` cases 18/18 → 08 stricter map-claim tests 16/18 → 09 agent v6 18/18 → 09b
   repeat 18/18. … → 27 v38 26/27 → 28 v38 26/27 (first traced run) → 29 / 29b v38 + rewritten
-  Knowledge 29/29 (2 `knowledge_*` cases added).
+  Knowledge 29/29 (2 `knowledge_*` cases added) → 30 v39 26/29 (the API-67 custom-metadata break,
+  since fixed) → 31 v40 24/29 (first run with the verification gate) → 32 v42 (gate enforced in Apex).
+- **The harness answers the verification gate itself.** When a reply asks for the six-digit code,
+  `run_eval.py` reads the newest `OCC_Verification__c` row for that address and sends it as an extra
+  turn, marked `auto: "verification_code"` in the transcript and counted in `auto_verifications`.
+  It needs `Keyburn_Setting__mdt.Test_Mode__c = true` (that is what writes `Code_Plain__c`), and it
+  requires `Contact__c != null` on the row, so it will not "verify" a typo a real caller could never
+  receive mail at. One mailbox per case: it never unlocks a second identity.
 - Nondeterminism is real (a skipped action was ~1 in 5 in traces). Repeat a run before calling
   something fixed, and trace failures with `sf agent preview` + `sf agent trace read` rather than
   guessing from the reply text.
@@ -399,6 +441,10 @@ cd src; py -3.8 run_eval.py eval_cases.yaml
   - It runs **real actions as the agent user**: each run creates about 5 Cases.
   - `conversationHistory` is replayed as text and no actions run for it. Anything that depends on a
     variable set by an action output stays harness-only (e.g. `guardrail_identity_switch_refused`).
+  - **Since v42 this costs the suite every gated case.** `email_verified` is False in a replayed
+    history, so every lookup case now hits `UNVERIFIED_REFUSAL`. That coverage belongs in the Studio
+    **conversation / voice** suites, which execute turns for real; the CLI suite keeps the cases that
+    need no lookup (policy, workflow, escalation). Don't "fix" it by weakening the Apex guard.
   - Don't assert `AnswerQuestionsWithKnowledge`. The agent-level `knowledge:` block injects the
     articles into the `policy_faq` prompt, so FAQs are answered without that action.
   - Voice cases are only in the UI: `specs/Keyburn_Voice.md`.
@@ -425,8 +471,9 @@ cd src; py -3.8 run_eval.py eval_cases.yaml
 
 ## Remaining work
 
-Phase 8 is **closed** (14/15 on agent v4, stable). Active is **v39**; the demo-safe fallback is
-**v38** (then v33, v4).
+Phase 8 is **closed** (14/15 on agent v4, stable). Active is **v42** (Phase 16 gate enforced in
+Apex); the demo-safe fallbacks are **v40** (gate becomes advisory, no Apex redeploy), then **v38**,
+then v33.
 Phases 9–18 are planned in detail, with spikes and cut-offs, in `docfiles/BUILD_RUNBOOK.md`.
 **Panel feedback on 2026-09-22 reopened the scope:** Phases 12–17 add observability (Session Tracing,
 Agent Analytics, Sessions & Intents), an S3 → Data 360 unstructured pipeline, a Knowledge readiness
