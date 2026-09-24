@@ -7,6 +7,52 @@ to the entry that replaced them.
 
 ---
 
+## 2026-09-24 — Observability run 02: escalation 15.4%, and the dashboard's 0% is correct
+
+Re-ran `scripts/observability_readout.apex` on demo day (~11:47 UTC), the post-freeze `run02` that
+run 01 asked for. Full report: `docfiles/observability_readout_run02.md`. 681 sessions, 2,600 turns,
+11,452 steps across the whole build week, v46 included (95 sessions).
+
+**Why Agent Analytics shows Escalation Rate 0%.** The question was whether purging eval Cases had
+emptied the metric. It had not, and it cannot: Agent Analytics reads the Session Tracing tables in
+Data Cloud, not Case records, and run 01 already demonstrated traces outliving a purge (61 traced
+escalations against 31 surviving Cases). The real reason is definitional — the platform metric means
+*handed off to a human*, and this agent never hands off. `OCC_CreateEscalationCase` logs a
+High-priority Case, says a specialist will follow up, and keeps the conversation.
+`ssot__AiAgentSessionEndType__c` is `NOT_SET` on all five channel rows, so there is no signal to
+count. The trace-based number is **105 of 681 sessions = 15.4%** (run 01: 15.1% — stable across nine
+versions, including the gate going in and coming back out).
+
+Consequence: the Phase 17 health alert `3VRak00000007BBGAY` watches `Escalation_Rate_mtc`, the
+platform metric, so it cannot fire while escalation stays case-based. The alert still demonstrates
+the mechanism; the containment story has to be told with the trace number. Decided to keep the
+design and explain the gap on stage rather than change escalation this close to the demo — "the
+dashboard measures handoff-to-human, mine is a case-logging handoff" is a better answer than a
+green dashboard.
+
+**The documented grep silently returns nothing.** `Select-String "READOUT\|"` now matches four
+lines, all of them the script's own source echo, because the CLI HTML-escapes the pipe in debug
+output as `&#124;`. This would have failed live on stage. Both script headers and the `CLAUDE.md`
+Commands block now carry the working decode pipeline
+(`Select-String "USER_DEBUG.*READOUT"` + a `-replace` of the entity).
+
+Other numbers worth keeping: 622 action calls with **zero** platform errors and an empty
+`action_errors` set; average turn 1,911 ms, slowest 14,406 ms (the cold first turn the warm-up call
+exists to avoid); 1,227 Trust guardrail steps against 1,232 topic steps, so the Trust layer runs
+every turn rather than sampled; `call_closing` visible for the first time at 12 turns / 11 sessions,
+which is the v44 two-step close running in real traffic.
+
+Quality slipped 77% → **74%** of moments scored 4 or 5, with score-2 moments up 22 → 99. The dip sits
+in the v40–v42 gate window, and the low-quality list is mostly order-status turns where the agent
+correctly asked for an identifier or correctly refused an unverified lookup. Same conclusion as run
+01 and Phase 8: a scored failure is not automatically an agent defect.
+
+**Open — the deck quotes 14.8% escalation**, from the earlier count; run 02 says 15.4%. The exported
+PDF is final, so say "about 15%" on stage rather than reading the slide number, or accept the
+one-decimal drift. The 1.9 s average turn on the same slide is still exact.
+
+---
+
 ## 2026-09-24 — Final deck; demo guide aligned to it
 
 The presented deck is the redesigned final version, exported as

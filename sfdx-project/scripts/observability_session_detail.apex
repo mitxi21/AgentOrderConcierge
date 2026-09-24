@@ -2,7 +2,11 @@
 // Intents drill-down does. Pick a session id from observability_readout.apex
 // ('escalated_session_ids'), paste it below, and run:
 //   sf apex run --file scripts/observability_session_detail.apex --target-org devorg
-// Read the output with: Select-String "DETAIL\|"
+// Read the output with (2026-09-24): the CLI HTML-escapes the pipe in debug output, so a plain
+// Select-String "DETAIL\|" matches only this file's own source echo and no data at all.
+//   sf apex run --file scripts/observability_session_detail.apex --target-org devorg |
+//     Select-String "USER_DEBUG.*DETAIL" |
+//     ForEach-Object { ($_ -replace '.*DEBUG\|DETAIL&#124;','') -replace '&#124;',' | ' }
 
 final String DATA_SPACE = 'default';
 final String SESSION_ID = '01a0ca6f-a0d0-743d-b8e4-1537a25cce15';

@@ -384,7 +384,10 @@ sf apex run --file scripts/assign_agent_permset.apex --target-org devorg       #
 sf apex run --file scripts/set_demo_geodata.apex --target-org devorg           # Phase 9 addresses + parcel positions
 sf apex run --file scripts/set_keyburn_settings.apex --target-org devorg       # warehouse + Google key (generate from .example, see below)
 
-# Phase 17: read the Session Tracing tables (PowerShell; pipe through Select-String "READOUT\|" / "DETAIL\|")
+# Phase 17: read the Session Tracing tables (PowerShell). The CLI HTML-escapes the pipe, so a plain
+# Select-String "READOUT\|" matches only the script's own source echo - decode the entity instead:
+#   ... | Select-String "USER_DEBUG.*READOUT" |
+#         ForEach-Object { ($_ -replace '.*DEBUG\|READOUT&#124;','') -replace '&#124;',' | ' }
 sf apex run --file scripts/observability_readout.apex --target-org devorg        # volume, actions, escalation rate, quality
 sf apex run --file scripts/observability_session_detail.apex --target-org devorg # one session, turn by turn (edit SESSION_ID)
 
@@ -694,10 +697,17 @@ Phase 16 (the OTP gate) is the only change to the agent's core flow; its cut-off
   versions, so in between the article is simply missing. To check, compare `SourceRecordId__c` in
   `KA_Agent_Library_Data_Space_chunk__dlm` with the online `Knowledge__kav` Ids. **No Knowledge edits
   after Wed 23.** The readiness tool's **Rerun** re-scores a run in place, so save its numbers first.
-- **Phase 17 — built 2026-09-22 (pre-freeze); re-run as `run02` after the freeze.**
+- **Phase 17 — built 2026-09-22 (pre-freeze); re-run as `run02` on 2026-09-24 (demo day).**
   `scripts/observability_readout.apex` and `scripts/observability_session_detail.apex` read the
-  Session Tracing tables through `ConnectApi.CdpQuery.queryAnsiSqlV2` (run from PowerShell; grep
-  `READOUT|` / `DETAIL|`). Results: `docfiles/observability_readout_run01.md`. **No Apex class is
+  Session Tracing tables through `ConnectApi.CdpQuery.queryAnsiSqlV2` (run from PowerShell; see the
+  decode note in the Commands block — a plain `READOUT|` grep returns nothing but source echo).
+  Results: `docfiles/observability_readout_run01.md` and `_run02.md`.
+  **Agent Analytics Escalation Rate is 0% and that is correct**: the platform metric means
+  handoff-to-human, and `ssot__AiAgentSessionEndType__c` is `NOT_SET` on every session in this org.
+  Escalation here logs a Case and keeps the conversation, so quote the trace-based number
+  (run02: 105 of 681 sessions = **15.4%**), not the dashboard. The Phase 17 health alert watches the
+  platform metric, so it will never fire. Purging eval Cases does not affect any of this - traces
+  outlive the Cases. **No Apex class is
   deployed for observability** — the skill's `AgentforceOptimizeService` was skipped so no
   permission set has to grant it. Reading the trace tables:
   - rows are `ConnectApi.CdpQueryV2Row` (`row.rowData`), and column order comes from

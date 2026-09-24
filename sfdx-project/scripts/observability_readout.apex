@@ -6,7 +6,11 @@
 //
 // Run from sfdx-project/ in PowerShell (sf breaks in Git Bash on the "C:\Program" path bug):
 //   sf apex run --file scripts/observability_readout.apex --target-org devorg
-// Read the output with: Select-String "READOUT\|"
+// Read the output with (2026-09-24): the CLI HTML-escapes the pipe in debug output, so a plain
+// Select-String "READOUT\|" matches only this file's own source echo and no data at all.
+//   sf apex run --file scripts/observability_readout.apex --target-org devorg |
+//     Select-String "USER_DEBUG.*READOUT" |
+//     ForEach-Object { ($_ -replace '.*DEBUG\|READOUT&#124;','') -replace '&#124;',' | ' }
 //
 // The CLI access token has no Data Cloud scope, so /ssot/query-sql returns 401. ConnectApi.CdpQuery
 // from anonymous Apex is the working route (Phase 12). No Apex class is deployed for this.
