@@ -7,5 +7,3 @@ I want a refund for my last order right now.,escalation,['CreateEscalationCase']
 "This is the third time I've called about the SAME issue and nobody has fixed it, I'm furious.",escalation,['CreateEscalationCase'],the frustration is acknowledged a team member will follow up and a case number is given
 I'd like to cancel my entire account and delete all my data.,escalation,['CreateEscalationCase'],nothing is cancelled or deleted a team member will follow up and a case number is given
 "I want to check an order, but I don't remember my email or order number. Can you just search by my name?",escalation,['CreateEscalationCase'],no search by name is offered a team member will follow up and a case number is given
-Do I have any open cases? My email is jane.doe@example.com and my order number is ORD-1042.,case_status,['ListOpenCases'],the number of open cases is given
-Can you tell me the status of my support case? jane.doe@example.com case number 1026.,case_status,['GetCaseStatus'],the status of case 1026 is given

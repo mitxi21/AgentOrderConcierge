@@ -7,6 +7,45 @@ to the entry that replaced them.
 
 ---
 
+## 2026-09-24 — Final deck; demo guide aligned to it
+
+The presented deck is the redesigned final version, exported as
+`Order & Case Concierge - Builders Panel.pdf`: 16 slides plus 5 appendix slides. The claude.ai Slides
+artifact is now only the earlier draft. Changes that matter for delivery: the architecture is a single
+slide and comes **before** the demo; the demo slide budgets 2 / 1 / 3 / 1 min; the measured numbers
+moved from the agent slide to Testing and Validation (31/31, Testing Center 28/28, 14.8% escalation,
+1.9 s average turn). `docfiles/DEMO_GUIDE.md` now refers to slides by page and title. Three slides
+still describe the email code as live (p5, p9, p10), so the guide scripts a spoken "switched off
+today" for each. `RehearsalScript.txt` still references the draft's slide ids.
+
+## 2026-09-24 — Studio Testing Center suites re-run on the active version (v46)
+
+**The morning's first Studio runs (06:51 UTC) exercised v39, not the active v46.** Session Tracing
+stamps every one of those sessions `v39`: a Studio suite keeps the agent version it was created
+against (22 Sep, when v39 was active). The suites were recreated from the same CSVs and re-run on
+v46 at 07:11–07:21 UTC. **Check the version stamp in the trace before quoting a Studio result.**
+
+v46 results, verified in Session Tracing rather than read off the Studio grid:
+
+- **Action suite (10 rows):** escalation ×4 called `CreateEscalationCase` (live: Cases
+  00001325–00001328); workflow ×4 called `ExplainOrderWorkflow`. The two `case_status` rows called
+  **no action** — both answered with a confirm-back ("Just to confirm, is your case number 1026 and
+  your email …?"), and the platform's own trace judged them `TaskResolution: UNRESOLVED`. On v39
+  the same `ListOpenCases` row acted on the first turn.
+- **No-action suite (13 rows):** every row routed to its expected subagent with no action.
+- **Voice suite (3 conversations):** escalation logged Case 00001329; both order calls ran
+  `GetOrderStatus`. Each ended with 4–6 `Chit_Chat` turns — the simulated caller talking on after
+  the task was done.
+
+**Test fix, not an agent fix:** v46 confirms identifiers before any lookup, so a single-turn row
+cannot reach a case action. The two case rows moved from `specs/Keyburn_Regression_upload.csv`
+(now 8 rows: workflow + escalation) to `specs/Keyburn_Regression_noaction.csv` (now 15 rows),
+expecting the confirm-back. Case-lookup action coverage stays in the multi-turn eval harness
+(`happy_case_status`, `case_list_open_some`, 31/31 in runs 34/34b).
+
+The voice run again pushed file storage over the 20 MB cap (−12 MB, 3 WAVs, 32.1 MB);
+`scripts/purge_voice_recordings.apex` cleared it.
+
 ## 2026-09-24 — Demo order dates moved to the demo day
 
 The three orders the demo sheet uses were seeded in early September, so the spoken *"estimated

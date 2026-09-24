@@ -12,3 +12,5 @@ Check the status of order O-1O42 my email is jane.doe@example.com,order_status,,
 Is my order eligible for a return? john.smith@example.com order ORD-2077.,return_eligibility,,the order number and email are read back once for confirmation
 Do I have any open cases? My email is maria.garcia@example.com and my order number is ORD-1038.,case_status,,the order number and email are read back once for confirmation
 I'd like to open a support case: my bluetooth speaker order hasn't shipped yet. My email is alex.chen@example.com and my order number is ORD-1033.,case_status,,the request is read back for confirmation before any case is opened
+Do I have any open cases? My email is jane.doe@example.com and my order number is ORD-1042.,case_status,,the order number and email are read back once for confirmation
+Can you tell me the status of my support case? jane.doe@example.com case number 1026.,case_status,,the case number and email are read back once for confirmation
